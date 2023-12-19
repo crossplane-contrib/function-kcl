@@ -1,0 +1,6 @@
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: kcl-function
+spec:
+  package: kcllang/crossplane-kcl:v0.1.0

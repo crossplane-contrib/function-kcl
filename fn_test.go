@@ -38,10 +38,21 @@ func TestRunFunction(t *testing.T) {
 				req: &fnv1beta1.RunFunctionRequest{
 					Meta: &fnv1beta1.RequestMeta{Tag: "hello"},
 					Input: resource.MustStructJSON(`{
-						"apiVersion": "template.fn.crossplane.io/v1beta1",
-						"kind": "Input",
-						"example": "Hello, world"
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLRun",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Resources",
+							"source": "{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n}"
+						}
 					}`),
+					Observed: &fnv1beta1.State{
+						Composite: &fnv1beta1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+					},
 				},
 			},
 			want: want{
@@ -50,7 +61,17 @@ func TestRunFunction(t *testing.T) {
 					Results: []*fnv1beta1.Result{
 						{
 							Severity: fnv1beta1.Severity_SEVERITY_NORMAL,
-							Message:  "I was run with input \"Hello, world\"!",
+							Message:  "created resource \":Generated\"",
+						},
+					},
+					Desired: &fnv1beta1.State{
+						Composite: &fnv1beta1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+						Resources: map[string]*fnv1beta1.Resource{
+							"0": {
+								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated"}`),
+							},
 						},
 					},
 				},
