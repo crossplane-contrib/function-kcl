@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	krmyaml "kcl-lang.io/krm-kcl/pkg/yaml"
 )
 
@@ -44,6 +45,28 @@ func JsonByteToUnstructured(jsonByte []byte) (*unstructured.Unstructured, error)
 	}
 	u := &unstructured.Unstructured{Object: data}
 	return u, nil
+}
+
+func UnstructuredToRawExtension(obj *unstructured.Unstructured) (runtime.RawExtension, error) {
+	if obj == nil {
+		return runtime.RawExtension{}, nil
+	}
+	raw, err := obj.MarshalJSON()
+	if err != nil {
+		return runtime.RawExtension{}, err
+	}
+	return runtime.RawExtension{Raw: raw}, nil
+}
+
+func ObjToRawExtension(obj interface{}) (runtime.RawExtension, error) {
+	if obj == nil {
+		return runtime.RawExtension{}, nil
+	}
+	raw, err := json.Marshal(obj)
+	if err != nil {
+		return runtime.RawExtension{}, err
+	}
+	return runtime.RawExtension{Raw: raw}, nil
 }
 
 // DataResourcesFromYaml returns the manifests list from the YAML stream data.

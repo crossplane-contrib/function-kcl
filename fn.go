@@ -7,6 +7,7 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
+	"k8s.io/apimachinery/pkg/runtime"
 	"kcl-lang.io/krm-kcl/pkg/kio"
 
 	fnv1beta1 "github.com/crossplane/function-sdk-go/proto/v1beta1"
@@ -48,6 +49,14 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		response.Fatal(rsp, errors.Wrap(err, "cannot get observed composite resource"))
 		return rsp, nil
 	}
+	if in.Spec.Params == nil {
+		in.Spec.Params = make(map[string]runtime.RawExtension)
+	}
+	in.Spec.Params["oxr"], err = pkgresource.UnstructuredToRawExtension(&oxr.Resource.Unstructured)
+	if err != nil {
+		response.Fatal(rsp, err)
+		return rsp, nil
+	}
 	log = log.WithValues(
 		"xr-version", oxr.Resource.GetAPIVersion(),
 		"xr-kind", oxr.Resource.GetKind(),
@@ -63,6 +72,11 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 	}
 	dxr.Resource.SetAPIVersion(oxr.Resource.GetAPIVersion())
 	dxr.Resource.SetKind(oxr.Resource.GetKind())
+	in.Spec.Params["dxr"], err = pkgresource.UnstructuredToRawExtension(&dxr.Resource.Unstructured)
+	if err != nil {
+		response.Fatal(rsp, err)
+		return rsp, nil
+	}
 
 	// The composed resources desired by any previous Functions in the pipeline.
 	desired, err := request.GetDesiredComposedResources(req)
@@ -71,6 +85,11 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		return rsp, nil
 	}
 	log.Debug(fmt.Sprintf("DesiredComposed resources: %d", len(desired)))
+	in.Spec.Params["dcds"], err = pkgresource.ObjToRawExtension(desired)
+	if err != nil {
+		response.Fatal(rsp, err)
+		return rsp, nil
+	}
 
 	// The composed resources desired by any previous Functions in the pipeline.
 	observed, err := request.GetObservedComposedResources(req)
@@ -79,6 +98,11 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		return rsp, nil
 	}
 	log.Debug(fmt.Sprintf("ObservedComposed resources: %d", len(observed)))
+	in.Spec.Params["ocds"], err = pkgresource.ObjToRawExtension(desired)
+	if err != nil {
+		response.Fatal(rsp, err)
+		return rsp, nil
+	}
 
 	// Input Example: https://github.com/kcl-lang/krm-kcl/blob/main/examples/mutation/set-annotations/suite/good.yaml
 	inputBytes, outputBytes := bytes.NewBuffer([]byte{}), bytes.NewBuffer([]byte{})
