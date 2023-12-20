@@ -2,5 +2,8 @@ apiVersion: pkg.crossplane.io/v1beta1
 kind: Function
 metadata:
   name: kcl-function
+  annotations:
+    # This tells crossplane beta render to connect to the function locally.
+    render.crossplane.io/runtime: Development
 spec:
-  package: kcllang/crossplane-kcl
+  package: kcllang/crossplane-kcl:0.1.0
