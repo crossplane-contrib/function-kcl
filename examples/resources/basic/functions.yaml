@@ -3,4 +3,4 @@ kind: Function
 metadata:
   name: kcl-function
 spec:
-  package: kcllang/crossplane-kcl:v0.1.0
+  package: kcllang/crossplane-kcl

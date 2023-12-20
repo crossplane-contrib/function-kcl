@@ -12,13 +12,13 @@ $ go generate ./...
 $ go test ./...
 
 # Build the function's runtime image - see Dockerfile
-$ docker build . --tag=runtime
+$ docker build . --tag=kcllang/crossplane-kcl
 
 # Build a function package - see package/crossplane.yaml
-$ crossplane xpkg build -f package --embed-runtime-image=runtime
+$ crossplane xpkg build -f package --embed-runtime-image=kcllang/crossplane-kcl
 ```
 
-## Examples
+## Quick Start Examples
 
 See [here](./examples/resources/basic/)
 

@@ -1,4 +1,4 @@
-# Example manifests
+# Example Manifests
 
 You can run your function locally and test it using `crossplane beta render`
 with these example manifests.
