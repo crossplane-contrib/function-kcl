@@ -11,11 +11,10 @@ import (
 
 	fnv1beta1 "github.com/crossplane/function-sdk-go/proto/v1beta1"
 	"github.com/crossplane/function-sdk-go/request"
-	"github.com/crossplane/function-sdk-go/resource"
-	"github.com/crossplane/function-sdk-go/resource/composed"
 	"github.com/crossplane/function-sdk-go/response"
 
-	"github.com/crossplane/function-template-go/input/v1beta1"
+	"kcl-lang.io/crossplane-kcl/input/v1beta1"
+	pkgresource "kcl-lang.io/crossplane-kcl/pkg/resource"
 
 	"sigs.k8s.io/yaml"
 )
@@ -72,10 +71,11 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		return rsp, nil
 	}
 	log.Debug(fmt.Sprintf("DesiredComposed resources: %d", len(desired)))
+
 	// The composed resources desired by any previous Functions in the pipeline.
 	observed, err := request.GetObservedComposedResources(req)
 	if err != nil {
-		response.Fatal(rsp, errors.Wrapf(err, "cannot get desired composed resources from %T", req))
+		response.Fatal(rsp, errors.Wrapf(err, "cannot get observed composed resources from %T", req))
 		return rsp, nil
 	}
 	log.Debug(fmt.Sprintf("ObservedComposed resources: %d", len(observed)))
@@ -84,92 +84,43 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 	inputBytes, outputBytes := bytes.NewBuffer([]byte{}), bytes.NewBuffer([]byte{})
 	kclRunBytes, err := yaml.Marshal(in)
 	if err != nil {
-		response.Fatal(rsp, errors.Wrap(err, "cannot get observed composite resource"))
+		response.Fatal(rsp, errors.Wrap(err, "cannot marshal input to yaml"))
 		return rsp, nil
 	}
 	inputBytes.Write(kclRunBytes)
 	// Run pipeline to get the result mutated or validated by the KCL source.
 	pipeline := kio.NewPipeline(inputBytes, outputBytes, false)
 	if err := pipeline.Execute(); err != nil {
-		response.Fatal(rsp, errors.Wrap(err, "cannot get observed composite resource"))
+		response.Fatal(rsp, errors.Wrap(err, "failed to run kcl function pipelines"))
 		return rsp, nil
 	}
 
-	output := successOutput{
-		target: in.Spec.Target,
-	}
-	conf := addResourcesConf{
-		overwrite: true,
-	}
-
-	data, err := buildData(outputBytes.Bytes())
-
+	data, err := pkgresource.DataResourcesFromYaml(outputBytes.Bytes())
 	if err != nil {
-		response.Fatal(rsp, errors.Wrapf(err, "cannot match resources to desired"))
+		response.Fatal(rsp, errors.Wrapf(err, "cannot parse data resources from the pipeline output in %T", rsp))
 		return rsp, nil
 	}
 
-	switch in.Spec.Target {
-	case v1beta1.XR:
-		conf.data = data
-		if err := addResourcesTo(dxr, conf); err != nil {
-			response.Fatal(rsp, errors.Wrapf(err, "cannot add resources to XR"))
-			return rsp, nil
-		}
-		output.object = dxr
-		output.msgCount = 1
-	case v1beta1.PatchDesired:
-		log.Debug("Matching PatchDesired Resources")
-		desiredMatches, err := matchResources(desired, data)
+	var resources pkgresource.ResourceList
+	for _, r := range in.Spec.Resources {
+		base, err := pkgresource.JsonByteToUnstructured(r.Base.Raw)
 		if err != nil {
-			response.Fatal(rsp, errors.Wrapf(err, "cannot match resources to desired"))
+			response.Fatal(rsp, errors.Wrapf(err, "cannot parse data resources from the pipeline output in %T", rsp))
 			return rsp, nil
 		}
-		log.Debug(fmt.Sprintf("Matched %+v", desiredMatches))
-
-		if err := addResourcesTo(desiredMatches, conf); err != nil {
-			response.Fatal(rsp, errors.Wrapf(err, "cannot update existing DesiredComposed"))
-			return rsp, nil
-		}
-		output.object = data
-		output.msgCount = len(data)
-	case v1beta1.PatchResources:
-		// Render the List of DesiredComposed resources from the input
-		// Update the existing desired map to be created as a base
-		for _, r := range in.Spec.Resources {
-			tmp := &resource.DesiredComposed{Resource: composed.New()}
-
-			if err := renderFromJSON(tmp.Resource, r.Base.Raw); err != nil {
-				response.Fatal(rsp, errors.Wrapf(err, "cannot parse base template of composed resource %q", r.Name))
-				return rsp, nil
-			}
-
-			desired[resource.Name(r.Name)] = tmp
-		}
-		// Match the data to the desired resources
-		desiredMatches, err := matchResources(desired, data)
-		if err != nil {
-			response.Fatal(rsp, errors.Wrapf(err, "cannot match resources to input resources"))
-			return rsp, nil
-		}
-
-		if err := addResourcesTo(desiredMatches, conf); err != nil {
-			response.Fatal(rsp, errors.Wrapf(err, "cannot add resources to DesiredComposed"))
-			return rsp, nil
-		}
-		output.object = data
-		output.msgCount = len(data)
-	case v1beta1.Resources:
-		conf.basename = in.Name
-		conf.data = data
-		if err := addResourcesTo(desired, conf); err != nil {
-			response.Fatal(rsp, errors.Wrapf(err, "cannot add resources to DesiredComposed"))
-			return rsp, nil
-		}
-		// Pass data here instead of desired
-		// This is because there already may be desired objects
-		output.object = data
-		output.msgCount = len(data)
+		resources = append(resources, pkgresource.Resource{
+			Name: r.Name,
+			Base: *base,
+		})
+	}
+	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
+		Basename:  in.Name,
+		Data:      data,
+		Overwrite: true,
+	})
+	if err != nil {
+		response.Fatal(rsp, errors.Wrapf(err, "cannot process xr and state with the pipeline output in %T", rsp))
+		return rsp, nil
 	}
 
 	// Set dxr and desired state
@@ -178,27 +129,20 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		response.Fatal(rsp, errors.Wrapf(err, "cannot set desired composite resource in %T", rsp))
 		return rsp, nil
 	}
-
-	for _, d := range desired {
-		log.Debug(fmt.Sprintf("Setting DesiredComposed state to %+v", d.Resource))
-	}
 	if err := response.SetDesiredComposedResources(rsp, desired); err != nil {
 		response.Fatal(rsp, errors.Wrapf(err, "cannot set desired composed resources in %T", rsp))
 		return rsp, nil
 	}
-	log.Debug(fmt.Sprintf("Set %d resource(s) to the desired state", output.msgCount))
 
-	// Output success
-	output.setSuccessMsgs()
-	for _, msg := range output.msgs {
+	log.Debug(fmt.Sprintf("Set %d resource(s) to the desired state", result.MsgCount))
+	for _, msg := range result.Msgs {
 		rsp.Results = append(rsp.Results, &fnv1beta1.Result{
 			Severity: fnv1beta1.Severity_SEVERITY_NORMAL,
 			Message:  msg,
 		})
 	}
 
-	log.Info("Successfully processed crossplane KCL function resources",
-		"input", in.Name)
+	log.Info("Successfully processed crossplane KCL function resources", "input", in.Name)
 
 	return rsp, nil
 }

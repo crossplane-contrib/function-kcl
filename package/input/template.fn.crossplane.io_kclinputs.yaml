@@ -19,7 +19,7 @@ spec:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Input can be used to provide input to this Function.
+        description: KCLInput can be used to provide input to this Function.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation

@@ -1,4 +1,4 @@
-package main
+package resource
 
 import (
 	"encoding/json"
@@ -6,69 +6,85 @@ import (
 	"sort"
 	"strings"
 
-	runtimeresource "github.com/crossplane/crossplane-runtime/pkg/resource"
 	"github.com/crossplane/function-sdk-go/resource"
 	"github.com/crossplane/function-sdk-go/resource/composed"
-	"github.com/crossplane/function-template-go/input/v1beta1"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	krmyaml "kcl-lang.io/krm-kcl/pkg/yaml"
 )
 
-type outputData struct {
-	// Name is a unique identifier for this entry
-	Name string `json:"name"`
-	// Resource is the managed resource output.
-	Resource map[string]interface{} `json:"resource"`
+type Target string
+
+const (
+	// PatchDesired targets existing Resources on the Desired XR
+	PatchDesired Target = "PatchDesired"
+	// PatchResources targets existing KCLInput.spec.Resources
+	// These resources are then created similar to the Resources target
+	PatchResources Target = "PatchResources"
+	// Resources creates new resources that are added to the DesiredComposed Resources
+	Resources Target = "Resources"
+	// XR targets the existing Observed XR itself
+	XR Target = "XR"
+)
+
+type ResourceList []Resource
+
+type Resource struct {
+	// Name is a unique identifier for this entry in a ResourceList
+	Name string                    `json:"name"`
+	Base unstructured.Unstructured `json:"base,omitempty"`
 }
 
-// renderFromJSON renders the supplied resource from JSON bytes.
-func renderFromJSON(o runtimeresource.Object, data []byte) error {
-	if err := json.Unmarshal(data, o); err != nil {
-		return errors.Wrap(err, "cannot unmarshal JSON data")
+func JsonByteToUnstructured(jsonByte []byte) (*unstructured.Unstructured, error) {
+	var data map[string]interface{}
+	err := json.Unmarshal(jsonByte, &data)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	u := &unstructured.Unstructured{Object: data}
+	return u, nil
 }
 
-func buildData(in []byte) (result []outputData, err error) {
-	bytes, err := splitDocuments(string(in))
+// DataResourcesFromYaml returns the manifests list from the YAML stream data.
+func DataResourcesFromYaml(in []byte) (result []unstructured.Unstructured, err error) {
+	bytes, err := krmyaml.SplitDocuments(string(in))
 	if err != nil {
 		return
 	}
-	for i, b := range bytes {
+	for _, b := range bytes {
 		var data map[string]interface{}
 		err = yaml.Unmarshal([]byte(b), &data)
 		if err != nil {
 			return
 		}
-		result = append(result, outputData{
-			Name:     fmt.Sprint(i),
-			Resource: data,
+		result = append(result, unstructured.Unstructured{
+			Object: data,
 		})
 	}
 	return
 }
 
-// desiredMatch matches a list of data to apply to a desired resource
+// DesiredMatch matches a list of data to apply to a desired resource
 // This is used when targeting PatchDesired resources
-type desiredMatch map[*resource.DesiredComposed][]map[string]interface{}
+type DesiredMatch map[*resource.DesiredComposed][]map[string]interface{}
 
 // matchResources finds and associates the data to the desired resource
 // The length of the passed data should match the total count of desired match data
-func matchResources(desired map[resource.Name]*resource.DesiredComposed, data []outputData) (desiredMatch, error) {
+func MatchResources(desired map[resource.Name]*resource.DesiredComposed, data []unstructured.Unstructured) (DesiredMatch, error) {
 	// Iterate over the data patches and match them to desired resources
-	matches := make(desiredMatch)
+	matches := make(DesiredMatch)
 	count := 0
 	// Get total count of all the match patches to apply
 	// this count should match the initial count of the supplied data
 	// otherwise we lost something somewhere
 	for _, d := range data {
 		// PatchDesired
-		if found, ok := desired[resource.Name(d.Name)]; ok {
+		if found, ok := desired[resource.Name(d.GetName())]; ok {
 			if _, ok := matches[found]; !ok {
-				matches[found] = []map[string]interface{}{d.Resource}
+				matches[found] = []map[string]interface{}{d.Object}
 			} else {
-				matches[found] = append(matches[found], d.Resource)
+				matches[found] = append(matches[found], d.Object)
 			}
 			count++
 		}
@@ -80,60 +96,57 @@ func matchResources(desired map[resource.Name]*resource.DesiredComposed, data []
 	return matches, nil
 }
 
-type successOutput struct {
-	target   v1beta1.Target
-	object   any
-	msgCount int
-	msgs     []string
+type AddResourcesResult struct {
+	Target   Target
+	Object   any
+	MsgCount int
+	Msgs     []string
 }
 
 // setSuccessMsgs generates the success messages for the input data
-func (output *successOutput) setSuccessMsgs() {
-	output.msgs = make([]string, output.msgCount)
-	switch output.target {
-	case v1beta1.Resources:
-		desired := output.object.([]outputData)
+func (r *AddResourcesResult) setSuccessMsgs() {
+	r.Msgs = make([]string, r.MsgCount)
+	switch r.Target {
+	case Resources:
+		desired := r.Object.([]unstructured.Unstructured)
 		j := 0
 		for _, d := range desired {
-			u := unstructured.Unstructured{Object: d.Resource}
-			output.msgs[j] = fmt.Sprintf("created resource \"%s:%s\"", u.GetName(), u.GetKind())
+			r.Msgs[j] = fmt.Sprintf("created resource \"%s:%s\"", d.GetName(), d.GetKind())
 			j++
 		}
-	case v1beta1.PatchDesired:
-		desired := output.object.([]outputData)
+	case PatchDesired:
+		desired := r.Object.([]unstructured.Unstructured)
 		j := 0
 		for _, d := range desired {
-			u := unstructured.Unstructured{Object: d.Resource}
-			output.msgs[j] = fmt.Sprintf("updated resource \"%s:%s\"", u.GetName(), u.GetKind())
+			r.Msgs[j] = fmt.Sprintf("updated resource \"%s:%s\"", d.GetName(), d.GetKind())
 			j++
 		}
-	case v1beta1.PatchResources:
-		desired := output.object.([]outputData)
+	case PatchResources:
+		desired := r.Object.([]unstructured.Unstructured)
 		j := 0
 		for _, d := range desired {
-			u := unstructured.Unstructured{Object: d.Resource}
-			output.msgs[j] = fmt.Sprintf("created resource \"%s:%s\"", u.GetName(), u.GetKind())
+			r.Msgs[j] = fmt.Sprintf("created resource \"%s:%s\"", d.GetName(), d.GetKind())
 			j++
 		}
-	case v1beta1.XR:
-		o := output.object.(*resource.Composite)
-		output.msgs[0] = fmt.Sprintf("updated xr \"%s:%s\"", o.Resource.GetName(), o.Resource.GetKind())
+	case XR:
+		o := r.Object.(*resource.Composite)
+		r.Msgs[0] = fmt.Sprintf("updated xr \"%s:%s\"", o.Resource.GetName(), o.Resource.GetKind())
 	}
-	sort.Strings(output.msgs)
+	sort.Strings(r.Msgs)
 }
 
-type addResourcesConf struct {
-	basename  string
-	data      []outputData
-	overwrite bool
+type AddResourcesOptions struct {
+	Basename  string
+	Data      []unstructured.Unstructured
+	Overwrite bool
 }
 
-// addResourcesTo adds the given data to any allowed object passed
+// AddResourcesTo adds the given data to any allowed object passed
 // Will return err if the object is not of a supported type
-// For 'desired' composed resources, the basename is used for the resource name
-// For 'xr' resources, the basename must match the xr name
-// For 'existing' resources, the basename must match the resource name
-func addResourcesTo(o any, conf addResourcesConf) error {
+// For 'desired' composed resources, the Basename is used for the resource name
+// For 'xr' resources, the Basename must match the xr name
+// For 'existing' resources, the Basename must match the resource name
+func AddResourcesTo(o any, opts *AddResourcesOptions) error {
 	// Merges data with the desired composed resource
 	// Values from data overwrite the desired composed resource
 	merged := func(data map[string]interface{}, from *resource.DesiredComposed) map[string]interface{} {
@@ -152,44 +165,41 @@ func addResourcesTo(o any, conf addResourcesConf) error {
 	case map[resource.Name]*resource.DesiredComposed:
 		// Resources
 		desired := val
-		for _, d := range conf.data {
-			name := resource.Name(d.Name)
-			u := unstructured.Unstructured{
-				Object: d.Resource,
-			}
+		for _, d := range opts.Data {
+			name := resource.Name(d.GetName())
 
-			// Add the resource name as a suffix to the basename
+			// Add the resource name as a suffix to the Basename
 			// if there are multiple resources to add
-			if len(conf.data) > 1 {
-				name = resource.Name(fmt.Sprintf("%s-%s", conf.basename, d.Name))
+			if len(opts.Data) > 1 {
+				name = resource.Name(fmt.Sprintf("%s-%s", opts.Basename, d.GetName()))
 			}
 			// If the value exists, merge its existing value with the patches
 			if v, ok := desired[name]; ok {
-				mergedData := merged(d.Resource, v)
-				u = unstructured.Unstructured{Object: mergedData}
+				mergedData := merged(d.Object, v)
+				d = unstructured.Unstructured{Object: mergedData}
 			}
 			desired[name] = &resource.DesiredComposed{
 				Resource: &composed.Unstructured{
-					Unstructured: u,
+					Unstructured: d,
 				},
 			}
 		}
-	case desiredMatch:
+	case DesiredMatch:
 		// PatchDesired
 		matches := val
 		// Set the Match data on the desired resource stored as keys
 		for obj, matchData := range matches {
 			// There may be multiple data patches to the DesiredComposed object
 			for _, d := range matchData {
-				if err := setData(d, "", obj, conf.overwrite); err != nil {
+				if err := SetData(d, "", obj, opts.Overwrite); err != nil {
 					return errors.Wrap(err, "cannot set data existing desired composed object")
 				}
 			}
 		}
 	case *resource.Composite:
 		// XR
-		for _, d := range conf.data {
-			if err := setData(d.Resource, "", o, conf.overwrite); err != nil {
+		for _, d := range opts.Data {
+			if err := SetData(d.Object, "", o, opts.Overwrite); err != nil {
 				return errors.Wrap(err, "cannot set data on xr")
 			}
 		}
@@ -203,7 +213,7 @@ var (
 	errNoSuchField = "no such field"
 )
 
-// setData is a recursive function that is intended to build a kube fieldpath valid
+// SetData is a recursive function that is intended to build a kube fieldpath valid
 // JSONPath(s) of the given object, it will then copy from 'data' at the given path
 // to the passed o object - at the same path, overwrite defines if this function should
 // be allowed to overwrite values or not, if not return an conflicting value error
@@ -211,7 +221,7 @@ var (
 // If the resource to write to 'o' contains a nil .Resource, setData will return an error
 // It is expected that the resource is created via composed.New() or composite.New() prior
 // to calling setData
-func setData(data any, path string, o any, overwrite bool) error {
+func SetData(data any, path string, o any, overwrite bool) error {
 	switch val := data.(type) {
 	case map[string]interface{}:
 		// Check if the parent field is annotations or labels
@@ -230,14 +240,14 @@ func setData(data any, path string, o any, overwrite bool) error {
 			} else {
 				newKey = fmt.Sprintf("%s.%v", path, key)
 			}
-			if err := setData(value, newKey, o, overwrite); err != nil {
+			if err := SetData(value, newKey, o, overwrite); err != nil {
 				return err
 			}
 		}
 	case []interface{}:
 		for i, value := range val {
 			newPath := fmt.Sprintf("%s[%d]", path, i)
-			if err := setData(value, newPath, o, overwrite); err != nil {
+			if err := SetData(value, newPath, o, overwrite); err != nil {
 				return err
 			}
 		}
@@ -292,4 +302,56 @@ func setData(data any, path string, o any, overwrite bool) error {
 		}
 	}
 	return nil
+}
+
+func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired map[resource.Name]*resource.DesiredComposed, observed map[resource.Name]resource.ObservedComposed, target Target, resources ResourceList, opts *AddResourcesOptions) (AddResourcesResult, error) {
+	result := AddResourcesResult{
+		Target: target,
+	}
+	data := opts.Data
+	switch target {
+	case XR:
+		if err := AddResourcesTo(dxr, opts); err != nil {
+			return result, err
+		}
+		result.Object = dxr
+		result.MsgCount = 1
+	case PatchDesired:
+		desiredMatches, err := MatchResources(desired, data)
+		if err != nil {
+			return result, err
+		}
+		if err := AddResourcesTo(desiredMatches, opts); err != nil {
+			return result, err
+		}
+		result.Object = data
+		result.MsgCount = len(data)
+	case PatchResources:
+		// Render the List of DesiredComposed resources from the input
+		// Update the existing desired map to be created as a base
+		for _, r := range resources {
+			desired[resource.Name(r.Name)] = &resource.DesiredComposed{Resource: &composed.Unstructured{Unstructured: r.Base}}
+		}
+		// Match the data to the desired resources
+		desiredMatches, err := MatchResources(desired, data)
+		if err != nil {
+			return result, err
+		}
+
+		if err := AddResourcesTo(desiredMatches, opts); err != nil {
+			return result, err
+		}
+		result.Object = data
+		result.MsgCount = len(data)
+	case Resources:
+		if err := AddResourcesTo(desired, opts); err != nil {
+			return result, err
+		}
+		// Pass data here instead of desired
+		// This is because there already may be desired objects
+		result.Object = data
+		result.MsgCount = len(data)
+	}
+	result.setSuccessMsgs()
+	return result, nil
 }

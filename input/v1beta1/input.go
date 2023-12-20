@@ -10,6 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"kcl-lang.io/crossplane-kcl/pkg/resource"
 )
 
 // This isn't a custom resource, in the sense that we never install its CRD.
@@ -33,10 +34,10 @@ func (in KCLInput) Validate() error {
 
 	switch in.Spec.Target {
 	// Allowed targets
-	case PatchDesired, Resources, XR:
-	case PatchResources:
+	case resource.PatchDesired, resource.Resources, resource.XR:
+	case resource.PatchResources:
 		if len(in.Spec.Resources) == 0 {
-			return field.Required(field.NewPath("spec.Resources"), fmt.Sprintf("%s target requires at least one resource", PatchResources))
+			return field.Required(field.NewPath("spec.Resources"), fmt.Sprintf("%s target requires at least one resource", resource.PatchResources))
 		}
 
 		for i, r := range in.Spec.Resources {
@@ -66,22 +67,8 @@ type RunSpec struct {
 	// Target determines what object the export output should be applied to
 	// +kubebuilder:default:=Resources
 	// +kubebuilder:validation:Enum:=PatchDesired;PatchResources;Resources;XR
-	Target Target `json:"target"`
+	Target resource.Target `json:"target"`
 }
-
-type Target string
-
-const (
-	// PatchDesired targets existing Resources on the Desired XR
-	PatchDesired Target = "PatchDesired"
-	// PatchResources targets existing KCLInput.spec.Resources
-	// These resources are then created similar to the Resources target
-	PatchResources Target = "PatchResources"
-	// Resources creates new resources that are added to the DesiredComposed Resources
-	Resources Target = "Resources"
-	// XR targets the existing Observed XR itself
-	XR Target = "XR"
-)
 
 type ResourceList []Resource
 

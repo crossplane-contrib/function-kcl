@@ -1,6 +1,6 @@
 # Crossplane Composition Functions using KCL
 
-[![CI](https://github.com/crossplane/function-template-go/actions/workflows/ci.yml/badge.svg)](https://github.com/crossplane/function-template-go/actions/workflows/ci.yml)
+[![CI](https://kcl-lang.io/crossplane-kcl/actions/workflows/ci.yml/badge.svg)](https://kcl-lang.io/crossplane-kcl/actions/workflows/ci.yml)
 
 ## Developing
 

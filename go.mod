@@ -1,4 +1,4 @@
-module github.com/crossplane/function-template-go
+module kcl-lang.io/crossplane-kcl
 
 go 1.21
 
@@ -7,11 +7,12 @@ require (
 	github.com/crossplane/crossplane-runtime v1.14.3
 	github.com/crossplane/function-sdk-go v0.1.0
 	github.com/google/go-cmp v0.6.0
+	github.com/google/martian v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.28.4
-	kcl-lang.io/krm-kcl v0.7.0
+	kcl-lang.io/krm-kcl v0.7.1-0.20231220065806-3885e2535f64
 	sigs.k8s.io/controller-tools v0.13.0
 	sigs.k8s.io/yaml v1.4.0
 )

@@ -69,7 +69,7 @@ func TestRunFunction(t *testing.T) {
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
 						Resources: map[string]*fnv1beta1.Resource{
-							"0": {
+							"": {
 								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated"}`),
 							},
 						},
