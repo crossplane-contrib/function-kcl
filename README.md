@@ -37,9 +37,9 @@ A KRM YAML list which means that each document must have an `apiVersion`, `kind`
 Here's what you can do in the KCL script:
 
 + Return an error using `assert {condition}, {error_message}`.
-+ Read the `ObservedCompositeResource` from `option("oxr").oxr`.
-+ Read the `ObservedComposedResources` from `option("ocds").ocds`.
-+ Read the `DesiredCompositeResource` from `option("dxr").dxr`.
++ Read the `ObservedCompositeResource` from `option("params").oxr`.
++ Read the `ObservedComposedResources` from `option("params").ocds`.
++ Read the `DesiredCompositeResource` from `option("params").dxr`.
 + Read the `DesiredComposedResources` from `option("params").dcds`.
 + Read the environment variables. e.g. `option("PATH")` (**Not yet implemented**).
 
