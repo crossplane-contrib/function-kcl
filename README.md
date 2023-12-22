@@ -1,6 +1,12 @@
 # Crossplane Composition Functions using KCL
 
-[![CI](https://kcl-lang.io/crossplane-kcl/actions/workflows/ci.yml/badge.svg)](https://kcl-lang.io/crossplane-kcl/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/kcl-lang.io/crossplane-kcl)](https://goreportcard.com/report/kcl-lang.io/crossplane-kcl)
+[![GoDoc](https://godoc.org/kcl-lang.io/crossplane-kcl?status.svg)](https://godoc.org/kcl-lang.io/crossplane-kcl)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://kcl-lang.io/crossplane-kcl/blob/main/LICENSE)
+
+## Introduction
+
+Crossplane KCL function allows developers to use [KCL](https://kcl-lang.io/) (a DSL) to write composite logic without the need for repeated packaging of crossplane functions, and we support package management and the [KRM KCL specification](https://github.com/kcl-lang/krm-kcl), which allows for OCI/Git source and the reuse of [KCL's module ecosystem](https://artifacthub.io/packages/search?org=kcl&sort=relevance&page=1).
 
 ## Developing
 
@@ -31,9 +37,9 @@ A KRM YAML list which means that each document must have an `apiVersion`, `kind`
 Here's what you can do in the KCL script:
 
 + Return an error using `assert {condition}, {error_message}`.
-+ Read the `ObservedCompositeResource` from `option("params").oxr`.
-+ Read the `ObservedComposedResources` from `option("params").ocds`.
-+ Read the `DesiredCompositeResource` from `option("params").dxr`.
++ Read the `ObservedCompositeResource` from `option("oxr").oxr`.
++ Read the `ObservedComposedResources` from `option("ocds").ocds`.
++ Read the `DesiredCompositeResource` from `option("dxr").dxr`.
 + Read the `DesiredComposedResources` from `option("params").dcds`.
 + Read the environment variables. e.g. `option("PATH")` (**Not yet implemented**).
 

@@ -17,9 +17,25 @@ kind: XR
 metadata:
   name: example-xr
 ---
+apiVersion: example.org/v1
+kind: Generated
+metadata:
+  annotations:
+    crossplane.io/composition-resource-name: ""
+  generateName: example-xr-
+  labels:
+    crossplane.io/composite: example-xr
+  ownerReferences:
+  - apiVersion: example.crossplane.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: XR
+    name: example-xr
+    uid: ""
+---
 apiVersion: render.crossplane.io/v1beta1
 kind: Result
-message: I was run with input "Hello world"!
+message: created resource ":Generated"
 severity: SEVERITY_NORMAL
-step: run-the-template
+step: normal
 ```

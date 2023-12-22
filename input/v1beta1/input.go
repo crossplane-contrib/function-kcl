@@ -49,7 +49,7 @@ func (in KCLInput) Validate() error {
 			}
 		}
 	default:
-		return field.Required(field.NewPath("spec.target"), fmt.Sprintf("invalid target %s", in.Spec.Target))
+		return field.Required(field.NewPath("spec.target"), fmt.Sprintf("invalid target: %s", in.Spec.Target))
 	}
 
 	return nil
