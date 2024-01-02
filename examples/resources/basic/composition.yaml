@@ -20,6 +20,10 @@ spec:
         target: Resources
         source: |
           {
-              apiVersion: "example.org/v1"
-              kind: "Generated"
+              apiVersion: "ec2.aws.upbound.io/v1beta1"
+              kind: "Instance"
+              metadata.name = "instance"
+              spec.forProvider.ami: "ami-0d9858aa3c6322f73"
+              spec.forProvider.instanceType: "t2.micro"
+              spec.forProvider.region: "us-east-2"
           }

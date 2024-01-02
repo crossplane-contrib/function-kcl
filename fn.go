@@ -118,12 +118,13 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		response.Fatal(rsp, errors.Wrap(err, "failed to run kcl function pipelines"))
 		return rsp, nil
 	}
-
+	log.Debug(fmt.Sprintf("Pipeline output: %v", outputBytes.String()))
 	data, err := pkgresource.DataResourcesFromYaml(outputBytes.Bytes())
 	if err != nil {
 		response.Fatal(rsp, errors.Wrapf(err, "cannot parse data resources from the pipeline output in %T", rsp))
 		return rsp, nil
 	}
+	log.Debug(fmt.Sprintf("Pipeline data: %v", data))
 
 	var resources pkgresource.ResourceList
 	for _, r := range in.Spec.Resources {
@@ -137,6 +138,7 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 			Base: *base,
 		})
 	}
+	log.Debug(fmt.Sprintf("Input resources: %v", resources))
 	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
 		Basename:  in.Name,
 		Data:      data,
@@ -152,6 +154,9 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 	if err := response.SetDesiredCompositeResource(rsp, dxr); err != nil {
 		response.Fatal(rsp, errors.Wrapf(err, "cannot set desired composite resource in %T", rsp))
 		return rsp, nil
+	}
+	for n, d := range desired {
+		log.Debug(fmt.Sprintf("Setting DesiredComposed state to %+v named %s", d.Resource, n))
 	}
 	if err := response.SetDesiredComposedResources(rsp, desired); err != nil {
 		response.Fatal(rsp, errors.Wrapf(err, "cannot set desired composed resources in %T", rsp))

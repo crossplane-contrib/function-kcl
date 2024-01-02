@@ -69,6 +69,36 @@ func ObjToRawExtension(obj interface{}) (runtime.RawExtension, error) {
 	return runtime.RawExtension{Raw: raw}, nil
 }
 
+func normalizeMap(input interface{}) (interface{}, error) {
+	switch in := input.(type) {
+	case map[interface{}]interface{}:
+		normalized := make(map[string]interface{})
+		for key, value := range in {
+			strKey, ok := key.(string)
+			if !ok {
+				return nil, fmt.Errorf("found non-string key in the map")
+			}
+			normalizedValue, err := normalizeMap(value)
+			if err != nil {
+				return nil, err
+			}
+			normalized[strKey] = normalizedValue
+		}
+		return normalized, nil
+	case []interface{}:
+		for i, v := range in {
+			normalizedValue, err := normalizeMap(v)
+			if err != nil {
+				return nil, err
+			}
+			in[i] = normalizedValue
+		}
+		return in, nil
+	default:
+		return input, nil
+	}
+}
+
 // DataResourcesFromYaml returns the manifests list from the YAML stream data.
 func DataResourcesFromYaml(in []byte) (result []unstructured.Unstructured, err error) {
 	bytes, err := krmyaml.SplitDocuments(string(in))
@@ -76,13 +106,20 @@ func DataResourcesFromYaml(in []byte) (result []unstructured.Unstructured, err e
 		return
 	}
 	for _, b := range bytes {
-		var data map[string]interface{}
+		var data interface{}
 		err = yaml.Unmarshal([]byte(b), &data)
 		if err != nil {
 			return
 		}
+
+		// Convert map[any]any to map[string]any
+		normalizedData, err := normalizeMap(data)
+		if err != nil {
+			return nil, err
+		}
+
 		result = append(result, unstructured.Unstructured{
-			Object: data,
+			Object: normalizedData.(map[string]interface{}),
 		})
 	}
 	return
@@ -190,7 +227,6 @@ func AddResourcesTo(o any, opts *AddResourcesOptions) error {
 		desired := val
 		for _, d := range opts.Data {
 			name := resource.Name(d.GetName())
-
 			// Add the resource name as a suffix to the Basename
 			// if there are multiple resources to add
 			if len(opts.Data) > 1 {
