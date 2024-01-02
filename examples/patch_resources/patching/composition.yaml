@@ -1,0 +1,36 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: function-template-go
+spec:
+  compositeTypeRef:
+    apiVersion: example.crossplane.io/v1
+    kind: XR
+  mode: Pipeline
+  pipeline:
+  - step: normal
+    functionRef:
+      name: kcl-function
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLRun
+      metadata:
+        name: basic
+      spec:
+        target: PatchResources
+        resources:
+        - name: bucket
+          base:
+            apiVersion: nobu.dev/v1
+            kind: Bucket
+            metadata:
+              name: bucket
+        source: |
+          {
+              metadata.name = "bucket"
+              metadata.annotations: {
+                  "nobu.dev/cueified": "true",
+                  "nobu.dev/app": "someapp",
+              }
+              spec.forProvider.network: "somenetwork"
+          }

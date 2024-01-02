@@ -1,0 +1,41 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: function-template-go
+spec:
+  compositeTypeRef:
+    apiVersion: example.crossplane.io/v1
+    kind: XR
+  mode: Pipeline
+  pipeline:
+  - step: normal
+    functionRef:
+      name: kcl-function
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLRun
+      metadata:
+        name: basic
+      spec:
+        target: Resources
+        params:
+          name: "input-instance"
+        source: |
+          env: str = option("params").oxr.spec.provider
+          items = [
+              {
+                  if env == "aws":
+                      apiVersion = "eks.nobu.dev/v1beta"
+                  if env == "gcp":
+                      apiVersion = "gke.nobu.dev/v1beta1"
+                  kind = "XNodepool"
+                  spec.parameters: {
+                  	  autoscaling: [{
+                  	  	  maxNodeCount: 1
+                  	  	  minNodeCount: 1
+                  	  }]
+                  	  clusterName: "example-injections"
+                  	  region: "us-east-2"
+                  }
+              }
+          ]

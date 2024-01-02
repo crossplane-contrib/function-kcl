@@ -21,11 +21,33 @@ apiVersion: ec2.aws.upbound.io/v1beta1
 kind: Instance
 metadata:
   annotations:
-    crossplane.io/composition-resource-name: instance
+    crossplane.io/composition-resource-name: basic-instance-us-east-1
   generateName: example-xr-
   labels:
     crossplane.io/composite: example-xr
-  name: instance
+  name: instance-us-east-1
+  ownerReferences:
+  - apiVersion: example.crossplane.io/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: XR
+    name: example-xr
+    uid: ""
+spec:
+  forProvider:
+    ami: ami-0d9858aa3c6322f73
+    instanceType: t2.micro
+    region: us-east-1
+---
+apiVersion: ec2.aws.upbound.io/v1beta1
+kind: Instance
+metadata:
+  annotations:
+    crossplane.io/composition-resource-name: basic-instance-us-east-2
+  generateName: example-xr-
+  labels:
+    crossplane.io/composite: example-xr
+  name: instance-us-east-2
   ownerReferences:
   - apiVersion: example.crossplane.io/v1
     blockOwnerDeletion: true
@@ -41,7 +63,13 @@ spec:
 ---
 apiVersion: render.crossplane.io/v1beta1
 kind: Result
-message: created resource "instance:Instance"
+message: created resource "instance-us-east-1:Instance"
+severity: SEVERITY_NORMAL
+step: normal
+---
+apiVersion: render.crossplane.io/v1beta1
+kind: Result
+message: created resource "instance-us-east-2:Instance"
 severity: SEVERITY_NORMAL
 step: normal
 ```

@@ -129,7 +129,7 @@ func DataResourcesFromYaml(in []byte) (result []unstructured.Unstructured, err e
 // This is used when targeting PatchDesired resources
 type DesiredMatch map[*resource.DesiredComposed][]map[string]interface{}
 
-// matchResources finds and associates the data to the desired resource
+// MatchResources finds and associates the data to the desired resource
 // The length of the passed data should match the total count of desired match data
 func MatchResources(desired map[resource.Name]*resource.DesiredComposed, data []unstructured.Unstructured) (DesiredMatch, error) {
 	// Iterate over the data patches and match them to desired resources
