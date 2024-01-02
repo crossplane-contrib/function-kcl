@@ -24,9 +24,20 @@ $ docker build . --tag=kcllang/crossplane-kcl
 $ crossplane xpkg build -f package --embed-runtime-image=kcllang/crossplane-kcl
 ```
 
-## Quick Start Examples
+## Quick Start Examples and Debug Locally
 
 See [here](./examples/resources/basic/)
+
+## Installing
+
+```yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: kcl-function
+spec:
+  package: kcllang/crossplane-kcl
+```
 
 ## Expected Output
 

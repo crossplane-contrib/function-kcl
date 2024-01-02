@@ -21,11 +21,11 @@ apiVersion: ec2.aws.upbound.io/v1beta1
 kind: Instance
 metadata:
   annotations:
-    crossplane.io/composition-resource-name: instance
+    crossplane.io/composition-resource-name: example-xr
   generateName: example-xr-
   labels:
     crossplane.io/composite: example-xr
-  name: instance
+  name: example-xr
   ownerReferences:
   - apiVersion: example.crossplane.io/v1
     blockOwnerDeletion: true
@@ -41,7 +41,7 @@ spec:
 ---
 apiVersion: render.crossplane.io/v1beta1
 kind: Result
-message: created resource "instance:Instance"
+message: created resource "example-xr:Instance"
 severity: SEVERITY_NORMAL
 step: normal
 ```

@@ -12,36 +12,36 @@ $ go run . --insecure --debug
 # Then, in another terminal, call it with these example manifests
 $ crossplane beta render xr.yaml composition.yaml functions.yaml -r
 ---
-apiVersion: example.crossplane.io/v1
-kind: XR
+apiVersion: nopexample.org/v1
+kind: XSubnetwork
 metadata:
-  name: example-xr
+  name: test-xrender
 ---
-apiVersion: ec2.aws.upbound.io/v1beta1
-kind: Instance
+apiVersion: nobu.dev/v1
+kind: Bucket
 metadata:
   annotations:
-    crossplane.io/composition-resource-name: instance
-  generateName: example-xr-
+    crossplane.io/composition-resource-name: bucket
+    nobu.dev/app: someapp
+    nobu.dev/cueified: "true"
+  generateName: test-xrender-
   labels:
-    crossplane.io/composite: example-xr
-  name: instance
+    crossplane.io/composite: test-xrender
+  name: bucket
   ownerReferences:
-  - apiVersion: example.crossplane.io/v1
+  - apiVersion: nopexample.org/v1
     blockOwnerDeletion: true
     controller: true
-    kind: XR
-    name: example-xr
+    kind: XSubnetwork
+    name: test-xrender
     uid: ""
 spec:
   forProvider:
-    ami: ami-0d9858aa3c6322f73
-    instanceType: t2.micro
-    region: us-east-2
+    network: somenetwork
 ---
 apiVersion: render.crossplane.io/v1beta1
 kind: Result
-message: created resource "instance:Instance"
+message: created resource "bucket:"
 severity: SEVERITY_NORMAL
 step: normal
 ```
