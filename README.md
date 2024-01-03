@@ -28,15 +28,17 @@ $ crossplane xpkg build -f package --embed-runtime-image=kcllang/crossplane-kcl
 
 See [here](./examples/resources/basic/)
 
-## Installing
+## Install the KCL Function to Cluster
 
 ```yaml
+cat <<EOF | kubectl apply -f -
 apiVersion: pkg.crossplane.io/v1beta1
 kind: Function
 metadata:
   name: kcl-function
 spec:
   package: kcllang/crossplane-kcl
+EOF
 ```
 
 ## Expected Output

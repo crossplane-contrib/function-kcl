@@ -1,0 +1,24 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xlabels.fn-demo.crossplane.io
+  labels:
+    provider: aws
+spec:
+  writeConnectionSecretsToNamespace: crossplane-system
+  compositeTypeRef:
+    apiVersion: fn-demo.crossplane.io/v1alpha1
+    kind: XNetwork
+  mode: Pipeline
+  pipeline:
+  - step: normal
+    functionRef:
+      name: kcl-function
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLRun
+      metadata:
+        name: basic
+      spec:
+        target: Resources
+        source: oci://ghcr.io/kcl-lang/crossplane-xnetwork-kcl-function
