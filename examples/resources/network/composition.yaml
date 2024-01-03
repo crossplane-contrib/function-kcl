@@ -1,0 +1,47 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: xlabels.fn-demo.crossplane.io
+  labels:
+    provider: aws
+spec:
+  writeConnectionSecretsToNamespace: crossplane-system
+  compositeTypeRef:
+    apiVersion: fn-demo.crossplane.io/v1alpha1
+    kind: XNetwork
+  mode: Pipeline
+  pipeline:
+  - step: normal
+    functionRef:
+      name: kcl-function
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLRun
+      metadata:
+        name: basic
+      spec:
+        target: Resources
+        source: |
+          id = option("params")?.oxr?.id or ""
+          network_id_labels = {"networks.meta.fn.crossplane.io/network-id" = id} if id else {}
+          vpc = {
+              apiVersion = "ec2.aws.upbound.io/v1beta1"
+              kind = "VPC"
+              metadata.labels: network_id_labels
+              spec.forProvider = {
+                  region = "eu-west-1"
+                  cidrBlock = "192.168.0.0/16"
+                  enableDnsSupport = True
+                  enableDnsHostnames = True
+              }
+          }
+          gateway = {
+              apiVersion = "ec2.aws.upbound.io/v1beta1"
+              kind = "InternetGateway"
+              metadata.labels: network_id_labels
+              spec.forProvider = {
+                  region = "eu-west-1"
+                  vpcIdSelector.matchControllerRef = True
+              }
+          }
+          items = [vpc, gateway]

@@ -1,0 +1,7 @@
+apiVersion: fn-demo.crossplane.io/v1alpha1
+kind: Network
+metadata:
+  name: network-test-functions
+  namespace: default
+spec:
+  id: network-test-functions
