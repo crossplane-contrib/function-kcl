@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # We use the latest Go 1.x version unless asked to use something else.
 # The GitHub Actions CI job sets this argument for a consistent Go version.
 ARG GO_VERSION=1
@@ -42,5 +40,4 @@ FROM kcllang/kcl AS image
 WORKDIR /
 COPY --from=build /function /function
 EXPOSE 9443
-USER nonroot:nonroot
 ENTRYPOINT ["/function"]
