@@ -22,6 +22,9 @@ $ docker build . --tag=kcllang/crossplane-kcl
 
 # Build a function package - see package/crossplane.yaml
 $ crossplane xpkg build -f package --embed-runtime-image=kcllang/crossplane-kcl
+
+# Push a function package to the registry
+$ crossplane --verbose xpkg push -f package/*.xpkg docker.io/kcllang/crossplane-kcl
 ```
 
 ## Quick Start Examples and Debug Locally
@@ -39,6 +42,17 @@ metadata:
 spec:
   package: kcllang/crossplane-kcl
 EOF
+```
+
+## Debugging the KCL Function in Cluster
+
+Logs are emitted to the Function's pod logs. Look for the Function pod in `crossplane-system`.
+
+### Levels
+
+```shell
+Info   # default
+Debug  # run with --debug flag
 ```
 
 ## Expected Output
