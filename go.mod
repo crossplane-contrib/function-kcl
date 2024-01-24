@@ -202,6 +202,6 @@ require (
 )
 
 replace (
-	oras.land/oras-go => oras.land/oras-go v1.2.4
+	oras.land/oras-go/v2 => oras.land/oras-go v2.3.1
 	oras.land/oras-go/v2 => oras.land/oras-go/v2 v2.3.0
 )
