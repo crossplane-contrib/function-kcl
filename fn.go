@@ -14,8 +14,8 @@ import (
 	"github.com/crossplane/function-sdk-go/request"
 	"github.com/crossplane/function-sdk-go/response"
 
-	"kcl-lang.io/crossplane-kcl/input/v1beta1"
-	pkgresource "kcl-lang.io/crossplane-kcl/pkg/resource"
+	"github.com/crossplane-contrib/function-kcl/input/v1beta1"
+	pkgresource "github.com/crossplane-contrib/function-kcl/pkg/resource"
 
 	"sigs.k8s.io/yaml"
 )
