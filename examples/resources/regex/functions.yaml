@@ -6,4 +6,4 @@ metadata:
     # This tells crossplane beta render to connect to the function locally.
     render.crossplane.io/runtime: Development
 spec:
-  package: kcllang/crossplane-kcl
+  package: docker.io/kcllang/crossplane-kcl
