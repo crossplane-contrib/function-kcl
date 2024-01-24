@@ -10,6 +10,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/apimachinery v0.29.1
 	kcl-lang.io/krm-kcl v0.7.1-0.20240123151849-daa152cdcd53
 	sigs.k8s.io/controller-tools v0.13.0
@@ -179,7 +180,6 @@ require (
 	google.golang.org/grpc v1.59.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/api v0.28.3 // indirect
 	k8s.io/apiextensions-apiserver v0.28.3 // indirect
 	k8s.io/apiserver v0.28.3 // indirect
