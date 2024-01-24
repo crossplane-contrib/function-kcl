@@ -7,10 +7,10 @@ package v1beta1
 import (
 	"fmt"
 
+	"github.com/crossplane-contrib/function-kcl/pkg/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"kcl-lang.io/crossplane-kcl/pkg/resource"
 )
 
 // This isn't a custom resource, in the sense that we never install its CRD.

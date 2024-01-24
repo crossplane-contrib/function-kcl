@@ -1,8 +1,8 @@
 # Crossplane Composition Functions using KCL
 
-[![Go Report Card](https://goreportcard.com/badge/kcl-lang.io/crossplane-kcl)](https://goreportcard.com/report/kcl-lang.io/crossplane-kcl)
-[![GoDoc](https://godoc.org/kcl-lang.io/crossplane-kcl?status.svg)](https://godoc.org/kcl-lang.io/crossplane-kcl)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://kcl-lang.io/crossplane-kcl/blob/main/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/crossplane-contrib/function-kcl)](https://goreportcard.com/report/github.com/crossplane-contrib/function-kcl)
+[![GoDoc](https://godoc.org/github.com/crossplane-contrib/function-kcl?status.svg)](https://godoc.org/github.com/crossplane-contrib/function-kcl)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/crossplane-contrib/function-kcl/blob/main/LICENSE)
 
 ## Introduction
 
