@@ -12,7 +12,7 @@ require (
 	google.golang.org/protobuf v1.31.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.28.4
-	kcl-lang.io/krm-kcl v0.7.1-0.20240123151849-daa152cdcd53
+	kcl-lang.io/krm-kcl v0.7.1-0.20240124071439-2e59400d7604
 	sigs.k8s.io/controller-tools v0.13.0
 	sigs.k8s.io/yaml v1.4.0
 )
