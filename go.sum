@@ -1559,8 +1559,12 @@ k8s.io/utils v0.0.0-20230726121419-3b25d923346b h1:sgn3ZU783SCgtaSJjpcVVlRqd6GSn
 k8s.io/utils v0.0.0-20230726121419-3b25d923346b/go.mod h1:OLgZIPagt7ERELqWJFomSt595RzquPNLL48iOWgYOg0=
 kcl-lang.io/cli v0.7.3 h1:IdP9WURITUxQh/qEYwFA383bwtdKPOk/36XCKBgwqDs=
 kcl-lang.io/cli v0.7.3/go.mod h1:4HJRwchbZJnXuNTJPYRvTtF33N/7fA+7uxrZ5fiV4L4=
+kcl-lang.io/cli v0.7.5 h1:5Cd3CKqovWz3qVlLIbJBPEUgLnFUE5kFBJXDWAwwoBk=
+kcl-lang.io/cli v0.7.5/go.mod h1:PnUfwEffCrDETABWEdEsSV/m62GGrsIX+SgHqtd+Wdk=
 kcl-lang.io/kcl-go v0.7.4 h1:teBnvTNFleGTwEaLof+1oHNMcWMRjiOlNawcOz55xEI=
 kcl-lang.io/kcl-go v0.7.4/go.mod h1:Ddy9n/AkFPaangh/qxOMVODmFStLmriBvv5I9ERBZwg=
+kcl-lang.io/kcl-go v0.7.5 h1:W6exZJPZ1ElDbOyStdtPUMQgLSBmMgZJ6FanRkj+LZY=
+kcl-lang.io/kcl-go v0.7.5/go.mod h1:Jp5CZYt1+tofkHXrXm6gUq9lT8zTIpki47FptuxLpm0=
 kcl-lang.io/kcl-openapi v0.5.5 h1:6LSbiy53nczagm7Ohgdy1DVgQ+5ffMihsOUY7PGkbh0=
 kcl-lang.io/kcl-openapi v0.5.5/go.mod h1:Ai9mFztCVKkRSFabczO/r5hCNdqaNtAc2ZIRxTeV0Mk=
 kcl-lang.io/kpm v0.6.0 h1:8gHMyV2l/EpZ/w27c3UyybXEBATvAzL81JdAFzdYqWc=
@@ -1569,8 +1573,12 @@ kcl-lang.io/krm-kcl v0.7.1-0.20240123151849-daa152cdcd53 h1:jVMjVZjIa8bPwAEs7mxc
 kcl-lang.io/krm-kcl v0.7.1-0.20240123151849-daa152cdcd53/go.mod h1:XFNqCQyUNnIs2aTe3BZMS9mVD4Xz7oXTjrVc1sKoPQA=
 kcl-lang.io/krm-kcl v0.7.1-0.20240124115115-9cfe8271fecc h1:FN5NfoIrRh9rFOE2sSazD7ttw79MzemnYMgE76+9CfE=
 kcl-lang.io/krm-kcl v0.7.1-0.20240124115115-9cfe8271fecc/go.mod h1:XFNqCQyUNnIs2aTe3BZMS9mVD4Xz7oXTjrVc1sKoPQA=
+kcl-lang.io/krm-kcl v0.7.1-0.20240126121510-c07ca197ee84 h1:Cm7cTysWkog/T4Y3dK3FK9SRLr7M3zSMotH54FdnkyU=
+kcl-lang.io/krm-kcl v0.7.1-0.20240126121510-c07ca197ee84/go.mod h1:3WCbW137m2WKF1YNZqH4A/Rz+7Sn/oWMn07Ti4C+S2w=
 kcl-lang.io/lib v0.7.6 h1:H1EV5cYQBt+S72dZEaYeJhUK4rLXzpDHwmHopoJZwCU=
 kcl-lang.io/lib v0.7.6/go.mod h1:ubsalGXxJaa5II/EsHmsI/tL2EluYHIcW+BwzQPt+uY=
+kcl-lang.io/lib v0.7.8 h1:kOYlrFqZkwzCG/CFs63cwbX3pPCNUci1Xvj7zqqnLno=
+kcl-lang.io/lib v0.7.8/go.mod h1:ubsalGXxJaa5II/EsHmsI/tL2EluYHIcW+BwzQPt+uY=
 oras.land/oras-go v1.2.4 h1:djpBY2/2Cs1PV87GSJlxv4voajVOMZxqqtq9AB8YNvY=
 oras.land/oras-go v1.2.4/go.mod h1:DYcGfb3YF1nKjcezfX2SNlDAeQFKSXmf+qrFmrh4324=
 oras.land/oras-go/v2 v2.3.0 h1:lqX1aXdN+DAmDTKjiDyvq85cIaI4RkIKp/PghWlAGIU=
