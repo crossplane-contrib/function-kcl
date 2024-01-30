@@ -129,7 +129,7 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/opencontainers/image-spec v1.1.0-rc5 // indirect
+	github.com/opencontainers/image-spec v1.1.0-rc6 // indirect
 	github.com/otiai10/copy v1.9.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
@@ -165,7 +165,7 @@ require (
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/oauth2 v0.11.0 // indirect
-	golang.org/x/sync v0.5.0 // indirect
+	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/term v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
@@ -203,5 +203,5 @@ require (
 
 replace (
 	oras.land/oras-go => oras.land/oras-go v1.2.4
-	oras.land/oras-go/v2 => oras.land/oras-go/v2 v2.3.0
+	oras.land/oras-go/v2 => oras.land/oras-go/v2 v2.4.0
 )
