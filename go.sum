@@ -646,6 +646,8 @@ github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320 h1:1/D3zfFHttUK
 github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320/go.mod h1:EiZBMaudVLy8fmjf9Npq1dq9RalhveqZG5w/yz3mHWs=
 github.com/hashicorp/go-getter v1.7.1 h1:SWiSWN/42qdpR0MdhaOc/bLR48PLuP1ZQtYLRlM69uY=
 github.com/hashicorp/go-getter v1.7.1/go.mod h1:W7TalhMmbPmsSMdNjD0ZskARur/9GJ17cfHTRtXV744=
+github.com/hashicorp/go-getter v1.7.3 h1:bN2+Fw9XPFvOCjB0UOevFIMICZ7G2XSQHzfvLUyOM5E=
+github.com/hashicorp/go-getter v1.7.3/go.mod h1:W7TalhMmbPmsSMdNjD0ZskARur/9GJ17cfHTRtXV744=
 github.com/hashicorp/go-hclog v1.2.1 h1:YQsLlGDJgwhXFpucSPyVbCBviQtjlHv3jLTlp8YmtEw=
 github.com/hashicorp/go-hclog v1.2.1/go.mod h1:W4Qnvbt70Wk/zYJryRzDRU/4r0kIg0PVHBcfoyhpF5M=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
@@ -1681,6 +1683,8 @@ kcl-lang.io/krm-kcl v0.7.1-0.20240130071107-069799b9d00f h1:fjwvEAljJq8Fd6pTjxDk
 kcl-lang.io/krm-kcl v0.7.1-0.20240130071107-069799b9d00f/go.mod h1:3WCbW137m2WKF1YNZqH4A/Rz+7Sn/oWMn07Ti4C+S2w=
 kcl-lang.io/krm-kcl v0.7.1-0.20240205032815-ffd7acd126c4 h1:5qFQ2hEWk8DetdK/ZzlQ/MC5u6J26cCQBNcC/w0qi2k=
 kcl-lang.io/krm-kcl v0.7.1-0.20240205032815-ffd7acd126c4/go.mod h1:3WCbW137m2WKF1YNZqH4A/Rz+7Sn/oWMn07Ti4C+S2w=
+kcl-lang.io/krm-kcl v0.7.1-0.20240220081420-32de146a2324 h1:57kQkSjeucPXX5hcNPbT/Dlw88DCfCn4gqG9xIQeAho=
+kcl-lang.io/krm-kcl v0.7.1-0.20240220081420-32de146a2324/go.mod h1:4Lml0u5aVQEWZgCmQz7IOeANpfDKuHgb1EqwP1lHuVE=
 kcl-lang.io/lib v0.7.6 h1:H1EV5cYQBt+S72dZEaYeJhUK4rLXzpDHwmHopoJZwCU=
 kcl-lang.io/lib v0.7.6/go.mod h1:ubsalGXxJaa5II/EsHmsI/tL2EluYHIcW+BwzQPt+uY=
 kcl-lang.io/lib v0.7.8 h1:kOYlrFqZkwzCG/CFs63cwbX3pPCNUci1Xvj7zqqnLno=
@@ -1705,6 +1709,8 @@ sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd h1:EDPBXCAspyGV4jQlpZSudPeMm
 sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd/go.mod h1:B8JuhiUyNFVKdsE8h686QcCxMaH6HrOAZj4vswFpcB0=
 sigs.k8s.io/kustomize/kyaml v0.14.3 h1:WpabVAKZe2YEp/irTSHwD6bfjwZnTtSDewd2BVJGMZs=
 sigs.k8s.io/kustomize/kyaml v0.14.3/go.mod h1:npvh9epWysfQ689Rtt/U+dpOJDTBn8kUnF1O6VzvmZA=
+sigs.k8s.io/kustomize/kyaml v0.16.0 h1:6J33uKSoATlKZH16unr2XOhDI+otoe2sR3M8PDzW3K0=
+sigs.k8s.io/kustomize/kyaml v0.16.0/go.mod h1:xOK/7i+vmE14N2FdFyugIshB8eF6ALpy7jI87Q2nRh4=
 sigs.k8s.io/structured-merge-diff/v4 v4.2.3 h1:PRbqxJClWWYMNV1dhaG4NsibJbArud9kFxnAMREiWFE=
 sigs.k8s.io/structured-merge-diff/v4 v4.2.3/go.mod h1:qjx8mGObPmV2aSZepjQjbmb2ihdVs8cGKBraizNC69E=
 sigs.k8s.io/structured-merge-diff/v4 v4.4.1 h1:150L+0vs/8DA78h1u02ooW1/fFq/Lwr+sGiqlzvrtq4=
