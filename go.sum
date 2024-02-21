@@ -319,6 +319,8 @@ github.com/crossplane/crossplane-runtime v1.14.4 h1:64zSZ75g1QXIMxR2zSQvz4+TTSq5
 github.com/crossplane/crossplane-runtime v1.14.4/go.mod h1:aOP+5W2wKpvthVs3pFNbVOe1jwrKYbJho0ThGNCVz9o=
 github.com/crossplane/crossplane-runtime v1.15.0 h1:9KmvKihwksyJnaH5AGnOUtYgTZLNTiT0Ki/zm9SqmlA=
 github.com/crossplane/crossplane-runtime v1.15.0/go.mod h1:kRcJjJQmBFrR2n/KhwL8wYS7xNfq3D8eK4JliEScOHI=
+github.com/crossplane/crossplane-runtime v1.15.1 h1:g1h75tNYOQT152IUNxs8ZgSsRFQKrZN9z69KefMujXs=
+github.com/crossplane/crossplane-runtime v1.15.1/go.mod h1:kRcJjJQmBFrR2n/KhwL8wYS7xNfq3D8eK4JliEScOHI=
 github.com/crossplane/function-sdk-go v0.1.0 h1:WN3CUSaj6wgDqQPZZP1whMVIkTAZtN3HVCS67pTMzd8=
 github.com/crossplane/function-sdk-go v0.1.0/go.mod h1:oRqHZ6RufpfZJ1N8aT4EfkP+5KpkhOKpWz7SeUDwwcw=
 github.com/crossplane/upjet v0.11.0-rc.0.0.20231012093706-c4a76d2a7505 h1:eCmYgfRopVn6r8RM1Ra4XQAPwVsjTGfktBj2Dk7yy+Y=
