@@ -12,7 +12,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/apimachinery v0.29.2
-	kcl-lang.io/krm-kcl v0.7.1-0.20240220081420-32de146a2324
+	kcl-lang.io/krm-kcl v0.7.1-0.20240222123706-e8ed6692e9db
 	sigs.k8s.io/controller-tools v0.14.0
 	sigs.k8s.io/yaml v1.4.0
 )
@@ -58,11 +58,12 @@ require (
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
+	github.com/dominikbraun/graph v0.23.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/evanphx/json-patch/v5 v5.8.0 // indirect
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/getkin/kin-openapi v0.122.0 // indirect
+	github.com/getkin/kin-openapi v0.123.0 // indirect
 	github.com/go-errors/errors v1.4.2 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.5.0 // indirect
@@ -74,16 +75,16 @@ require (
 	github.com/go-openapi/analysis v0.21.2 // indirect
 	github.com/go-openapi/errors v0.20.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
-	github.com/go-openapi/jsonpointer v0.19.6 // indirect
+	github.com/go-openapi/jsonpointer v0.20.2 // indirect
 	github.com/go-openapi/jsonreference v0.20.2 // indirect
 	github.com/go-openapi/loads v0.21.1 // indirect
 	github.com/go-openapi/spec v0.20.6 // indirect
 	github.com/go-openapi/strfmt v0.21.2 // indirect
-	github.com/go-openapi/swag v0.22.4 // indirect
+	github.com/go-openapi/swag v0.22.8 // indirect
 	github.com/go-openapi/validate v0.21.0 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/gobuffalo/flect v1.0.2 // indirect
-	github.com/goccy/go-yaml v1.11.0 // indirect
+	github.com/goccy/go-yaml v1.11.3 // indirect
 	github.com/gofrs/flock v0.8.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-collections/collections v0.0.0-20130729185459-604e922904d3 // indirect
@@ -97,7 +98,7 @@ require (
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-getter v1.7.3 // indirect
 	github.com/hashicorp/go-safetemp v1.0.0 // indirect
@@ -142,7 +143,7 @@ require (
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/qri-io/jsonpointer v0.1.1 // indirect
-	github.com/rogpeppe/go-internal v1.11.0 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/skeema/knownhosts v1.2.1 // indirect
@@ -155,7 +156,7 @@ require (
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
-	github.com/yuin/goldmark v1.4.13 // indirect
+	github.com/yuin/goldmark v1.7.0 // indirect
 	go.mongodb.org/mongo-driver v1.9.1 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/otel v1.22.0 // indirect
@@ -180,7 +181,7 @@ require (
 	google.golang.org/genproto v0.0.0-20240102182953-50ed04b92917 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240116215550-a9fa1716bcac // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240116215550-a9fa1716bcac // indirect
-	google.golang.org/grpc v1.61.0 // indirect
+	google.golang.org/grpc v1.61.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	k8s.io/api v0.29.1 // indirect
@@ -191,11 +192,11 @@ require (
 	k8s.io/klog/v2 v2.110.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e // indirect
-	kcl-lang.io/cli v0.7.5 // indirect
-	kcl-lang.io/kcl-go v0.7.5 // indirect
+	kcl-lang.io/cli v0.8.0-alpha.1 // indirect
+	kcl-lang.io/kcl-go v0.8.0-alpha.1.0.20240222103725-9868c9e39e75 // indirect
 	kcl-lang.io/kcl-openapi v0.5.5 // indirect
-	kcl-lang.io/kpm v0.6.0 // indirect
-	kcl-lang.io/lib v0.7.8 // indirect
+	kcl-lang.io/kpm v0.7.1-0.20240218044217-0224b99dc9f7 // indirect
+	kcl-lang.io/lib v0.8.0-alpha.1 // indirect
 	oras.land/oras-go v1.2.3 // indirect
 	oras.land/oras-go/v2 v2.3.0 // indirect
 	sigs.k8s.io/controller-runtime v0.17.0 // indirect
