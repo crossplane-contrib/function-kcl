@@ -8,6 +8,8 @@
 
 Crossplane KCL function allows developers to use [KCL](https://kcl-lang.io/) (a DSL) to write composite logic without the need for repeated packaging of crossplane functions, and we support package management and the [KRM KCL specification](https://github.com/kcl-lang/krm-kcl), which allows for OCI/Git source and the reuse of [KCL's module ecosystem](https://artifacthub.io/packages/search?org=kcl&sort=relevance&page=1).
 
+Check out this [blog](https://blog.crossplane.io/function-kcl/) to learn more.
+
 ## Developing
 
 ```shell
@@ -24,7 +26,7 @@ $ docker build . --tag=kcllang/crossplane-kcl
 $ crossplane xpkg build -f package --embed-runtime-image=kcllang/crossplane-kcl
 
 # Push a function package to the registry
-$ crossplane --verbose xpkg push -f package/*.xpkg docker.io/kcllang/crossplane-kcl
+$ crossplane --verbose xpkg push -f package/*.xpkg xpkg.upbound.io/crossplane-contrib/function-kcl:v0.2.0
 ```
 
 ## Quick Start Examples and Debug Locally
@@ -40,7 +42,7 @@ kind: Function
 metadata:
   name: kcl-function
 spec:
-  package: docker.io/kcllang/crossplane-kcl
+  package: xpkg.upbound.io/crossplane-contrib/function-kcl:v0.2.0
 EOF
 ```
 
@@ -68,7 +70,6 @@ Here's what you can do in the KCL script:
 + Read the `ObservedComposedResources` from `option("params").ocds`.
 + Read the `DesiredCompositeResource` from `option("params").dxr`.
 + Read the `DesiredComposedResources` from `option("params").dcds`.
-+ Read the environment variables. e.g. `option("PATH")` (**Not yet implemented**).
 
 ## Library
 
