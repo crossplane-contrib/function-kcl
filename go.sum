@@ -1771,6 +1771,8 @@ kcl-lang.io/krm-kcl v0.7.1-0.20240222123706-e8ed6692e9db h1:KlCDmqqdLAxqeJX9Sa8z
 kcl-lang.io/krm-kcl v0.7.1-0.20240222123706-e8ed6692e9db/go.mod h1:smTw5Nq3TYH1RuS4Xad2hID3flOFqcIPW781R6LYNHc=
 kcl-lang.io/krm-kcl v0.7.1-0.20240228124621-b047e5061655 h1:pJ8goztLldVBgye/EeqpEHJQbuFaZDrxVwxOomScKBc=
 kcl-lang.io/krm-kcl v0.7.1-0.20240228124621-b047e5061655/go.mod h1:NbMewgn4wKmghm/UV+oJihP5tcjlemxIn3bMjngDbYs=
+kcl-lang.io/krm-kcl v0.7.1-0.20240301094926-e4bcebef59ed h1:BdReNQS5xn5a8eo/UpWPG56JDif1cvupYVoRanjIezg=
+kcl-lang.io/krm-kcl v0.7.1-0.20240301094926-e4bcebef59ed/go.mod h1:NbMewgn4wKmghm/UV+oJihP5tcjlemxIn3bMjngDbYs=
 kcl-lang.io/lib v0.7.6 h1:H1EV5cYQBt+S72dZEaYeJhUK4rLXzpDHwmHopoJZwCU=
 kcl-lang.io/lib v0.7.6/go.mod h1:ubsalGXxJaa5II/EsHmsI/tL2EluYHIcW+BwzQPt+uY=
 kcl-lang.io/lib v0.7.8 h1:kOYlrFqZkwzCG/CFs63cwbX3pPCNUci1Xvj7zqqnLno=

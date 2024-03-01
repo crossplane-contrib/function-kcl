@@ -12,7 +12,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/apimachinery v0.29.2
-	kcl-lang.io/krm-kcl v0.7.1-0.20240228124621-b047e5061655
+	kcl-lang.io/krm-kcl v0.7.1-0.20240301094926-e4bcebef59ed
 	sigs.k8s.io/controller-tools v0.14.0
 	sigs.k8s.io/yaml v1.4.0
 )
