@@ -2,5 +2,15 @@
 apiVersion: meta.pkg.crossplane.io/v1beta1
 kind: Function
 metadata:
-  name: kcl-function
+  name: function-kcl
+  annotations:
+    meta.crossplane.io/maintainer: The KCL Programming Language Team <kcl-lang.io@domainsbyproxy.com>
+    meta.crossplane.io/source: github.com/crossplane-contrib/function-kcl
+    meta.crossplane.io/license: Apache-2.0
+    meta.crossplane.io/description: A KCL programming language composition function
+    meta.crossplane.io/readme: |
+      Crossplane KCL function allows developers to use [KCL](https://kcl-lang.io/) (a DSL) 
+      to write composite logic without the need for repeated packaging of crossplane functions,
+      and we support package management and the [KRM KCL specification](https://github.com/kcl-lang/krm-kcl),
+      which allows for OCI/Git source and the reuse of [KCL's module ecosystem](https://artifacthub.io/packages/search?org=kcl&sort=relevance&page=1).
 spec: {}
