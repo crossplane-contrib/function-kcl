@@ -11,7 +11,7 @@ require (
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.29.2
-	kcl-lang.io/krm-kcl v0.8.0-beta.1
+	kcl-lang.io/krm-kcl v0.8.0
 	sigs.k8s.io/controller-tools v0.14.0
 	sigs.k8s.io/yaml v1.4.0
 )
@@ -130,7 +130,7 @@ require (
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc6 // indirect
-	github.com/otiai10/copy v1.9.0 // indirect
+	github.com/otiai10/copy v1.14.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/powerman/rpc-codec v1.2.2 // indirect
@@ -191,11 +191,11 @@ require (
 	k8s.io/klog/v2 v2.110.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e // indirect
-	kcl-lang.io/cli v0.8.0-beta.1 // indirect
-	kcl-lang.io/kcl-go v0.8.0-beta.1 // indirect
+	kcl-lang.io/cli v0.8.0 // indirect
+	kcl-lang.io/kcl-go v0.8.0 // indirect
 	kcl-lang.io/kcl-openapi v0.5.5 // indirect
-	kcl-lang.io/kpm v0.8.0-beta.1 // indirect
-	kcl-lang.io/lib v0.8.0-beta.1 // indirect
+	kcl-lang.io/kpm v0.8.0 // indirect
+	kcl-lang.io/lib v0.8.0 // indirect
 	oras.land/oras-go v1.2.3 // indirect
 	oras.land/oras-go/v2 v2.3.0 // indirect
 	sigs.k8s.io/controller-runtime v0.17.0 // indirect
