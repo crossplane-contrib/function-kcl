@@ -26,7 +26,7 @@ $ docker build . --tag=kcllang/crossplane-kcl
 $ crossplane xpkg build -f package --embed-runtime-image=kcllang/crossplane-kcl
 
 # Push a function package to the registry
-$ crossplane --verbose xpkg push -f package/*.xpkg xpkg.upbound.io/crossplane-contrib/function-kcl:v0.3.2
+$ crossplane --verbose xpkg push -f package/*.xpkg xpkg.upbound.io/crossplane-contrib/function-kcl:latest
 ```
 
 ## Quick Start Examples and Debug Locally
@@ -42,7 +42,7 @@ kind: Function
 metadata:
   name: kcl-function
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/function-kcl:v0.3.2
+  package: xpkg.upbound.io/crossplane-contrib/function-kcl:latest
 EOF
 ```
 
