@@ -25,4 +25,5 @@ spec:
                   "nobu.dev/app": "someapp",
               }
               spec.forProvider.network: "somenetwork"
+              status.is_ok = True
           }
