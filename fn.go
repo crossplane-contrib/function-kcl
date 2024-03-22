@@ -16,7 +16,6 @@ import (
 
 	"github.com/crossplane-contrib/function-kcl/input/v1beta1"
 	pkgresource "github.com/crossplane-contrib/function-kcl/pkg/resource"
-
 	"sigs.k8s.io/yaml"
 )
 
@@ -98,7 +97,7 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		return rsp, nil
 	}
 	log.Debug(fmt.Sprintf("ObservedComposed resources: %d", len(observed)))
-	in.Spec.Params["ocds"], err = pkgresource.ObjToRawExtension(desired)
+	in.Spec.Params["ocds"], err = pkgresource.ObjToRawExtension(observed)
 	if err != nil {
 		response.Fatal(rsp, err)
 		return rsp, nil
