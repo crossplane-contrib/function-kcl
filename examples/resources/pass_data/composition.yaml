@@ -1,0 +1,42 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: function-template-go
+spec:
+  compositeTypeRef:
+    apiVersion: example.crossplane.io/v1
+    kind: XR
+  mode: Pipeline
+  pipeline:
+  - step: normal1
+    functionRef:
+      name: kcl-function
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLRun
+      metadata:
+        name: basic
+      spec:
+        target: Resources
+        source: |
+          {
+              apiVersion: "nopexample.org/v1"
+              metadata.name = "resource1"
+              spec.atProvider.network: "somenetwork"
+          }
+  - step: normal2
+    functionRef:
+      name: kcl-function
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLRun
+      metadata:
+        name: basic
+      spec:
+        target: Resources
+        source: |
+          {
+              apiVersion: "nopexample.org/v1"
+              metadata.name = "resource2"
+              spec.forProvider = option("params").dcds["resource1"].Resource.spec.atProvider
+          }
