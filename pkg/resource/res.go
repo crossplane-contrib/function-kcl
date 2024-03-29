@@ -227,11 +227,6 @@ func AddResourcesTo(o any, opts *AddResourcesOptions) error {
 		desired := val
 		for _, d := range opts.Data {
 			name := resource.Name(d.GetName())
-			// Add the resource name as a suffix to the Basename
-			// if there are multiple resources to add
-			if len(opts.Data) > 1 {
-				name = resource.Name(fmt.Sprintf("%s-%s", opts.Basename, d.GetName()))
-			}
 			// If the value exists, merge its existing value with the patches
 			if v, ok := desired[name]; ok {
 				mergedData := merged(d.Object, v)
