@@ -1,17 +1,23 @@
 package resource
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
 
+	"dario.cat/mergo"
+	"github.com/crossplane/crossplane-runtime/pkg/fieldpath"
+	"github.com/crossplane/crossplane-runtime/pkg/meta"
 	"github.com/crossplane/function-sdk-go/resource"
 	"github.com/crossplane/function-sdk-go/resource/composed"
+
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+
 	krmyaml "kcl-lang.io/krm-kcl/pkg/yaml"
 )
 
@@ -27,6 +33,15 @@ const (
 	Resources Target = "Resources"
 	// XR targets the existing Observed XR itself
 	XR Target = "XR"
+	// Default targets the existing all resources including XR, Desired XR,
+	// spec.Resources and DesiredComposed Resources.
+	Default Target = "Default"
+)
+
+const (
+	AnnotationKeyReady = "krm.kcl.dev/ready"
+
+	MetaApiVersion = "meta.krm.kcl.dev/v1alpha1"
 )
 
 type ResourceList []Resource
@@ -405,6 +420,57 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 		// This is because there already may be desired objects
 		result.Object = data
 		result.MsgCount = len(data)
+	case Default:
+		for _, obj := range data {
+			cd := resource.NewDesiredComposed()
+			cd.Resource.Unstructured = obj
+			// Patch dxr
+			if cd.Resource.GetAPIVersion() == oxr.Resource.GetAPIVersion() && cd.Resource.GetKind() == oxr.Resource.GetKind() {
+				dst := make(map[string]any)
+				if err := dxr.Resource.GetValueInto("status", &dst); err != nil && !fieldpath.IsNotFound(err) {
+					return result, errors.Wrap(err, "cannot get desired composite status")
+				}
+				src := make(map[string]any)
+				if err := cd.Resource.GetValueInto("status", &src); err != nil && !fieldpath.IsNotFound(err) {
+					return result, errors.Wrap(err, "cannot get templated composite status")
+				}
+				if err := mergo.Merge(&dst, src, mergo.WithOverride); err != nil {
+					return result, errors.Wrap(err, "cannot merge desired composite status")
+				}
+				if err := fieldpath.Pave(dxr.Resource.Object).SetValue("status", dst); err != nil {
+					return result, errors.Wrap(err, "cannot set desired composite status")
+				}
+				continue
+			}
+			// Check the meta resource
+			if cd.Resource.GetAPIVersion() == MetaApiVersion {
+				switch obj.GetKind() {
+				case "CompositeConnectionDetails":
+					con, _ := cd.Resource.GetStringObject("data")
+					for k, v := range con {
+						d, _ := base64.StdEncoding.DecodeString(v) //nolint:errcheck // k8s returns secret values encoded
+						dxr.ConnectionDetails[k] = d
+					}
+				default:
+					return result, errors.Errorf("invalid kind %q for apiVersion %q - must be CompositeConnectionDetails", obj.GetKind(), MetaApiVersion)
+				}
+				continue
+			}
+			if v, found := cd.Resource.GetAnnotations()[AnnotationKeyReady]; found {
+				if v != string(resource.ReadyTrue) && v != string(resource.ReadyUnspecified) && v != string(resource.ReadyFalse) {
+					return result, errors.Errorf("invalid function input: invalid %q annotation value %q: must be True, False, or Unspecified", AnnotationKeyReady, v)
+				}
+				cd.Ready = resource.Ready(v)
+				// Remove meta annotation.
+				meta.RemoveAnnotations(cd.Resource, AnnotationKeyReady)
+			}
+			// Patch desired with resource meta name.
+			desired[resource.Name(cd.Resource.GetName())] = cd
+		}
+		result.Object = data
+		result.MsgCount = len(data)
+		result.setSuccessMsgs()
+		return result, nil
 	}
 	result.setSuccessMsgs()
 	return result, nil
