@@ -32,8 +32,8 @@ spec:
               kind: "CompositeConnectionDetails"
               if "sample-access-key-0" in ocds:
                   data: {
-                      username = ocds["sample-access-key-0"].connectionDetails.username
-                      password = ocds["sample-access-key-0"].connectionDetails.password
+                      username = ocds["sample-access-key-0"].ConnectionDetails.username
+                      password = ocds["sample-access-key-0"].ConnectionDetails.password
                       url = base64.encode("http://www.example.com")
                   }
               else:
