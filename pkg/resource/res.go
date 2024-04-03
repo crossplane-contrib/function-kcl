@@ -40,7 +40,6 @@ const (
 
 const (
 	AnnotationKeyReady = "krm.kcl.dev/ready"
-
 	MetaApiVersion = "meta.krm.kcl.dev/v1alpha1"
 )
 
