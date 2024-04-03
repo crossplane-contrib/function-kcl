@@ -152,13 +152,6 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		return rsp, nil
 	}
 	log.Debug(fmt.Sprintf("Set %d resource(s) to the desired state", result.MsgCount))
-	for _, msg := range result.Msgs {
-		rsp.Results = append(rsp.Results, &fnv1beta1.Result{
-			Severity: fnv1beta1.Severity_SEVERITY_NORMAL,
-			Message:  msg,
-		})
-	}
-
 	// Set dxr and desired state
 	log.Debug(fmt.Sprintf("Setting desired XR state to %+v", dxr.Resource))
 	if err := response.SetDesiredCompositeResource(rsp, dxr); err != nil {
