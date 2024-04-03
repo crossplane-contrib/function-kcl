@@ -1,0 +1,68 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: function-template-go
+spec:
+  compositeTypeRef:
+    apiVersion: example.crossplane.io/v1
+    kind: XR
+  mode: Pipeline
+  pipeline:
+  - step: normal
+    functionRef:
+      name: kcl-function
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLRun
+      metadata:
+        name: basic
+      spec:
+        source: |
+          import base64
+
+          oxr = option("params").oxr
+          count = oxr.spec.count or 1
+          ocds = option("params").ocds
+          dxr = {
+              **oxr
+              status.dummy = "cool-status"
+          }
+          details = {
+              apiVersion: "meta.krm.kcl.dev/v1alpha1"
+              kind: "CompositeConnectionDetails"
+              if "sample-access-key-0" in ocds:
+                  data: {
+                      username = ocds["sample-access-key-0"].ConnectionDetails.username
+                      password = ocds["sample-access-key-0"].ConnectionDetails.password
+                      url = base64.encode("http://www.example.com")
+                  }
+              else:
+                  data: {}
+          }
+          items = sum([[{
+              apiVersion: "iam.aws.upbound.io/v1beta1"
+              kind: "User"
+              metadata.name = "test-user-{}".format(i)
+              metadata.labels: {
+                  "testing.upbound.io/example-name" = "test-user-{}".format(i)
+                  if "test-user-{}".format(i) in ocds:
+                      dummy = ocds["test-user-{}".format(i)].Resource.metadata.labels.dummy
+                  else:
+                      dummy = "foo"
+              }
+              spec.forProvider: {}
+          }, {
+              apiVersion: "iam.aws.upbound.io/v1beta1"
+              kind: "AccessKey"
+              metadata.name = "sample-access-key-{}".format(i)
+              spec.forProvider.userSelector.matchLabels: {
+                  "testing.upbound.io/example-name" = "test-user-{}".format(i)
+              }
+              spec.writeConnectionSecretToRef: {
+                  name: "sample-access-key-secret-{}".format(i)
+                  namespace: "crossplane-system"
+              }
+          }] for i in range(count)], []) + [
+              details
+              dxr
+          ]

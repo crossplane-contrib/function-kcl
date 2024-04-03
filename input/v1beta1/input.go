@@ -27,14 +27,14 @@ type KCLInput struct {
 	Spec RunSpec `json:"spec,omitempty" yaml:"spec,omitempty"`
 }
 
-func (in KCLInput) Validate() error {
+func (in *KCLInput) Validate() error {
 	if in.Spec.Source == "" {
 		return field.Required(field.NewPath("spec.source"), "kcl source cannot be empty")
 	}
 
 	switch in.Spec.Target {
 	// Allowed targets
-	case resource.PatchDesired, resource.Resources, resource.XR:
+	case resource.Default, resource.PatchDesired, resource.Resources, resource.XR:
 	case resource.PatchResources:
 		if len(in.Spec.Resources) == 0 {
 			return field.Required(field.NewPath("spec.Resources"), fmt.Sprintf("%s target requires at least one resource", resource.PatchResources))
@@ -49,7 +49,7 @@ func (in KCLInput) Validate() error {
 			}
 		}
 	default:
-		return field.Required(field.NewPath("spec.target"), fmt.Sprintf("invalid target: %s", in.Spec.Target))
+		in.Spec.Target = resource.Default
 	}
 
 	return nil

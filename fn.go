@@ -16,7 +16,6 @@ import (
 
 	"github.com/crossplane-contrib/function-kcl/input/v1beta1"
 	pkgresource "github.com/crossplane-contrib/function-kcl/pkg/resource"
-	
 	"sigs.k8s.io/yaml"
 )
 
@@ -38,20 +37,25 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		response.Fatal(rsp, errors.Wrapf(err, "cannot get Function input from %T", req))
 		return rsp, nil
 	}
+	// Set default target
+	if in.Spec.Target == "" {
+		in.Spec.Target = pkgresource.Default
+	}
+	// Set default params
+	if in.Spec.Params == nil {
+		in.Spec.Params = make(map[string]runtime.RawExtension)
+	}
 	if err := in.Validate(); err != nil {
 		response.Fatal(rsp, errors.Wrap(err, "invalid function input"))
 		return rsp, nil
 	}
-
 	// The composite resource that actually exists.
 	oxr, err := request.GetObservedCompositeResource(req)
 	if err != nil {
 		response.Fatal(rsp, errors.Wrap(err, "cannot get observed composite resource"))
 		return rsp, nil
 	}
-	if in.Spec.Params == nil {
-		in.Spec.Params = make(map[string]runtime.RawExtension)
-	}
+	// Set option("params").oxr
 	in.Spec.Params["oxr"], err = pkgresource.UnstructuredToRawExtension(&oxr.Resource.Unstructured)
 	if err != nil {
 		response.Fatal(rsp, err)
@@ -70,6 +74,7 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		response.Fatal(rsp, errors.Wrap(err, "cannot get desired composite resource"))
 		return rsp, nil
 	}
+	// Set option("params").oxr
 	dxr.Resource.SetAPIVersion(oxr.Resource.GetAPIVersion())
 	dxr.Resource.SetKind(oxr.Resource.GetKind())
 	in.Spec.Params["dxr"], err = pkgresource.UnstructuredToRawExtension(&dxr.Resource.Unstructured)
@@ -77,7 +82,6 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		response.Fatal(rsp, err)
 		return rsp, nil
 	}
-
 	// The composed resources desired by any previous Functions in the pipeline.
 	desired, err := request.GetDesiredComposedResources(req)
 	if err != nil {
@@ -103,7 +107,6 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		response.Fatal(rsp, err)
 		return rsp, nil
 	}
-
 	// Input Example: https://github.com/kcl-lang/krm-kcl/blob/main/examples/mutation/set-annotations/suite/good.yaml
 	inputBytes, outputBytes := bytes.NewBuffer([]byte{}), bytes.NewBuffer([]byte{})
 	kclRunBytes, err := yaml.Marshal(in)
@@ -148,7 +151,7 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		response.Fatal(rsp, errors.Wrapf(err, "cannot process xr and state with the pipeline output in %T", rsp))
 		return rsp, nil
 	}
-
+	log.Debug(fmt.Sprintf("Set %d resource(s) to the desired state", result.MsgCount))
 	// Set dxr and desired state
 	log.Debug(fmt.Sprintf("Setting desired XR state to %+v", dxr.Resource))
 	if err := response.SetDesiredCompositeResource(rsp, dxr); err != nil {
@@ -162,16 +165,6 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		response.Fatal(rsp, errors.Wrapf(err, "cannot set desired composed resources in %T", rsp))
 		return rsp, nil
 	}
-
-	log.Debug(fmt.Sprintf("Set %d resource(s) to the desired state", result.MsgCount))
-	for _, msg := range result.Msgs {
-		rsp.Results = append(rsp.Results, &fnv1beta1.Result{
-			Severity: fnv1beta1.Severity_SEVERITY_NORMAL,
-			Message:  msg,
-		})
-	}
-
 	log.Info("Successfully processed crossplane KCL function resources", "input", in.Name)
-
 	return rsp, nil
 }
