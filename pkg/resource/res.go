@@ -465,7 +465,11 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 				meta.RemoveAnnotations(cd.Resource, AnnotationKeyReady)
 			}
 			// Patch desired with resource meta name.
-			desired[resource.Name(cd.Resource.GetName())] = cd
+			AddResourcesTo(desired, &AddResourcesOptions{
+				Basename:  opts.Basename,
+				Data:      []unstructured.Unstructured{obj},
+				Overwrite: opts.Overwrite,
+			})
 		}
 		result.Object = data
 		result.MsgCount = len(data)
