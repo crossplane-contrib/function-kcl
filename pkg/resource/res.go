@@ -40,7 +40,7 @@ const (
 
 const (
 	AnnotationKeyReady = "krm.kcl.dev/ready"
-	MetaApiVersion = "meta.krm.kcl.dev/v1alpha1"
+	MetaApiVersion     = "meta.krm.kcl.dev/v1alpha1"
 )
 
 type ResourceList []Resource
@@ -464,11 +464,7 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 				meta.RemoveAnnotations(cd.Resource, AnnotationKeyReady)
 			}
 			// Patch desired with resource meta name.
-			AddResourcesTo(desired, &AddResourcesOptions{
-				Basename:  opts.Basename,
-				Data:      []unstructured.Unstructured{obj},
-				Overwrite: opts.Overwrite,
-			})
+			desired[resource.Name(cd.Resource.GetName())] = cd
 		}
 		result.Object = data
 		result.MsgCount = len(data)

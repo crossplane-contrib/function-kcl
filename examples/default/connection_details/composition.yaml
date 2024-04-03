@@ -69,3 +69,19 @@ spec:
               details
               dxr
           ]
+
+  # Just for test
+  - step: normal1
+    functionRef:
+      name: kcl-function
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLRun
+      metadata:
+        name: show-dcds
+      spec:
+        source: |
+          {
+              metadata.name = "dcds"
+              dcds: option("params").dcds
+          }
