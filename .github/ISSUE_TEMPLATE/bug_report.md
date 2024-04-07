@@ -13,8 +13,8 @@ for questions, support, and discussion.
 
 ### What happened?
 <!--
-Please let us know what behaviour you expected and how this Function diverged
-from that behaviour.
+Please let us know what behavior you expected and how this Function diverged
+from that behavior.
 -->
 
 
