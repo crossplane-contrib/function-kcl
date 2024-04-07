@@ -52,6 +52,9 @@ spec:
                   else:
                       dummy = "foo"
               }
+              metadata.annotations: {
+                  "krm.kcl.dev/ready": "False"
+              }
               spec.forProvider: {}
           }, {
               apiVersion: "iam.aws.upbound.io/v1beta1"

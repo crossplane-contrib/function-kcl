@@ -20,31 +20,6 @@ status:
   dummy: cool-status
 ---
 apiVersion: iam.aws.upbound.io/v1beta1
-kind: AccessKey
-metadata:
-  annotations:
-    crossplane.io/composition-resource-name: sample-access-key-1
-  generateName: example-
-  labels:
-    crossplane.io/composite: example
-  name: sample-access-key-1
-  ownerReferences:
-  - apiVersion: example.crossplane.io/v1beta1
-    blockOwnerDeletion: true
-    controller: true
-    kind: XR
-    name: example
-    uid: ""
-spec:
-  forProvider:
-    userSelector:
-      matchLabels:
-        testing.upbound.io/example-name: test-user-1
-  writeConnectionSecretToRef:
-    name: sample-access-key-secret-1
-    namespace: crossplane-system
----
-apiVersion: iam.aws.upbound.io/v1beta1
 kind: User
 metadata:
   annotations:
@@ -90,17 +65,43 @@ spec:
     name: sample-access-key-secret-0
     namespace: crossplane-system
 ---
-apiVersion: iam.aws.upbound.io/v1beta1
-kind: User
+dcds:
+  sample-access-key-0:
+    Ready: "True"
+    Resource:
+      apiVersion: iam.aws.upbound.io/v1beta1
+      kind: AccessKey
+      metadata:
+        annotations: {}
+        name: sample-access-key-0
+      spec:
+        forProvider:
+          userSelector:
+            matchLabels:
+              testing.upbound.io/example-name: test-user-0
+        writeConnectionSecretToRef:
+          name: sample-access-key-secret-0
+          namespace: crossplane-system
+  test-user-0:
+    Ready: "False"
+    Resource:
+      apiVersion: iam.aws.upbound.io/v1beta1
+      kind: User
+      metadata:
+        annotations: {}
+        labels:
+          dummy: foo
+          testing.upbound.io/example-name: test-user-0
+        name: test-user-0
+      spec:
+        forProvider: {}
 metadata:
   annotations:
-    crossplane.io/composition-resource-name: test-user-1
+    crossplane.io/composition-resource-name: dcds
   generateName: example-
   labels:
     crossplane.io/composite: example
-    dummy: foo
-    testing.upbound.io/example-name: test-user-1
-  name: test-user-1
+  name: dcds
   ownerReferences:
   - apiVersion: example.crossplane.io/v1beta1
     blockOwnerDeletion: true
@@ -108,6 +109,4 @@ metadata:
     kind: XR
     name: example
     uid: ""
-spec:
-  forProvider: {}
 ```
