@@ -12,7 +12,7 @@ require (
 	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.29.3
-	kcl-lang.io/krm-kcl v0.8.3-0.20240407013056-5c464aec3ff0
+	kcl-lang.io/krm-kcl v0.8.3-0.20240408142914-d9a261f2b6b6
 	sigs.k8s.io/controller-tools v0.14.0
 	sigs.k8s.io/yaml v1.4.0
 )
@@ -191,10 +191,10 @@ require (
 	k8s.io/klog/v2 v2.110.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20231010175941-2dd684a91f00 // indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e // indirect
-	kcl-lang.io/cli v0.8.4 // indirect
+	kcl-lang.io/cli v0.8.5 // indirect
 	kcl-lang.io/kcl-go v0.8.3 // indirect
 	kcl-lang.io/kcl-openapi v0.6.1 // indirect
-	kcl-lang.io/kpm v0.8.4 // indirect
+	kcl-lang.io/kpm v0.8.5-0.20240401071819-7a69be511c95 // indirect
 	kcl-lang.io/lib v0.8.3 // indirect
 	oras.land/oras-go v1.2.3 // indirect
 	oras.land/oras-go/v2 v2.3.0 // indirect
