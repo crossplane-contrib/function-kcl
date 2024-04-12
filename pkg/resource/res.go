@@ -51,6 +51,14 @@ type Resource struct {
 	Base unstructured.Unstructured `json:"base,omitempty"`
 }
 
+func JsonByteToRawExtension(jsonByte []byte) (runtime.RawExtension, error) {
+	o, err := JsonByteToUnstructured(jsonByte)
+	if err != nil {
+		return runtime.RawExtension{}, err
+	}
+	return UnstructuredToRawExtension(o)
+}
+
 func JsonByteToUnstructured(jsonByte []byte) (*unstructured.Unstructured, error) {
 	var data map[string]interface{}
 	err := json.Unmarshal(jsonByte, &data)

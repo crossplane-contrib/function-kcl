@@ -107,6 +107,18 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		response.Fatal(rsp, err)
 		return rsp, nil
 	}
+	// Set function context
+	ctxByte, err := req.Context.MarshalJSON()
+	if err != nil {
+		response.Fatal(rsp, err)
+		return rsp, nil
+	}
+	ctxObj, err := pkgresource.JsonByteToRawExtension(ctxByte)
+	if err != nil {
+		response.Fatal(rsp, err)
+		return rsp, nil
+	}
+	in.Spec.Params["ctx"] = ctxObj
 	// Input Example: https://github.com/kcl-lang/krm-kcl/blob/main/examples/mutation/set-annotations/suite/good.yaml
 	inputBytes, outputBytes := bytes.NewBuffer([]byte{}), bytes.NewBuffer([]byte{})
 	kclRunBytes, err := yaml.Marshal(in)

@@ -70,6 +70,7 @@ Here's what you can do in the KCL script:
 + Read the `ObservedComposedResources` from `option("params").ocds`.
 + Read the `DesiredCompositeResource` from `option("params").dxr`.
 + Read the `DesiredComposedResources` from `option("params").dcds`.
++ Read the function pipeline's context from `option("params").ctx`.
 
 ## Library
 
