@@ -37,6 +37,8 @@ RUN --mount=target=. \
 # Produce the Function image. We use a very lightweight 'distroless' image that
 # does not include any of the build tools used in previous stages.
 FROM kcllang/kcl AS image
+# Walkaround for #68: unset the kcl cache path env variable (the value is /tmp) to avoid the data competition.
+RUN unset KCL_CACHE_PATH
 WORKDIR /
 COPY --from=build /function /function
 EXPOSE 9443
