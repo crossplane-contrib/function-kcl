@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
@@ -23,7 +24,8 @@ import (
 type Function struct {
 	fnv1beta1.UnimplementedFunctionRunnerServiceServer
 
-	log logging.Logger
+	log   logging.Logger
+	mutex sync.Mutex
 }
 
 // RunFunction runs the Function.
@@ -129,6 +131,12 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 	inputBytes.Write(kclRunBytes)
 	// Run pipeline to get the result mutated or validated by the KCL source.
 	pipeline := kio.NewPipeline(inputBytes, outputBytes, false)
+
+	// Walk around for #68, #71 and https://github.com/kcl-lang/kcl/issues/1222
+	// In KCL v0.9, more fine-grained concurrent execution will be supported, and here we use locks
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
 	if err := pipeline.Execute(); err != nil {
 		response.Fatal(rsp, errors.Wrap(err, "failed to run kcl function pipelines"))
 		return rsp, nil

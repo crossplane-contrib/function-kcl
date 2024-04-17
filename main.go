@@ -2,8 +2,6 @@
 package main
 
 import (
-	"os"
-
 	"github.com/alecthomas/kong"
 
 	"github.com/crossplane/function-sdk-go"
@@ -25,9 +23,6 @@ func (c *CLI) Run() error {
 	if err != nil {
 		return err
 	}
-
-	// Walk around for #68: unset the kcl cache path env variable (the value is /tmp) to avoid the data competition.
-	os.Unsetenv("KCL_CACHE_PATH")
 
 	return function.Serve(&Function{log: log},
 		function.Listen(c.Network, c.Address),
