@@ -1,0 +1,31 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: function-template-go
+spec:
+  compositeTypeRef:
+    apiVersion: example.crossplane.io/v1
+    kind: XR
+  mode: Pipeline
+  pipeline:
+  - step: normal
+    functionRef:
+      name: kcl-function
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLRun
+      metadata:
+        name: basic
+      spec:
+        source: |
+          {
+              apiVersion: "ec2.aws.upbound.io/v1beta1"
+              kind: "Instance"
+              metadata.name = "instance"
+              metadata.annotations = {
+                "crossplane.io/external-name" = "custom-external-name"
+              }
+              spec.forProvider.ami: "ami-0d9858aa3c6322f73"
+              spec.forProvider.instanceType: "t2.micro"
+              spec.forProvider.region: "us-east-2"
+          }
