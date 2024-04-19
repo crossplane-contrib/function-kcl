@@ -1,0 +1,7 @@
+apiVersion: fn-demo.crossplane.io/v1alpha1
+kind: Database
+metadata:
+  name: database-test-functions
+  namespace: default
+spec:
+  id: database-test-functions
