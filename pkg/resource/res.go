@@ -39,8 +39,10 @@ const (
 )
 
 const (
-	AnnotationKeyReady = "krm.kcl.dev/ready"
-	MetaApiVersion     = "meta.krm.kcl.dev/v1alpha1"
+	AnnotationKeyReady                   = "krm.kcl.dev/ready"
+	AnnotationKeyCompositionResourceName = "crossplane.io/composition-resource-name"
+	AnnotationKeyExternalName            = "crossplane.io/external-name"
+	MetaApiVersion                       = "meta.krm.kcl.dev/v1alpha1"
 )
 
 type ResourceList []Resource
@@ -162,7 +164,7 @@ func MatchResources(desired map[resource.Name]*resource.DesiredComposed, data []
 	// otherwise we lost something somewhere
 	for _, d := range data {
 		// PatchDesired
-		if found, ok := desired[resource.Name(d.GetName())]; ok {
+		if found, ok := desired[resource.Name(GetResourceName(&d))]; ok {
 			if _, ok := matches[found]; !ok {
 				matches[found] = []map[string]interface{}{d.Object}
 			} else {
@@ -193,21 +195,21 @@ func (r *AddResourcesResult) setSuccessMsgs() {
 		desired := r.Object.([]unstructured.Unstructured)
 		j := 0
 		for _, d := range desired {
-			r.Msgs[j] = fmt.Sprintf("created resource \"%s:%s\"", d.GetName(), d.GetKind())
+			r.Msgs[j] = fmt.Sprintf("created resource \"%s:%s\"", GetResourceName(&d), d.GetKind())
 			j++
 		}
 	case PatchDesired:
 		desired := r.Object.([]unstructured.Unstructured)
 		j := 0
 		for _, d := range desired {
-			r.Msgs[j] = fmt.Sprintf("updated resource \"%s:%s\"", d.GetName(), d.GetKind())
+			r.Msgs[j] = fmt.Sprintf("updated resource \"%s:%s\"", GetResourceName(&d), d.GetKind())
 			j++
 		}
 	case PatchResources:
 		desired := r.Object.([]unstructured.Unstructured)
 		j := 0
 		for _, d := range desired {
-			r.Msgs[j] = fmt.Sprintf("created resource \"%s:%s\"", d.GetName(), d.GetKind())
+			r.Msgs[j] = fmt.Sprintf("created resource \"%s:%s\"", GetResourceName(&d), d.GetKind())
 			j++
 		}
 	case XR:
@@ -248,7 +250,7 @@ func AddResourcesTo(o any, opts *AddResourcesOptions) error {
 		// Resources
 		desired := val
 		for _, d := range opts.Data {
-			name := resource.Name(d.GetName())
+			name := resource.Name(GetResourceName(&d))
 			// If the value exists, merge its existing value with the patches
 			if v, ok := desired[name]; ok {
 				mergedData := merged(d.Object, v)
@@ -471,8 +473,12 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 				// Remove meta annotation.
 				meta.RemoveAnnotations(cd.Resource, AnnotationKeyReady)
 			}
+			// Get the resource name.
+			name := GetResourceName(&obj)
+			// Remove resource name annotation.
+			meta.RemoveAnnotations(cd.Resource, AnnotationKeyCompositionResourceName)
 			// Patch desired with resource meta name.
-			desired[resource.Name(cd.Resource.GetName())] = cd
+			desired[resource.Name(name)] = cd
 		}
 		result.Object = data
 		result.MsgCount = len(data)
@@ -481,4 +487,13 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 	}
 	result.setSuccessMsgs()
 	return result, nil
+}
+
+// GetResourceName returns the resource name from `metadata.annotations."crossplane.io/composition-resource-name" or metadata.name`
+func GetResourceName(obj *unstructured.Unstructured) (name string) {
+	name, found := obj.GetAnnotations()[AnnotationKeyCompositionResourceName]
+	if !found {
+		name = obj.GetName()
+	}
+	return
 }
