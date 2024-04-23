@@ -8,7 +8,7 @@
 
 Crossplane KCL function allows developers to use [KCL](https://kcl-lang.io/) (a DSL) to write composite logic without the need for repeated packaging of crossplane functions, and we support package management and the [KRM KCL specification](https://github.com/kcl-lang/krm-kcl), which allows for OCI/Git source and the reuse of [KCL's module ecosystem](https://artifacthub.io/packages/search?org=kcl&sort=relevance&page=1).
 
-Check out this [blog](https://blog.crossplane.io/function-kcl/) to learn more. Here's an simple example:
+Check out this [blog](https://blog.crossplane.io/function-kcl/) to learn more. Here's a simple example:
 
 ```yaml
 apiVersion: apiextensions.crossplane.io/v1
@@ -68,7 +68,26 @@ EOF
 
 ### Source Support
 
-The function can load KCL codes from inline source, OCI source, Git source and FileSystem source.
+To use a `KCLRun` as the function config, the KCL source must be specified in the `source` field. Additional parameters can be specified in the `params` field. The params field supports any complex data structure as long as it can be represented in YAML. Besides, the function can load KCL codes from inline source, OCI source, Git source and FileSystem source.
+
++ Inline source example
+
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLRun
+metadata:
+  name: basic
+spec:
+  source: |
+    {
+        apiVersion = "s3.aws.upbound.io/v1beta1"
+        kind = "Bucket"
+        metadata.annotations: {
+            "krm.kcl.dev/composition-resource-name" = "bucket"
+        }
+        spec.forProvider.region = option("oxr").spec.region
+    }
+```
 
 + OCI source example
 
@@ -104,14 +123,16 @@ spec:
   source: ./path/to/kcl/file.k
 ```
 
-### Read the Function Requests through the `option` Function
+### Read the Function Requests and Values through the `option` Function
 
-+ Return an error using `assert {condition}, {error_message}`.
 + Read the `ObservedCompositeResource` from `option("params").oxr`.
 + Read the `ObservedComposedResources` from `option("params").ocds`.
 + Read the `DesiredCompositeResource` from `option("params").dxr`.
 + Read the `DesiredComposedResources` from `option("params").dcds`.
 + Read the function pipeline's context from `option("params").ctx`.
++ Return an error using `assert {condition}, {error_message}`.
++ Read the PATH variables. e.g. `option("PATH")`.
++ Read the environment variables. e.g. `option("env")`.
 
 You can define your custom parameters in the `params` field and use `option("params").custom_key` to get the `custom_value`.
 
@@ -171,6 +192,31 @@ spec:
     }
 ```
 
+### Target Support
+
+The KCL function can target various types of objects:
+
++ `Default`: create new resources and set fields on the XR.
++ `Resources`: create new resources.
++ `PatchDesired`: set fields on existing DesiredComposed Resources.
++ `PatchResources`: set fields on existing resources fields. These resources will then be added to the desired resources map.
++ `XR`: set fields on the XR.
+
+This is controlled by fields on the `KCLRun`
+
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLRun
+metadata:
+  name: basic
+spec:
+  # default: Default
+  target: Default | PatchDesired | PatchResources | Resources | XR
+  source: |
+    # Omit the source field
+    ...
+```
+
 ### Composite Resource Connection Details
 
 To return desired composite resource connection details, include a KCL dict that produces the special CompositeConnectionDetails resource like [the example](./examples/default/connection_details/composition.yaml):
@@ -215,7 +261,7 @@ user = {
 
 ### Patching the XR status field
 
-You can read the XR and patch it with the status field and returns the new patched XR in the `item` result like this
+You can read the XR, patch it with the status field and return the new patched XR in the `item` result like this
 
 ```
 # Read the XR
@@ -238,7 +284,7 @@ See [here](https://kcl-lang.io/docs/reference/lang/tour) to study more features 
 
 ## Examples
 
-More examples can found [here](./examples/)
+More examples can be found [here](./examples/)
 
 ## Debugging the KCL Function in Cluster
 
