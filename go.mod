@@ -9,7 +9,7 @@ require (
 	github.com/crossplane/function-sdk-go v0.2.0
 	github.com/google/go-cmp v0.6.0
 	github.com/pkg/errors v0.9.1
-	google.golang.org/protobuf v1.33.0
+	google.golang.org/protobuf v1.34.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.30.0
 	kcl-lang.io/krm-kcl v0.8.5
