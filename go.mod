@@ -12,7 +12,7 @@ require (
 	google.golang.org/protobuf v1.34.0
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.30.0
-	kcl-lang.io/krm-kcl v0.8.5
+	kcl-lang.io/krm-kcl v0.8.6
 	sigs.k8s.io/controller-tools v0.15.0
 	sigs.k8s.io/yaml v1.4.0
 )
@@ -29,7 +29,7 @@ require (
 	github.com/GoogleContainerTools/kpt-functions-sdk/go/api v0.0.0-20220720212527-133180134b93 // indirect
 	github.com/GoogleContainerTools/kpt-functions-sdk/go/fn v0.0.0-20230427202446-3255accc518d // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
-	github.com/Microsoft/hcsshim v0.11.0 // indirect
+	github.com/Microsoft/hcsshim v0.11.4 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
@@ -44,7 +44,7 @@ require (
 	github.com/chai2010/jsonv v1.1.3 // indirect
 	github.com/chai2010/protorpc v1.1.4 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
-	github.com/containerd/containerd v1.7.6 // indirect
+	github.com/containerd/containerd v1.7.11 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -191,11 +191,11 @@ require (
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e // indirect
-	kcl-lang.io/cli v0.8.6 // indirect
-	kcl-lang.io/kcl-go v0.8.5 // indirect
+	kcl-lang.io/cli v0.8.7 // indirect
+	kcl-lang.io/kcl-go v0.8.6 // indirect
 	kcl-lang.io/kcl-openapi v0.6.1 // indirect
-	kcl-lang.io/kpm v0.8.5 // indirect
-	kcl-lang.io/lib v0.8.5 // indirect
+	kcl-lang.io/kpm v0.8.6 // indirect
+	kcl-lang.io/lib v0.8.6 // indirect
 	oras.land/oras-go v1.2.3 // indirect
 	oras.land/oras-go/v2 v2.3.0 // indirect
 	sigs.k8s.io/controller-runtime v0.17.0 // indirect
