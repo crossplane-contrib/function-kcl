@@ -163,7 +163,8 @@ func MatchResources(desired map[resource.Name]*resource.DesiredComposed, data []
 	// otherwise we lost something somewhere
 	for _, d := range data {
 		// PatchDesired
-		if found, ok := desired[resource.Name(d.GetName())]; ok {
+		name := getName(&d)
+		if found, ok := desired[resource.Name(name)]; ok {
 			if _, ok := matches[found]; !ok {
 				matches[found] = []map[string]interface{}{d.Object}
 			} else {
@@ -249,7 +250,7 @@ func AddResourcesTo(o any, opts *AddResourcesOptions) error {
 		// Resources
 		desired := val
 		for _, d := range opts.Data {
-			name := resource.Name(d.GetName())
+			name := resource.Name(getName(&d))
 			// If the value exists, merge its existing value with the patches
 			if v, ok := desired[name]; ok {
 				mergedData := merged(d.Object, v)
@@ -473,10 +474,7 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 				meta.RemoveAnnotations(cd.Resource, AnnotationKeyReady)
 			}
 			// Patch desired with custom name from annotation or default to resource meta name.
-			name, found := cd.Resource.GetAnnotations()[AnnotationKeyCompositionResourceName]
-			if !found {
-				name = cd.Resource.GetName()
-			}
+			name := getName(&cd.Resource.Unstructured)
 			meta.RemoveAnnotations(cd.Resource, AnnotationKeyCompositionResourceName)
 			desired[resource.Name(name)] = cd
 		}
@@ -487,4 +485,12 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 	}
 	result.setSuccessMsgs()
 	return result, nil
+}
+
+func getName(o *unstructured.Unstructured) string {
+	name, found := o.GetAnnotations()[AnnotationKeyCompositionResourceName]
+	if !found {
+		name = o.GetAPIVersion() + "-" + o.GetKind() + "-" + o.GetNamespace() + "-" + o.GetName()
+	}
+	return name
 }
