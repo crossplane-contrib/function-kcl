@@ -63,7 +63,7 @@ func TestRunFunction(t *testing.T) {
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
 						Resources: map[string]*fnv1beta1.Resource{
-							"example.org/v1-Generated--": {
+							"": {
 								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated"}`),
 							},
 						},
@@ -101,7 +101,7 @@ func TestRunFunction(t *testing.T) {
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
 						Resources: map[string]*fnv1beta1.Resource{
-							"sql.gcp.upbound.io/v1beta1-DatabaseInstance--": {
+							"": {
 								Resource: resource.MustStructJSON(`{"apiVersion": "sql.gcp.upbound.io/v1beta1", "kind": "DatabaseInstance", "spec": {"forProvider": {"project": "test-project", "settings": [{"databaseFlags": [{"name": "log_checkpoints", "value": "on"}]}]}}}`),
 							},
 						},
