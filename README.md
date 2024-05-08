@@ -21,9 +21,9 @@ spec:
     kind: XR
   mode: Pipeline
   pipeline:
-    - step: create-a-bucket
+    - step: basic
       functionRef:
-        name: function-go-templating
+        name: function-kcl
       input:
         apiVersion: krm.kcl.dev/v1alpha1
         kind: KCLRun
@@ -119,20 +119,24 @@ kind: KCLRun
 metadata:
   name: basic
 spec:
-  target: Resources
   source: ./path/to/kcl/file.k
 ```
 
 ### Read the Function Requests and Values through the `option` Function
 
-+ Read the `ObservedCompositeResource` from `option("params").oxr`.
-+ Read the `ObservedComposedResources` from `option("params").ocds`.
-+ Read the `DesiredCompositeResource` from `option("params").dxr`.
-+ Read the `DesiredComposedResources` from `option("params").dcds`.
-+ Read the function pipeline's context from `option("params").ctx`.
++ Read the [`ObservedCompositeResource`](https://docs.crossplane.io/latest/concepts/composition-functions/#observed-state) from `option("params").oxr`.
++ Read the [`ObservedComposedResources`](https://docs.crossplane.io/latest/concepts/composition-functions/#observed-state) from `option("params").ocds`.
++ Read the [`DesiredCompositeResource`](https://docs.crossplane.io/latest/concepts/composition-functions/#desired-state) from `option("params").dxr`.
++ Read the [`DesiredComposedResources`](https://docs.crossplane.io/latest/concepts/composition-functions/#desired-state) from `option("params").dcds`.
++ Read the [`function pipeline's context`](https://docs.crossplane.io/latest/concepts/composition-functions/#function-pipeline-context) from `option("params").ctx`.
 + Return an error using `assert {condition}, {error_message}`.
++ Log variable values using the function `print(variable)` and it will be output to the stdout of the function pod.
 + Read the PATH variables. e.g. `option("PATH")`.
 + Read the environment variables. e.g. `option("env")`.
+
+### oxr
+
+#### Custom Parameters
 
 You can define your custom parameters in the `params` field and use `option("params").custom_key` to get the `custom_value`.
 
@@ -217,61 +221,113 @@ spec:
     ...
 ```
 
+### Extract Data from a Specific Composed Resource
+
+To extract data from a specific composed resource by using the resource name, we can use the `option("params").ocds` variable, `ocds` is a mapping that its key is the resource name and its value is the [`observed composed resource`](https://pkg.go.dev/github.com/crossplane/function-sdk-go@v0.2.0/resource#ObservedComposed) like [the example](./examples/default/read_ocds_resource/composition.yaml).
+
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLRun
+metadata:
+  name: show-ocds
+spec:
+  source: |
+    {
+        metadata.name = "ocds"
+        spec.ocds = option("params").ocds
+        spec.user_kind = option("params").ocds["test-user"]?.Resource.Kind
+        spec.user_metadata = option("params").ocds["test-user"]?.Resource.metadata
+        spec.user_status = option("params").ocds["test-user"]?.Resource.status
+    }
+```
+
 ### Composite Resource Connection Details
 
-To return desired composite resource connection details, include a KCL dict that produces the special CompositeConnectionDetails resource like [the example](./examples/default/connection_details/composition.yaml):
+To return desired composite resource connection details, include a KCL config that produces the special CompositeConnectionDetails resource like [the example](./examples/default/connection_details/composition.yaml):
 
-```kcl
-details = {
-    apiVersion: "meta.krm.kcl.dev/v1alpha1"
-    kind: "CompositeConnectionDetails"
-    data: {
-        "connection-secret-key": "connection-secret-value"
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLRun
+metadata:
+  name: basic
+spec:
+  source: |
+    details = {
+        apiVersion: "meta.krm.kcl.dev/v1alpha1"
+        kind: "CompositeConnectionDetails"
+        data: {
+            "connection-secret-key": "connection-secret-value"
+        }
     }
-}
+    # Omit other composite logics.
+    # Input the details resource into the return resource list.
+    items = [
+        details
+        # Omit other return resources.
+    ]
 ```
 
 > Note: The value of the connection secret value must be base64 encoded. This is already the case if you are referencing a key from a managed resource's connectionDetails field. However, if you want to include a connection secret value from somewhere else, you will need to use the `base64.encode` function:
 
-```kcl
-import base64
-
-ocds = option("params").ocds
-details = {
-    apiVersion: "meta.krm.kcl.dev/v1alpha1"
-    kind: "CompositeConnectionDetails"
-    data: {
-        "server-endpoint" = base64.encode(ocds["my-server"].Resource.status.atProvider.endpoint)
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLRun
+metadata:
+  name: basic
+spec:
+  source: |
+    import base64
+    
+    # Omit other logic
+    ocds = option("params").ocds
+    details = {
+        apiVersion: "meta.krm.kcl.dev/v1alpha1"
+        kind: "CompositeConnectionDetails"
+        data: {
+            "server-endpoint" = base64.encode(ocds["my-server"].Resource.status.    atProvider.endpoint)
+        }
     }
-}
 ```
 
 To mark a desired composed resource as ready, use the `krm.kcl.dev/ready` annotation:
 
-```kcl
-user = {
-    apiVersion: "iam.aws.upbound.io/v1beta1"
-    kind: "User"
-    metadata.name = "test-user"
-    metadata.annotations: {
-        "krm.kcl.dev/ready": "True"
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLRun
+metadata:
+  name: basic
+spec:
+  source: |
+    # Omit other logic
+    user = {
+        apiVersion: "iam.aws.upbound.io/v1beta1"
+        kind: "User"
+        metadata.name = "test-user"
+        metadata.annotations: {
+            "krm.kcl.dev/ready": "True"
+        }
     }
-}
 ```
 
 ### Patching the XR status field
 
 You can read the XR, patch it with the status field and return the new patched XR in the `item` result like this
 
-```
-# Read the XR
-oxr = option("params").oxr
-# Patch the XR with the status field
-dxr = {
-    **oxr
-    status.dummy = "cool-status"
-}
-items = [dxr] # Omit other resources
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLRun
+metadata:
+  name: basic
+spec:
+  source: |
+    # Read the XR
+    oxr = option("params").oxr
+    # Patch the XR with the status field
+    dxr = {
+        **oxr
+        status.dummy = "cool-status"
+    }
+    items = [dxr] # Omit other resources
 ```
 
 ## Library
