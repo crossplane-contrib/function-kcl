@@ -77,6 +77,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Prepare docker image
+        run: cp -f ./docker/${{ matrix.arch }}/Dockerfile .
+
       # We ask Docker to use GitHub Action's native caching support to speed up
       # the build, per https://docs.docker.com/build/cache/backends/gha/.
       - name: Build Runtime
