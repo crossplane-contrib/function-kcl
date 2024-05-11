@@ -8,6 +8,8 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"k8s.io/apimachinery/pkg/runtime"
+	"kcl-lang.io/krm-kcl/pkg/api"
+	"kcl-lang.io/krm-kcl/pkg/api/v1alpha1"
 	"kcl-lang.io/krm-kcl/pkg/kio"
 
 	fnv1beta1 "github.com/crossplane/function-sdk-go/proto/v1beta1"
@@ -119,8 +121,12 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1beta1.RunFunctionRequ
 		return rsp, nil
 	}
 	in.Spec.Params["ctx"] = ctxObj
-	// Input Example: https://github.com/kcl-lang/krm-kcl/blob/main/examples/mutation/set-annotations/suite/good.yaml
 	inputBytes, outputBytes := bytes.NewBuffer([]byte{}), bytes.NewBuffer([]byte{})
+	// Convert the function-kcl KCLInput to the KRM-KCL spec and run function pipelines.
+	// Input Example: https://github.com/kcl-lang/krm-kcl/blob/main/examples/mutation/set-annotations/suite/good.yaml
+	in.APIVersion = v1alpha1.KCLRunAPIVersion
+	in.Kind = api.KCLRunKind
+	// Note use "sigs.k8s.io/yaml" here.
 	kclRunBytes, err := yaml.Marshal(in)
 	if err != nil {
 		response.Fatal(rsp, errors.Wrap(err, "cannot marshal input to yaml"))

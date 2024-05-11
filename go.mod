@@ -12,7 +12,7 @@ require (
 	google.golang.org/protobuf v1.34.1
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.30.0
-	kcl-lang.io/krm-kcl v0.8.6
+	kcl-lang.io/krm-kcl v0.8.7-0.20240511092915-909e5fb3485f
 	sigs.k8s.io/controller-tools v0.15.0
 	sigs.k8s.io/yaml v1.4.0
 )
@@ -26,8 +26,6 @@ require (
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/BurntSushi/toml v1.3.2 // indirect
-	github.com/GoogleContainerTools/kpt-functions-sdk/go/api v0.0.0-20220720212527-133180134b93 // indirect
-	github.com/GoogleContainerTools/kpt-functions-sdk/go/fn v0.0.0-20230427202446-3255accc518d // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/Microsoft/hcsshim v0.11.4 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // indirect
@@ -191,11 +189,11 @@ require (
 	k8s.io/klog/v2 v2.120.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
 	k8s.io/utils v0.0.0-20240102154912-e7106e64919e // indirect
-	kcl-lang.io/cli v0.8.7 // indirect
-	kcl-lang.io/kcl-go v0.8.6 // indirect
+	kcl-lang.io/cli v0.8.8 // indirect
+	kcl-lang.io/kcl-go v0.8.7 // indirect
 	kcl-lang.io/kcl-openapi v0.6.1 // indirect
 	kcl-lang.io/kpm v0.8.6 // indirect
-	kcl-lang.io/lib v0.8.6 // indirect
+	kcl-lang.io/lib v0.8.7 // indirect
 	oras.land/oras-go v1.2.3 // indirect
 	oras.land/oras-go/v2 v2.3.0 // indirect
 	sigs.k8s.io/controller-runtime v0.17.0 // indirect
