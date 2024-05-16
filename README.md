@@ -284,7 +284,7 @@ spec:
         apiVersion: "meta.krm.kcl.dev/v1alpha1"
         kind: "CompositeConnectionDetails"
         data: {
-            "server-endpoint" = base64.encode(ocds["my-server"].Resource.status.    atProvider.endpoint)
+            "server-endpoint" = base64.encode(ocds["my-server"].Resource.status.atProvider.endpoint)
         }
     }
 ```
