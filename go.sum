@@ -1571,6 +1571,8 @@ kcl-lang.io/krm-kcl v0.8.7-0.20240511092915-909e5fb3485f h1:iRxTZwNo00ufyxP0ljCJ
 kcl-lang.io/krm-kcl v0.8.7-0.20240511092915-909e5fb3485f/go.mod h1:TQGqN8/frOFUbPqkxi1cJXwYeD5KHIVkomtg6788GyM=
 kcl-lang.io/krm-kcl v0.8.7-0.20240513154121-ec1dabcda340 h1:csvD6YNVKEXwvzWi0n2bgLnRdkKkKPoBAZRRS/5iygc=
 kcl-lang.io/krm-kcl v0.8.7-0.20240513154121-ec1dabcda340/go.mod h1:PWt/UzH2TxJ0F6YaJbgAWsyURcj09RC2/4mbyKS1Zb4=
+kcl-lang.io/krm-kcl v0.8.7-0.20240516090518-ba06813424c8 h1:MMrofvErkeaKGSXOxJSXbqpfEzjlxQKprDlv9jR/AZA=
+kcl-lang.io/krm-kcl v0.8.7-0.20240516090518-ba06813424c8/go.mod h1:PWt/UzH2TxJ0F6YaJbgAWsyURcj09RC2/4mbyKS1Zb4=
 kcl-lang.io/lib v0.8.7 h1:qN7FOrwd8l4IiuPUDEEIKJqavGAq+rTMR1GCn0OrydE=
 kcl-lang.io/lib v0.8.7/go.mod h1:ubsalGXxJaa5II/EsHmsI/tL2EluYHIcW+BwzQPt+uY=
 oras.land/oras-go v1.2.5 h1:XpYuAwAb0DfQsunIyMfeET92emK8km3W4yEzZvUbsTo=
