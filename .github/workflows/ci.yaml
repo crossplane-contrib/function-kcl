@@ -33,7 +33,7 @@ env:
   XPKG: xpkg.upbound.io/${{ github.repository}}
 
   # The package version to push. The default is 0.0.0-gitsha.
-  XPKG_VERSION: v0.8.0
+  XPKG_VERSION: v0.9.0
 
 jobs:
   unit-test:

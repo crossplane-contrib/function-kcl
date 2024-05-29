@@ -26,7 +26,7 @@ spec:
         name: function-kcl
       input:
         apiVersion: krm.kcl.dev/v1alpha1
-        kind: KCLRun
+        kind: KCLInput
         source: |
           # Read the XR
           oxr = option("params").oxr
@@ -68,13 +68,13 @@ EOF
 
 ### Source Support
 
-To use a `KCLRun` as the function config, the KCL source must be specified in the `source` field. Additional parameters can be specified in the `params` field. The params field supports any complex data structure as long as it can be represented in YAML. Besides, the function can load KCL codes from inline source, OCI source, Git source and FileSystem source.
+To use a `KCLInput` as the function config, the KCL source must be specified in the `source` field. Additional parameters can be specified in the `params` field. The params field supports any complex data structure as long as it can be represented in YAML. Besides, the function can load KCL codes from inline source, OCI source, Git source and FileSystem source.
 
 + Inline source example
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
@@ -93,7 +93,7 @@ spec:
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
@@ -104,7 +104,7 @@ spec:
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
@@ -115,7 +115,7 @@ spec:
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
@@ -134,21 +134,65 @@ spec:
 + Read the PATH variables. e.g. `option("PATH")`.
 + Read the environment variables. e.g. `option("env")`.
 
-### oxr
-
-#### Custom Parameters
+### Custom Parameters
 
 You can define your custom parameters in the `params` field and use `option("params").custom_key` to get the `custom_value`.
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
   params:
      custom_key: custom_value
   source: oci://ghcr.io/kcl-lang/crossplane-xnetwork-kcl-function
+```
+
+### Source Credentials
+
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLInput
+metadata:
+  name: kcl-xnetwork
+spec:
+  params:
+    annotations:
+      config.kubernetes.io/local-config: "true"
+  source: oci://ghcr.io/kcl-lang/crossplane-xnetwork-kcl-function
+  credentials: # If private OCI registry
+    url: https://<oci-host-url> # or KCL_SRC_URL environment variable
+    username: <username> # or KCL_SRC_USERNAME environment variable
+    password: <password> # or KCL_SRC_PASSWORD environment variable
+```
+
+### Run Config
+
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLInput
+spec:
+  source: oci://ghcr.io/kcl-lang/crossplane-xnetwork-kcl-function
+  config: # See [pkg/api/ConfigSpec]
+    vendor: true
+    sortKeys: true
+    disableNone: true
+    # omit other fields
+```
+
+### Dependencies
+
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLInput
+spec:
+  # Set the dependencies are the external dependencies for the KCL code.
+  # The format of the `dependencies` field is same as the [dependencies]` in the `kcl.mod` file
+  dependencies:
+    helloworld = 0.1.0
+  source: |
+    import helloworld
 ```
 
 ### Expect Output
@@ -159,7 +203,7 @@ A KRM YAML list means that each document must have an `apiVersion`, `kind` throu
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
@@ -181,7 +225,7 @@ spec:
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
@@ -206,11 +250,11 @@ The KCL function can target various types of objects:
 + `PatchResources`: set fields on existing resources fields. These resources will then be added to the desired resources map.
 + `XR`: set fields on the XR.
 
-This is controlled by fields on the `KCLRun`
+This is controlled by fields on the `KCInput`
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
@@ -227,7 +271,7 @@ To extract data from a specific composed resource by using the resource name, we
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: show-ocds
 spec:
@@ -247,7 +291,7 @@ To return desired composite resource connection details, include a KCL config th
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
@@ -271,7 +315,7 @@ spec:
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
@@ -293,7 +337,7 @@ To mark a desired composed resource as ready, use the `krm.kcl.dev/ready` annota
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
@@ -315,7 +359,7 @@ You can read the XR, patch it with the status field and return the new patched X
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
-kind: KCLRun
+kind: KCLInput
 metadata:
   name: basic
 spec:
