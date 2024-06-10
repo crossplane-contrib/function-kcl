@@ -21,7 +21,27 @@ apiVersion: v1
 kind: XR
 metadata:
   annotations:
-    crossplane.io/composition-resource-name: bucket
+    crossplane.io/composition-resource-name: bucket2
+  generateName: test-xrender-
+  labels:
+    crossplane.io/composite: test-xrender
+  name: bucket2
+  ownerReferences:
+  - apiVersion: nopexample.org/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: XSubnetwork
+    name: test-xrender
+    uid: ""
+spec:
+  forProvider:
+    network: some-override-network2
+---
+apiVersion: v1
+kind: XR
+metadata:
+  annotations:
+    crossplane.io/composition-resource-name: bucket1
   generateName: test-xrender-
   labels:
     crossplane.io/composite: test-xrender
@@ -34,5 +54,5 @@ metadata:
     uid: ""
 spec:
   forProvider:
-    network: some-override-network
+    network: some-override-network1
 ```

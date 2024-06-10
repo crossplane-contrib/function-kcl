@@ -18,14 +18,19 @@ spec:
         name: kcl-function-1
       spec:
         source: |
-          {
+          items = [{
               apiVersion: "v1"
               kind: "XR"
               metadata.annotations: {
-                  "krm.kcl.dev/composition-resource-name" = "bucket"
+                  "krm.kcl.dev/composition-resource-name" = "bucket1"
               }
               spec.forProvider.network: "some-network"
-          }
+          }, {
+              apiVersion: "v1"
+              kind: "XR"
+              metadata.name = "bucket2"
+              spec.forProvider.network: "some-network"
+          }]
   - step: patch desired resources
     functionRef:
       name: kcl-function
@@ -37,7 +42,10 @@ spec:
       spec:
         target: PatchDesired
         source: |
-          {
-              metadata.name = "bucket"
-              spec.forProvider.network: "some-override-network"
-          }
+          items = [{
+              metadata.name = "bucket1"
+              spec.forProvider.network: "some-override-network1"
+          }, {
+              metadata.name = "bucket2"
+              spec.forProvider.network: "some-override-network2"       
+          }]
