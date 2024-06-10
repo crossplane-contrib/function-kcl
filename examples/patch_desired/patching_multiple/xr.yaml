@@ -1,0 +1,5 @@
+# Replace this with your XR!
+apiVersion: nopexample.org/v1
+kind: XSubnetwork
+metadata:
+  name: test-xrender
