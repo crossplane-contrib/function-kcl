@@ -159,7 +159,7 @@ metadata:
 spec:
   params:
     annotations:
-      config.kubernetes.io/local-config: "true"
+      krm.kcl.dev/allow-insecure-source: "true" # For localhost OCI registry
   source: oci://ghcr.io/kcl-lang/crossplane-xnetwork-kcl-function
   credentials: # If private OCI registry
     url: https://<oci-host-url> # or KCL_SRC_URL environment variable
