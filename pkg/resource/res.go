@@ -163,7 +163,9 @@ func MatchResources(desired map[resource.Name]*resource.DesiredComposed, data []
 	// otherwise we lost something somewhere
 	for _, d := range data {
 		// PatchDesired
-		if found, ok := desired[resource.Name(d.GetName())]; ok {
+		cd := resource.NewDesiredComposed()
+		cd.Resource.Unstructured = d
+		if found, ok := desired[resource.Name(GetResourceName(cd))]; ok {
 			if _, ok := matches[found]; !ok {
 				matches[found] = []map[string]interface{}{d.Object}
 			} else {
@@ -249,10 +251,13 @@ func AddResourcesTo(o any, opts *AddResourcesOptions) error {
 		// Resources
 		desired := val
 		for _, d := range opts.Data {
-			name := resource.Name(d.GetName())
+			cd := resource.NewDesiredComposed()
+			cd.Resource.Unstructured = d
+			name := resource.Name(GetResourceName(cd))
+			d := cd.Resource.Unstructured
 			// If the value exists, merge its existing value with the patches
 			if v, ok := desired[name]; ok {
-				mergedData := merged(d.Object, v)
+				mergedData := merged(cd.Resource.Object, v)
 				d = unstructured.Unstructured{Object: mergedData}
 			}
 			desired[name] = &resource.DesiredComposed{
@@ -472,13 +477,10 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 				// Remove meta annotation.
 				meta.RemoveAnnotations(cd.Resource, AnnotationKeyReady)
 			}
-			// Patch desired with custom name from annotation or default to resource meta name.
-			name, found := cd.Resource.GetAnnotations()[AnnotationKeyCompositionResourceName]
-			if !found {
-				name = cd.Resource.GetName()
+			err := CheckAndSetDesired(desired, cd)
+			if err != nil {
+				return result, err
 			}
-			meta.RemoveAnnotations(cd.Resource, AnnotationKeyCompositionResourceName)
-			desired[resource.Name(name)] = cd
 		}
 		result.Object = data
 		result.MsgCount = len(data)
@@ -487,4 +489,23 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 	}
 	result.setSuccessMsgs()
 	return result, nil
+}
+
+// Check the set the resource into the desired resource map.
+func CheckAndSetDesired(desired map[resource.Name]*resource.DesiredComposed, cd *resource.DesiredComposed) error {
+	name := GetResourceName(cd)
+	if _, existed := desired[resource.Name(name)]; existed {
+		return errors.Errorf("duplicate resource names %s found, when returning multiple resources, you need to set different metadata.name or matadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish between different resources in the composition functions.", name)
+	}
+	desired[resource.Name(name)] = cd
+	return nil
+}
+
+func GetResourceName(cd *resource.DesiredComposed) string {
+	name, found := cd.Resource.GetAnnotations()[AnnotationKeyCompositionResourceName]
+	if !found {
+		name = cd.Resource.GetName()
+	}
+	meta.RemoveAnnotations(cd.Resource, AnnotationKeyCompositionResourceName)
+	return name
 }
