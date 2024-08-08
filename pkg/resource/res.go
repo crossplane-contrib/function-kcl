@@ -496,7 +496,7 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 func CheckAndSetDesired(desired map[resource.Name]*resource.DesiredComposed, checked map[string]struct{}, cd *resource.DesiredComposed) error {
 	name := GetResourceName(cd)
 	if _, existed := checked[name]; existed {
-		return errors.Errorf("duplicate resource names %s found, when returning multiple resources, you need to set different metadata.name or matadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish between different resources in the composition functions.", name)
+		return errors.Errorf("duplicate resource names %s found, when returning multiple resources, you need to set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish between different resources in the composition functions.", name)
 	}
 	checked[name] = struct{}{}
 	desired[resource.Name(name)] = cd
