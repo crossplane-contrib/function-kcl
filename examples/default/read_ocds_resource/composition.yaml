@@ -15,7 +15,7 @@ spec:
       name: kcl-function
     input:
       apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLRun
+      kind: KCLInput
       metadata:
         name: show-ocds
       spec:
