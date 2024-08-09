@@ -220,7 +220,7 @@ func TestRunFunctionSimple(t *testing.T) {
 					Results: []*fnv1beta1.Result{
 						{
 							Severity: fnv1beta1.Severity_SEVERITY_FATAL,
-							Message:  "cannot process xr and state with the pipeline output in *v1beta1.RunFunctionResponse: duplicate resource names custom-composition-resource-name found, when returning multiple resources, you need to set different metadata.name or matadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish between different resources in the composition functions.",
+							Message:  "cannot process xr and state with the pipeline output in *v1beta1.RunFunctionResponse: duplicate resource names custom-composition-resource-name found, when returning multiple resources, you need to set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish between different resources in the composition functions.",
 						},
 					}},
 			},

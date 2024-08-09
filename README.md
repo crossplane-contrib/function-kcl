@@ -240,7 +240,7 @@ spec:
     }
 ```
 
-> Note that when returning multiple resources, we need to set different `metadata.name` or `matadata.annotations."krm.kcl.dev/composition-resource-name" ` to distinguish between different resources in the composition functions.
+> Note that when returning multiple resources, we need to set different `metadata.name` or `metadata.annotations."krm.kcl.dev/composition-resource-name" ` to distinguish between different resources in the composition functions.
 
 ### Target Support
 
