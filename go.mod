@@ -215,8 +215,3 @@ require (
 	sigs.k8s.io/kustomize/kyaml v0.16.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 )
-
-replace (
-	oras.land/oras-go => oras.land/oras-go v1.2.6
-	oras.land/oras-go/v2 => oras.land/oras-go/v2 v2.5.0
-)
