@@ -1,0 +1,2 @@
+run:
+	kcl composition.k
