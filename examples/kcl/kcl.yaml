@@ -1,0 +1,39 @@
+kcl_options:
+- key: params
+  value:
+    oxr:
+      apiVersion: devopstoolkitseries.com/v1alpha1
+      kind: ClusterClaim
+      metadata:
+        name: a-team-eks
+      spec:
+        claimRef:
+          apiVersion: devopstoolkitseries.com/v1alpha1
+          kind: ClusterClaim
+          name: a-team-eks
+        compositionRef:
+          name: cluster-aws
+        compositionSelector:
+          matchLabels:
+            cluster: eks
+            provider: aws
+        id: a-team-eks
+        parameters:
+          nodeSize: medium
+          minNodeCount: 3
+          apps:
+            crossplane:
+              enabled: true
+            openfunction:
+              enabled: true
+            externalSecrets:
+              enabled: true
+          creds:
+            name: aws-creds
+            namespace: crossplane-system
+            keys:
+              - access-key-id
+              - secret-access-key
+        resourceRef:
+          apiVersion: devopstoolkitseries.com/v1alpha1
+          kind: CompositeCluster
