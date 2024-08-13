@@ -13,7 +13,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.34.2
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/apimachinery v0.30.3
+	k8s.io/apimachinery v0.31.0
 	kcl-lang.io/krm-kcl v0.9.3
 	sigs.k8s.io/controller-tools v0.15.0
 	sigs.k8s.io/yaml v1.4.0
@@ -69,6 +69,7 @@ require (
 	github.com/evanphx/json-patch/v5 v5.9.0 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
+	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/getkin/kin-openapi v0.127.0 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
@@ -164,6 +165,7 @@ require (
 	github.com/thoas/go-funk v0.9.3 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
+	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
 	github.com/yuin/goldmark v1.7.4 // indirect
@@ -201,9 +203,9 @@ require (
 	k8s.io/apiserver v0.30.1 // indirect
 	k8s.io/client-go v0.30.2 // indirect
 	k8s.io/component-base v0.30.1 // indirect
-	k8s.io/klog/v2 v2.120.1 // indirect
+	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
-	k8s.io/utils v0.0.0-20240310230437-4693a0247e57 // indirect
+	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8 // indirect
 	kcl-lang.io/cli v0.9.8 // indirect
 	kcl-lang.io/kcl-go v0.9.3 // indirect
 	kcl-lang.io/kcl-openapi v0.6.6 // indirect
