@@ -1,0 +1,31 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: function-template-go
+spec:
+  compositeTypeRef:
+    apiVersion: example.crossplane.io/v1
+    kind: XR
+  mode: Pipeline
+  pipeline:
+  - step: normal
+    functionRef:
+      name: kcl-function
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: basic
+      spec:
+        dependencies:
+          k8s = "1.31"
+        source: |
+          import k8s.api.core.v1 as k8core
+
+          k8core.Pod {
+              spec: k8core.PodSpec{
+                  containers: [{
+                      name = "main"
+                  }]
+              }
+          }

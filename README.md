@@ -190,9 +190,17 @@ spec:
   # Set the dependencies are the external dependencies for the KCL code.
   # The format of the `dependencies` field is same as the [dependencies]` in the `kcl.mod` file
   dependencies:
-    helloworld = 0.1.0
+    k8s = "1.31"
   source: |
-    import helloworld
+    import k8s.api.core.v1 as k8core
+
+    k8core.Pod {
+        spec: k8core.PodSpec{
+            containers: [{
+                name = "main"
+            }]
+        }
+    }
 ```
 
 ### Expect Output
