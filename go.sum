@@ -207,8 +207,8 @@ github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7l
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/alecthomas/assert/v2 v2.10.0 h1:jjRCHsj6hBJhkmhznrCzoNpbA3zqy0fYiUcYZP/GkPY=
 github.com/alecthomas/assert/v2 v2.10.0/go.mod h1:Bze95FyfUr7x34QZrjL+XP+0qgp/zg8yS+TtBj1WA3k=
-github.com/alecthomas/kong v1.2.0 h1:rzOKVDXrKg6hpQi+99VFbgkiXLCRbnYp18PAlK6wYas=
-github.com/alecthomas/kong v1.2.0/go.mod h1:rKTSFhbdp3Ryefn8x5MOEprnRFQ7nlmMC01GKhehhBM=
+github.com/alecthomas/kong v1.2.1 h1:E8jH4Tsgv6wCRX2nGrdPyHDUCSG83WH2qE4XLACD33Q=
+github.com/alecthomas/kong v1.2.1/go.mod h1:rKTSFhbdp3Ryefn8x5MOEprnRFQ7nlmMC01GKhehhBM=
 github.com/alecthomas/repr v0.4.0 h1:GhI2A8MACjfegCPVq9f1FLvIBS+DrQ2KQBFZP1iFzXc=
 github.com/alecthomas/repr v0.4.0/go.mod h1:Fr0507jx4eOXV7AlPV6AVZLYrLIuIeSOWtW57eE/O/4=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
