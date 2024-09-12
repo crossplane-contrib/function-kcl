@@ -305,8 +305,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46t
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/creack/pty v1.1.18 h1:n56/Zwd5o6whRC5PMGretI4IdRLlmBXYNjScPaBgsbY=
 github.com/creack/pty v1.1.18/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
-github.com/crossplane/crossplane-runtime v1.15.1 h1:g1h75tNYOQT152IUNxs8ZgSsRFQKrZN9z69KefMujXs=
-github.com/crossplane/crossplane-runtime v1.15.1/go.mod h1:kRcJjJQmBFrR2n/KhwL8wYS7xNfq3D8eK4JliEScOHI=
+github.com/crossplane/crossplane-runtime v1.17.0 h1:y+GvxPT1M9s8BKt2AeZJdd2d6pg2xZeCO6LiR+VxEF8=
+github.com/crossplane/crossplane-runtime v1.17.0/go.mod h1:vtglCrnnbq2HurAk9yLHa4qS0bbnCxaKL7C21cQcB/0=
 github.com/crossplane/function-sdk-go v0.2.0 h1:4r+dXeGgwOC2XehJlHsHlkdkUsGW8PzkiyPPd2cshQs=
 github.com/crossplane/function-sdk-go v0.2.0/go.mod h1:AvaWMHeKvzzE0vODLBrU5njOzW6sm61Ou4js9OdBUXM=
 github.com/crossplane/upjet v1.1.0-rc.0.0.20231227120826-4cb45f9104ac h1:T1MTxsPAE/Cs0/EAGjeC29H9O/rO81yol2/5qGsf888=
@@ -363,8 +363,8 @@ github.com/envoyproxy/go-control-plane v0.9.9-0.20210512163311-63b5d3c536b0/go.m
 github.com/envoyproxy/go-control-plane v0.9.10-0.20210907150352-cf90f659a021/go.mod h1:AFq3mo9L8Lqqiid3OhADV3RfLJnjiw63cSpi+fDTRC0=
 github.com/envoyproxy/go-control-plane v0.10.2-0.20220325020618-49ff273808a1/go.mod h1:KJwIaB5Mv44NWtYuAOFCVOjcI94vtpEz2JU/D2v6IjE=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
-github.com/evanphx/json-patch v5.6.0+incompatible h1:jBYDEEiFBPxA0v50tFdvOzQQTCvpL6mnFh5mB2/l16U=
-github.com/evanphx/json-patch v5.6.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
+github.com/evanphx/json-patch v5.9.0+incompatible h1:fBXyNpNMuTTDdquAq/uisOr2lShz4oaXpDTX2bLe7ls=
+github.com/evanphx/json-patch v5.9.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch/v5 v5.9.0 h1:kcBlZQbplgElYIlo/n1hJbls2z/1awpXxpRi0/FOJfg=
 github.com/evanphx/json-patch/v5 v5.9.0/go.mod h1:VNkHZ/282BpEyt/tObQO8s5CMPmYYq14uClGH4abBuQ=
 github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8=
