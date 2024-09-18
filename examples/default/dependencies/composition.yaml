@@ -1,0 +1,61 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: function-template-go
+spec:
+  compositeTypeRef:
+    apiVersion: example.crossplane.io/v1
+    kind: XR
+  mode: Pipeline
+  pipeline:
+  - step: normal
+    functionRef:
+      name: kcl-function
+    input:
+      apiVersion: krm.kcl.dev/v1alpha1
+      kind: KCLInput
+      metadata:
+        name: basic
+      spec:
+        dependencies: |
+          k8s = "1.31"
+          crossplane = "1.16.0"
+        source: |
+          import k8s.api.rbac.v1 as k8srbac
+          import crossplane.v1 as cpv1
+          import crossplane.v1beta1 as cpv1beta1
+
+          items = [
+              cpv1.Provider {
+                  metadata.name = "provider-helm"
+                  spec: {
+                      package = "xpkg.upbound.io/crossplane-contrib/provider-helm:v0.19.0"
+                      runtimeConfigRef.name = "provider-helm"
+                  }
+              }
+              cpv1beta1.DeploymentRuntimeConfig {
+                  metadata.name = "provider-helm"
+                  spec: {
+                      serviceAccountTemplate: {metadata.name = "provider-helm"}
+                  }
+              }
+              k8srbac.ClusterRoleBinding {
+                  metadata.name = "provider-helm-cluster-admin"
+                  subjects: [{
+                      kind = "ServiceAccount"
+                      name = "provider-helm"
+                      namespace = "crossplane-system"
+                  }]
+                  roleRef: {
+                      kind = "ClusterRole"
+                      name = "provider-helm-cluster-admin"
+                      apiGroup = "rbac.authorization.k8s.io"
+                  }
+              }
+              cpv1beta1.ProviderConfig {
+                metadata.name = "helm-provider"
+                spec = {
+                  credentials.source = "InjectedIdentity"
+                }
+              }
+          ]
