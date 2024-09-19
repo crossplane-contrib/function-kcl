@@ -14,7 +14,7 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 
-	fnv1beta1 "github.com/crossplane/function-sdk-go/proto/v1beta1"
+	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/crossplane/function-sdk-go/resource"
 	"github.com/crossplane/function-sdk-go/response"
 
@@ -24,10 +24,10 @@ import (
 func TestRunFunctionSimple(t *testing.T) {
 	type args struct {
 		ctx context.Context
-		req *fnv1beta1.RunFunctionRequest
+		req *fnv1.RunFunctionRequest
 	}
 	type want struct {
-		rsp *fnv1beta1.RunFunctionResponse
+		rsp *fnv1.RunFunctionResponse
 		err error
 	}
 	cases := map[string]struct {
@@ -38,8 +38,8 @@ func TestRunFunctionSimple(t *testing.T) {
 		"ResponseIsReturned": {
 			reason: "The Function should return a fatal result if no input was specified",
 			args: args{
-				req: &fnv1beta1.RunFunctionRequest{
-					Meta: &fnv1beta1.RequestMeta{Tag: "hello"},
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "hello"},
 					Input: resource.MustStructJSON(`{
 						"apiVersion": "krm.kcl.dev/v1alpha1",
 						"kind": "KCLInput",
@@ -51,21 +51,21 @@ func TestRunFunctionSimple(t *testing.T) {
 							"source": "{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n}"
 						}
 					}`),
-					Observed: &fnv1beta1.State{
-						Composite: &fnv1beta1.Resource{
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
 					},
 				},
 			},
 			want: want{
-				rsp: &fnv1beta1.RunFunctionResponse{
-					Meta: &fnv1beta1.ResponseMeta{Tag: "hello", Ttl: durationpb.New(response.DefaultTTL)},
-					Desired: &fnv1beta1.State{
-						Composite: &fnv1beta1.Resource{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "hello", Ttl: durationpb.New(response.DefaultTTL)},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
-						Resources: map[string]*fnv1beta1.Resource{
+						Resources: map[string]*fnv1.Resource{
 							"": {
 								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated"}`),
 							},
@@ -77,8 +77,8 @@ func TestRunFunctionSimple(t *testing.T) {
 		"DatabaseInstance": {
 			reason: "The Function should return a fatal result if no input was specified",
 			args: args{
-				req: &fnv1beta1.RunFunctionRequest{
-					Meta: &fnv1beta1.RequestMeta{Tag: "database-instance"},
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "database-instance"},
 					Input: resource.MustStructJSON(`{
 						"apiVersion": "krm.kcl.dev/v1alpha1",
 						"kind": "KCLInput",
@@ -89,21 +89,21 @@ func TestRunFunctionSimple(t *testing.T) {
 							"source": "items = [{ \n    apiVersion: \"sql.gcp.upbound.io/v1beta1\"\n    kind: \"DatabaseInstance\"\n    spec: {\n        forProvider: {\n            project: \"test-project\"\n            settings: [{databaseFlags: [{\n                name: \"log_checkpoints\"\n                value: \"on\"\n            }]}]\n        }\n    }\n}]\n"
 						}
 					}`),
-					Observed: &fnv1beta1.State{
-						Composite: &fnv1beta1.Resource{
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
 					},
 				},
 			},
 			want: want{
-				rsp: &fnv1beta1.RunFunctionResponse{
-					Meta: &fnv1beta1.ResponseMeta{Tag: "database-instance", Ttl: durationpb.New(response.DefaultTTL)},
-					Desired: &fnv1beta1.State{
-						Composite: &fnv1beta1.Resource{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "database-instance", Ttl: durationpb.New(response.DefaultTTL)},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
-						Resources: map[string]*fnv1beta1.Resource{
+						Resources: map[string]*fnv1.Resource{
 							"": {
 								Resource: resource.MustStructJSON(`{"apiVersion": "sql.gcp.upbound.io/v1beta1", "kind": "DatabaseInstance", "spec": {"forProvider": {"project": "test-project", "settings": [{"databaseFlags": [{"name": "log_checkpoints", "value": "on"}]}]}}}`),
 							},
@@ -115,8 +115,8 @@ func TestRunFunctionSimple(t *testing.T) {
 		"CustomCompositionResourceNameIsSet": {
 			reason: "The Function should set value of crossplane.io/composition-resource-name annotation by krm.kcl.dev/composition-resource-name annotation ",
 			args: args{
-				req: &fnv1beta1.RunFunctionRequest{
-					Meta: &fnv1beta1.RequestMeta{Tag: "hello"},
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "hello"},
 					Input: resource.MustStructJSON(`{
 						"apiVersion": "krm.kcl.dev/v1alpha1",
 						"kind": "KCLInput",
@@ -128,21 +128,21 @@ func TestRunFunctionSimple(t *testing.T) {
 							"source": "{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n metadata.annotations = {\"krm.kcl.dev/composition-resource-name\": \"custom-composition-resource-name\"}\n}"
 						}
 					}`),
-					Observed: &fnv1beta1.State{
-						Composite: &fnv1beta1.Resource{
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
 					},
 				},
 			},
 			want: want{
-				rsp: &fnv1beta1.RunFunctionResponse{
-					Meta: &fnv1beta1.ResponseMeta{Tag: "hello", Ttl: durationpb.New(response.DefaultTTL)},
-					Desired: &fnv1beta1.State{
-						Composite: &fnv1beta1.Resource{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "hello", Ttl: durationpb.New(response.DefaultTTL)},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
-						Resources: map[string]*fnv1beta1.Resource{
+						Resources: map[string]*fnv1.Resource{
 							"custom-composition-resource-name": {
 								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated","metadata":{"annotations":{}}}`),
 							},
@@ -154,8 +154,8 @@ func TestRunFunctionSimple(t *testing.T) {
 		"MultipleResource": {
 			reason: "The Function should return multiple resources with different resource names",
 			args: args{
-				req: &fnv1beta1.RunFunctionRequest{
-					Meta: &fnv1beta1.RequestMeta{Tag: "multiple-resource"},
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "multiple-resource"},
 					Input: resource.MustStructJSON(`{
 						"apiVersion": "krm.kcl.dev/v1alpha1",
 						"kind": "KCLInput",
@@ -166,21 +166,21 @@ func TestRunFunctionSimple(t *testing.T) {
 							"source": "items = [\n{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n metadata.annotations = {\"krm.kcl.dev/composition-resource-name\": \"custom-composition-resource-name-0\"}\n}\n{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n metadata.annotations = {\"krm.kcl.dev/composition-resource-name\": \"custom-composition-resource-name-1\"}\n}\n]\n"
 						}
 					}`),
-					Observed: &fnv1beta1.State{
-						Composite: &fnv1beta1.Resource{
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
 					},
 				},
 			},
 			want: want{
-				rsp: &fnv1beta1.RunFunctionResponse{
-					Meta: &fnv1beta1.ResponseMeta{Tag: "multiple-resource", Ttl: durationpb.New(response.DefaultTTL)},
-					Desired: &fnv1beta1.State{
-						Composite: &fnv1beta1.Resource{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "multiple-resource", Ttl: durationpb.New(response.DefaultTTL)},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
-						Resources: map[string]*fnv1beta1.Resource{
+						Resources: map[string]*fnv1.Resource{
 							"custom-composition-resource-name-0": {
 								Resource: resource.MustStructJSON(`{"apiVersion": "example.org/v1", "kind": "Generated", "metadata": {"annotations": {}}}`),
 							},
@@ -196,8 +196,8 @@ func TestRunFunctionSimple(t *testing.T) {
 		// "MultipleResourceError": {
 		// 	reason: "The Function should return a fatal result if input resources have duplicate names",
 		// 	args: args{
-		// 		req: &fnv1beta1.RunFunctionRequest{
-		// 			Meta: &fnv1beta1.RequestMeta{Tag: "multiple-resource-error"},
+		// 		req: &fnv1.RunFunctionRequest{
+		// 			Meta: &fnv1.RequestMeta{Tag: "multiple-resource-error"},
 		// 			Input: resource.MustStructJSON(`{
 		// 				"apiVersion": "krm.kcl.dev/v1alpha1",
 		// 				"kind": "KCLInput",
@@ -208,19 +208,19 @@ func TestRunFunctionSimple(t *testing.T) {
 		// 					"source": "items = [\n{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n metadata.annotations = {\"krm.kcl.dev/composition-resource-name\": \"custom-composition-resource-name\"}\n}\n{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n metadata.annotations = {\"krm.kcl.dev/composition-resource-name\": \"custom-composition-resource-name\"}\n}\n]\n"
 		// 				}
 		// 			}`),
-		// 			Observed: &fnv1beta1.State{
-		// 				Composite: &fnv1beta1.Resource{
+		// 			Observed: &fnv1.State{
+		// 				Composite: &fnv1.Resource{
 		// 					Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 		// 				},
 		// 			},
 		// 		},
 		// 	},
 		// 	want: want{
-		// 		rsp: &fnv1beta1.RunFunctionResponse{
-		// 			Meta: &fnv1beta1.ResponseMeta{Tag: "multiple-resource-error", Ttl: durationpb.New(response.DefaultTTL)},
-		// 			Results: []*fnv1beta1.Result{
+		// 		rsp: &fnv1.RunFunctionResponse{
+		// 			Meta: &fnv1.ResponseMeta{Tag: "multiple-resource-error", Ttl: durationpb.New(response.DefaultTTL)},
+		// 			Results: []*fnv1.Result{
 		// 				{
-		// 					Severity: fnv1beta1.Severity_SEVERITY_FATAL,
+		// 					Severity: fnv1.Severity_SEVERITY_FATAL,
 		// 					Message:  "cannot process xr and state with the pipeline output in *v1beta1.RunFunctionResponse: duplicate resource names custom-composition-resource-name found, when returning multiple resources, you need to set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish between different resources in the composition functions.",
 		// 				},
 		// 			}},
@@ -311,11 +311,11 @@ func TestFunctionExamples(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			req := &fnv1beta1.RunFunctionRequest{
+			req := &fnv1.RunFunctionRequest{
 				Input: input,
 				// option("params").oxr
-				Observed: &fnv1beta1.State{
-					Composite: &fnv1beta1.Resource{
+				Observed: &fnv1.State{
+					Composite: &fnv1.Resource{
 						Resource: oxr,
 					},
 				},
