@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
@@ -20,6 +21,8 @@ import (
 	pkgresource "github.com/crossplane-contrib/function-kcl/pkg/resource"
 	"sigs.k8s.io/yaml"
 )
+
+var defaultSource = os.Getenv("FUNCTION_KCL_DEFAULT_SOURCE")
 
 // Function returns whatever response you ask it to.
 type Function struct {
@@ -38,6 +41,10 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	if err := request.GetInput(req, in); err != nil {
 		response.Fatal(rsp, errors.Wrapf(err, "cannot get Function input from %T", req))
 		return rsp, nil
+	}
+	// Set default source
+	if in.Spec.Source == "" {
+		in.Spec.Source = defaultSource
 	}
 	// Set default target
 	if in.Spec.Target == "" {
