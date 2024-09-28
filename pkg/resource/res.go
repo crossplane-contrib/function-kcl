@@ -13,6 +13,7 @@ import (
 	"github.com/crossplane/function-sdk-go/resource"
 	"github.com/crossplane/function-sdk-go/resource/composed"
 
+	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -386,7 +387,7 @@ func SetData(data any, path string, o any, overwrite bool) error {
 	return nil
 }
 
-func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired map[resource.Name]*resource.DesiredComposed, observed map[resource.Name]resource.ObservedComposed, target Target, resources ResourceList, opts *AddResourcesOptions) (AddResourcesResult, error) {
+func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired map[resource.Name]*resource.DesiredComposed, observed map[resource.Name]resource.ObservedComposed, extraResources map[string]*fnv1.ResourceSelector, target Target, resources ResourceList, opts *AddResourcesOptions) (AddResourcesResult, error) {
 	result := AddResourcesResult{
 		Target: target,
 	}
@@ -465,8 +466,20 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 						d, _ := base64.StdEncoding.DecodeString(v) //nolint:errcheck // k8s returns secret values encoded
 						dxr.ConnectionDetails[k] = d
 					}
+				case "ExtraResources":
+					// Set extra resources requirements.
+					ers := make(ExtraResourcesRequirements)
+					if err := cd.Resource.GetValueInto("requirements", &ers); err != nil {
+						return result, errors.Wrap(err, "cannot get extra resources requirements")
+					}
+					for k, v := range ers {
+						if _, found := extraResources[k]; found {
+							return result, errors.Errorf("duplicate extra resource key %q", k)
+						}
+						extraResources[k] = v.ToResourceSelector()
+					}
 				default:
-					return result, errors.Errorf("invalid kind %q for apiVersion %q - must be CompositeConnectionDetails", obj.GetKind(), MetaApiVersion)
+					return result, errors.Errorf("invalid kind %q for apiVersion %q - must be CompositeConnectionDetails or ExtraResources", obj.GetKind(), MetaApiVersion)
 				}
 				continue
 			}
