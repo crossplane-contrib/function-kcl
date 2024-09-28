@@ -121,6 +121,18 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 		return rsp, nil
 	}
 	in.Spec.Params["ctx"] = ctxObj
+	// The extra resources by myself or any previous Functions in the pipeline.
+	extras, err := request.GetExtraResources(req)
+	if err != nil {
+		response.Fatal(rsp, errors.Wrapf(err, "cannot get extra resources from %T", req))
+		return rsp, nil
+	}
+	log.Debug(fmt.Sprintf("Extra resources: %d", len(extras)))
+	in.Spec.Params["extraResources"], err = pkgresource.ObjToRawExtension(extras)
+	if err != nil {
+		response.Fatal(rsp, err)
+		return rsp, nil
+	}
 	inputBytes, outputBytes := bytes.NewBuffer([]byte{}), bytes.NewBuffer([]byte{})
 	// Convert the function-kcl KCLInput to the KRM-KCL spec and run function pipelines.
 	// Input Example: https://github.com/kcl-lang/krm-kcl/blob/main/examples/mutation/set-annotations/suite/good.yaml
@@ -161,7 +173,8 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 		})
 	}
 	log.Debug(fmt.Sprintf("Input resources: %v", resources))
-	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
+	extraResources := map[string]*fnv1.ResourceSelector{}
+	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, extraResources, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
 		Basename:  in.Name,
 		Data:      data,
 		Overwrite: true,
@@ -169,6 +182,12 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	if err != nil {
 		response.Fatal(rsp, errors.Wrapf(err, "cannot process xr and state with the pipeline output in %T", rsp))
 		return rsp, nil
+	}
+	if len(extraResources) > 0 {
+		for n, d := range extraResources {
+			log.Debug(fmt.Sprintf("Requesting ExtraResources from %s named %s", d.String(), n))
+		}
+		rsp.Requirements = &fnv1.Requirements{ExtraResources: extraResources}
 	}
 	log.Debug(fmt.Sprintf("Set %d resource(s) to the desired state", result.MsgCount))
 	// Set dxr and desired state

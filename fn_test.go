@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/go-logr/logr/testr"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"google.golang.org/protobuf/testing/protocmp"
@@ -30,6 +31,12 @@ func TestRunFunctionSimple(t *testing.T) {
 		rsp *fnv1.RunFunctionResponse
 		err error
 	}
+
+	var (
+		cd = `{"apiVersion":"example.org/v1","kind":"CD","metadata":{"annotations":{"krm.kcl.dev/composition-resource-name":"cool-cd"},"name":"cool-cd"}}`
+		xr = `{"apiVersion":"example.org/v1","kind":"XR","metadata":{"name":"cool-xr"},"spec":{"count":2}}`
+	)
+
 	cases := map[string]struct {
 		reason string
 		args   args
@@ -192,6 +199,194 @@ func TestRunFunctionSimple(t *testing.T) {
 				},
 			},
 		},
+		"ExtraResources": {
+			reason: "The Function should return the desired composite with extra resources.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "extra-resources"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"cool-extra-resource\"\n    }\n  }\n},\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"another-cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchLabels = {\n        key: \"value\"\n      }\n    }\n    \"yet-another-cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"foo\"\n    }\n  }\n},\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"all-cool-resources\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchLabels = {}\n    }\n  }\n}\n]\n"
+            }
+          }`),
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"cool-cd": {
+								Resource: resource.MustStructJSON(cd),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta:    &fnv1.ResponseMeta{Tag: "extra-resources", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{},
+					Requirements: &fnv1.Requirements{
+						ExtraResources: map[string]*fnv1.ResourceSelector{
+							"cool-extra-resource": {
+								ApiVersion: "example.org/v1",
+								Kind:       "CoolExtraResource",
+								Match: &fnv1.ResourceSelector_MatchName{
+									MatchName: "cool-extra-resource",
+								},
+							},
+							"another-cool-extra-resource": {
+								ApiVersion: "example.org/v1",
+								Kind:       "CoolExtraResource",
+								Match: &fnv1.ResourceSelector_MatchLabels{
+									MatchLabels: &fnv1.MatchLabels{
+										Labels: map[string]string{"key": "value"},
+									},
+								},
+							},
+							"yet-another-cool-extra-resource": {
+								ApiVersion: "example.org/v1",
+								Kind:       "CoolExtraResource",
+								Match: &fnv1.ResourceSelector_MatchName{
+									MatchName: "foo",
+								},
+							},
+							"all-cool-resources": {
+								ApiVersion: "example.org/v1",
+								Kind:       "CoolExtraResource",
+								Match: &fnv1.ResourceSelector_MatchLabels{
+									MatchLabels: &fnv1.MatchLabels{
+										Labels: map[string]string{},
+									},
+								},
+							},
+						},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"cool-cd": {
+								Resource: resource.MustStructJSON(cd),
+							},
+						},
+					},
+				},
+			},
+		},
+		"ExtraResourcesIn": {
+			reason: "The Function should return the extra resources from the request.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "extra-resources-in"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+            "source": "items = [v.Resource for v in option(\"params\").extraResources[\"cool1\"]]\n"
+            }
+          }`),
+					ExtraResources: map[string]*fnv1.Resources{
+						"cool1": {
+							Items: []*fnv1.Resource{
+								{Resource: resource.MustStructJSON(xr)},
+								{Resource: resource.MustStructJSON(cd)},
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta:    &fnv1.ResponseMeta{Tag: "extra-resources-in", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"","kind":""}`),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"cool-xr": {
+								Resource: resource.MustStructJSON(xr),
+							},
+							"cool-cd": {
+								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"CD","metadata":{"annotations":{},"name":"cool-cd"}}`),
+							},
+						},
+					},
+				},
+			},
+		},
+		"DuplicateExtraResourceKey": {
+			reason: "The Function should return a fatal result if the extra resource key is duplicated.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "duplicate-extra-resources"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"cool-extra-resource\"\n    }\n  }\n}\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"another-cool-extra-resource\"\n    }\n  }\n}\n]\n"
+						}
+					}`),
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"cool-cd": {
+								Resource: resource.MustStructJSON(cd),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "duplicate-extra-resources", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{
+						{
+							Severity: fnv1.Severity_SEVERITY_FATAL,
+							Target:   fnv1.Target_TARGET_COMPOSITE.Enum(),
+							Message:  "cannot process xr and state with the pipeline output in *v1.RunFunctionResponse: duplicate extra resource key \"cool-extra-resource\"",
+						},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"cool-cd": {
+								Resource: resource.MustStructJSON(cd),
+							},
+						},
+					},
+				},
+			},
+		},
 		// TODO: disable the resource check, and fix the kcl dup resource evaluation issues.
 		// "MultipleResourceError": {
 		// 	reason: "The Function should return a fatal result if input resources have duplicate names",
@@ -230,7 +425,8 @@ func TestRunFunctionSimple(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			f := &Function{log: logging.NewNopLogger()}
+			// f := &Function{log: logging.NewNopLogger()}
+			f := &Function{log: logging.NewLogrLogger(testr.New(t))}
 			rsp, err := f.RunFunction(tc.args.ctx, tc.args.req)
 
 			if diff := cmp.Diff(tc.want.rsp, rsp, protocmp.Transform()); diff != "" {
