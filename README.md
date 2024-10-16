@@ -122,6 +122,46 @@ spec:
   source: ./path/to/kcl/file.k
 ```
 
+> Note: You can't run the FileSystem example using `crossplane render` because it loads templates from a ConfigMap in the cluster. You can create a `ConfigMap` with the templates using the following command.
+
+```shell
+kubectl create configmap templates --from-file=templates.k -n crossplane-system
+```
+
+This `ConfigMap` will be mounted to the function pod and the templates will be available in the `/templates` directory. See the following function config for details.
+
+```yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-kcl
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-kcl:latest
+  runtimeConfigRef:
+    name: mount-templates
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: mount-templates
+spec:
+  deploymentTemplate:
+    spec:
+      selector: {}
+      template:
+        spec:
+          containers:
+            - name: package-runtime
+              volumeMounts:
+                - mountPath: /templates
+                  name: templates
+                  readOnly: true
+          volumes:
+            - name: templates
+              configMap:
+                name: templates
+```
+
 ### Read the Function Requests and Values through the `option` Function
 
 + Read the [`ObservedCompositeResource`](https://docs.crossplane.io/latest/concepts/composition-functions/#observed-state) from `option("params").oxr`.
