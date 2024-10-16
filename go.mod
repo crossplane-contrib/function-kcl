@@ -13,14 +13,14 @@ require (
 	google.golang.org/protobuf v1.35.1
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.31.1
-	kcl-lang.io/krm-kcl v0.10.0
+	kcl-lang.io/krm-kcl v0.10.3
 	sigs.k8s.io/controller-tools v0.16.4
 	sigs.k8s.io/yaml v1.4.0
 )
 
 require (
 	cloud.google.com/go v0.112.1 // indirect
-	cloud.google.com/go/compute/metadata v0.3.0 // indirect
+	cloud.google.com/go/compute/metadata v0.5.0 // indirect
 	cloud.google.com/go/iam v1.1.6 // indirect
 	cloud.google.com/go/storage v1.38.0 // indirect
 	github.com/AdaLogics/go-fuzz-headers v0.0.0-20230811130428-ced1acdcaa24 // indirect
@@ -61,6 +61,7 @@ require (
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dominikbraun/graph v0.23.0 // indirect
+	github.com/ebitengine/purego v0.7.1 // indirect
 	github.com/elliotchance/orderedmap/v2 v2.4.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/emicklei/proto v1.13.2 // indirect
@@ -69,7 +70,7 @@ require (
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
-	github.com/getkin/kin-openapi v0.127.0 // indirect
+	github.com/getkin/kin-openapi v0.128.0 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.5.0 // indirect
@@ -115,7 +116,6 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/julienschmidt/httprouter v1.3.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
@@ -144,7 +144,6 @@ require (
 	github.com/otiai10/copy v1.14.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
-	github.com/powerman/rpc-codec v1.2.2 // indirect
 	github.com/prometheus/client_golang v1.20.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.55.0 // indirect
@@ -192,7 +191,7 @@ require (
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240903143218-8af14fe29dc1 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
-	google.golang.org/grpc v1.66.2 // indirect
+	google.golang.org/grpc v1.67.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
@@ -204,11 +203,11 @@ require (
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
 	k8s.io/utils v0.0.0-20240902221715-702e33fdd3c3 // indirect
-	kcl-lang.io/cli v0.10.0 // indirect
-	kcl-lang.io/kcl-go v0.10.1 // indirect
+	kcl-lang.io/cli v0.10.4-0.20241016021654-a8eb2b56bdd8 // indirect
+	kcl-lang.io/kcl-go v0.10.3 // indirect
 	kcl-lang.io/kcl-openapi v0.9.0 // indirect
 	kcl-lang.io/kpm v0.10.0 // indirect
-	kcl-lang.io/lib v0.10.0 // indirect
+	kcl-lang.io/lib v0.10.3 // indirect
 	oras.land/oras-go v1.2.6 // indirect
 	oras.land/oras-go/v2 v2.5.0 // indirect
 	sigs.k8s.io/controller-runtime v0.19.0 // indirect
