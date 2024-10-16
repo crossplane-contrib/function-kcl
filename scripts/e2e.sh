@@ -8,6 +8,12 @@ find examples -type f -name "Makefile" -exec sh -c '
     make
 ' \;
 
+find examples -type f -name "Makefile" -exec sh -c '
+    dir="{}"
+    cd "$(dirname "$dir")" || exit
+    make run-in-docker
+' \;
+
 find examples_kcl -type f -name "Makefile" -exec sh -c '
     dir="{}"
     cd "$(dirname "$dir")" || exit
