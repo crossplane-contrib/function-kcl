@@ -12,7 +12,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.35.1
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/apimachinery v0.31.1
+	k8s.io/apimachinery v0.31.2
 	kcl-lang.io/krm-kcl v0.10.4
 	sigs.k8s.io/controller-tools v0.16.4
 	sigs.k8s.io/yaml v1.4.0
