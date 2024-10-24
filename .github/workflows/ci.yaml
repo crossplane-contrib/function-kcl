@@ -35,7 +35,7 @@ env:
   XPKG: xpkg.upbound.io/${{ github.repository}}
 
   # The package version to push. The default is 0.0.0-gitsha.
-  XPKG_VERSION: v0.10.3
+  XPKG_VERSION: v0.10.4
 
 jobs:
   lint:
@@ -93,9 +93,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Prepare docker image
-        run: cp -f ./docker/${{ matrix.arch }}/Dockerfile .
 
       # We ask Docker to use GitHub Action's native caching support to speed up
       # the build, per https://docs.docker.com/build/cache/backends/gha/.

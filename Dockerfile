@@ -37,7 +37,7 @@ RUN --mount=target=. \
 
 # Produce the Function image. We use a very lightweight 'distroless' image that
 # does not include any of the build tools used in previous stages.
-FROM ${BASE_IMAGE} AS image
+FROM --platform=${BUILDPLATFORM} ${BASE_IMAGE} AS image
 WORKDIR /
 COPY --from=build /function /function
 EXPOSE 9443
