@@ -2,8 +2,6 @@
 package main
 
 import (
-	"os"
-
 	"github.com/alecthomas/kong"
 
 	"github.com/crossplane/function-sdk-go"
@@ -25,9 +23,6 @@ func (c *CLI) Run() error {
 	if err != nil {
 		return err
 	}
-	// Set the fast eval mode for KCL
-	os.Setenv("KCL_FAST_EVAL", "1")
-
 	return function.Serve(&Function{log: log},
 		function.Listen(c.Network, c.Address),
 		function.MTLSCertificates(c.TLSCertsDir),
