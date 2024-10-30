@@ -40,5 +40,6 @@ RUN --mount=target=. \
 FROM --platform=${BUILDPLATFORM} ${BASE_IMAGE} AS image
 WORKDIR /
 COPY --from=build /function /function
+RUN /function --help
 EXPOSE 9443
 ENTRYPOINT ["/function"]
