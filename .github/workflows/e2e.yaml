@@ -1,9 +1,12 @@
 name: Function KCL e2e tests
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - main
+      - release-*
+    tags:
+      - "v*"
+  pull_request: {}
 
 env:
   GO_VERSION: '1.23'
