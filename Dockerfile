@@ -37,8 +37,9 @@ RUN --mount=target=. \
 
 # Produce the Function image. We use a very lightweight 'distroless' image that
 # does not include any of the build tools used in previous stages.
-FROM --platform=${BUILDPLATFORM} ${BASE_IMAGE} AS image
+FROM ${BASE_IMAGE} AS image
 WORKDIR /
 COPY --from=build /function /function
+RUN /function --help
 EXPOSE 9443
 ENTRYPOINT ["/function"]
