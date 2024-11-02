@@ -24,7 +24,7 @@ spec:
           count = oxr.spec.count or 1
           ocds = option("params").ocds
           dxr = {
-              **oxr.meta
+              **option("params").dxr
               status.dummy = "cool-status"
           }
           details = {
