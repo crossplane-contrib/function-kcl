@@ -25,7 +25,7 @@ spec:
           print("The value of `count` field in the XR is", count)
           ocds = option("params").ocds
           dxr = {
-              **oxr
+              **option("params").dxr
               status.dummy = "cool-status"
           }
           details = {

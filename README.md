@@ -32,7 +32,7 @@ spec:
           oxr = option("params").oxr
           # Patch the XR with the status field
           dxr = {
-              **oxr
+              **option("params").dxr
               status.dummy = "cool-status"
           }
           # Construct a bucket
@@ -495,12 +495,9 @@ metadata:
 spec:
   source: |
     # Read the XR
-    oxr = option("params").oxr
+    dxr = option("params").dxr
     # Patch the XR with the status field
-    dxr = {
-        **oxr
-        status.dummy = "cool-status"
-    }
+    dxr.status.dummy = "cool-status"
     items = [dxr] # Omit other resources
 ```
 
