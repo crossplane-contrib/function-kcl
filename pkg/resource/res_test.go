@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	res "github.com/crossplane/function-sdk-go/resource"
+	"github.com/crossplane/function-sdk-go/resource/composed"
+	"github.com/google/go-cmp/cmp"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
@@ -70,4 +72,57 @@ func TestObjToRawExtension(t *testing.T) {
 
 func equal(a, b []byte) bool {
 	return (a == nil && b == nil) || (a != nil && b != nil && string(a) == string(b))
+}
+
+func TestSetData(t *testing.T) {
+	type args struct {
+		data      any
+		path      string
+		o         any
+		overwrite bool
+	}
+	tests := []struct {
+		name     string
+		args     args
+		expected *res.DesiredComposed
+		wantErr  bool
+	}{
+		{
+			name: "Should create a new element on existing array",
+			args: args{
+				data: "c",
+				path: ".some-array[2]",
+				o: &res.DesiredComposed{
+					Resource: &composed.Unstructured{
+						Unstructured: unstructured.Unstructured{
+							Object: map[string]interface{}{
+								"some-array": []interface{}{"a", "b"},
+							},
+						},
+					},
+				},
+				overwrite: true,
+			},
+			expected: &res.DesiredComposed{
+				Resource: &composed.Unstructured{
+					Unstructured: unstructured.Unstructured{
+						Object: map[string]interface{}{
+							"some-array": []interface{}{"a", "b", "c"},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := SetData(tt.args.data, tt.args.path, tt.args.o, tt.args.overwrite); (err != nil) != tt.wantErr {
+				t.Errorf("SetData() error = %v, wantErr %v", err, tt.wantErr)
+			}
+			if diff := cmp.Diff(tt.args.o, tt.expected); diff != "" {
+				t.Errorf("SetData(): -want rsp, +got rsp:\n%s", diff)
+			}
+		})
+	}
 }

@@ -292,10 +292,6 @@ func AddResourcesTo(o any, opts *AddResourcesOptions) error {
 	return nil
 }
 
-var (
-	errNoSuchField = "no such field"
-)
-
 // SetData is a recursive function that is intended to build a kube fieldpath valid
 // JSONPath(s) of the given object, it will then copy from 'data' at the given path
 // to the passed o object - at the same path, overwrite defines if this function should
@@ -351,7 +347,7 @@ func SetData(data any, path string, o any, overwrite bool) error {
 				return errors.New("cannot set data on a nil DesiredComposed resource")
 			}
 
-			if curVal, err := r.GetValue(path); err != nil && !strings.Contains(err.Error(), errNoSuchField) {
+			if curVal, err := r.GetValue(path); err != nil && !fieldpath.IsNotFound(err) {
 				return errors.Wrapf(err, "getting %s:%s in xr failed", path, data)
 			} else if curVal != nil && !overwrite {
 				return fmt.Errorf("%s: conflicting values %q and %q", path, curVal, data)
@@ -371,7 +367,7 @@ func SetData(data any, path string, o any, overwrite bool) error {
 				return fmt.Errorf("cannot set data on a nil XR")
 			}
 
-			if curVal, err := r.GetValue(path); err != nil && !strings.Contains(err.Error(), errNoSuchField) {
+			if curVal, err := r.GetValue(path); err != nil && !fieldpath.IsNotFound(err) {
 				return errors.Wrapf(err, "getting %s:%s in xr failed", path, data)
 			} else if curVal != nil && !overwrite {
 				return fmt.Errorf("%s: conflicting values %q and %q", path, curVal, data)
