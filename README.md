@@ -8,7 +8,12 @@
 
 Crossplane KCL function allows developers to use [KCL](https://kcl-lang.io/) (a DSL) to write composite logic without the need for repeated packaging of crossplane functions, and we support package management and the [KRM KCL specification](https://github.com/kcl-lang/krm-kcl), which allows for OCI/Git source and the reuse of [KCL's module ecosystem](https://artifacthub.io/packages/search?org=kcl&sort=relevance&page=1).
 
-Check out this [blog](https://blog.crossplane.io/function-kcl/) to learn more. Here's a simple example:
+Check out these following blogs to learn more. 
+
++ [Using KCL Programming Language to Write Crossplane Composition Functions](https://blog.crossplane.io/function-kcl/)
++ [KCL: The Game-Changer for Crossplane Composition Building](https://blog.upbound.io/kcl-benefits-crossplane-composition-building)
+
+Here's a simple example:
 
 ```yaml
 apiVersion: apiextensions.crossplane.io/v1
