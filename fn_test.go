@@ -38,9 +38,10 @@ func TestRunFunctionSimple(t *testing.T) {
 	)
 
 	cases := map[string]struct {
-		reason string
-		args   args
-		want   want
+		reason        string
+		defaultSource string
+		args          args
+		want          want
 	}{
 		"ResponseIsReturned": {
 			reason: "The Function should return a fatal result if no input was specified",
@@ -387,6 +388,60 @@ func TestRunFunctionSimple(t *testing.T) {
 				},
 			},
 		},
+		"EmptyInputWithDefaultSource": {
+			reason:        "The function should use the default source when input is not provided and default source is set",
+			defaultSource: "{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n}",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta:  &fnv1.RequestMeta{Tag: "empty-input"},
+					Input: nil,
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "empty-input", Ttl: durationpb.New(response.DefaultTTL)},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"": {
+								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated"}`),
+							},
+						},
+					},
+				},
+			},
+		},
+		"EmptyInputWithoutDefaultSource": {
+			reason: "The function should fail when input is not provided and default source is not set",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta:  &fnv1.RequestMeta{Tag: "empty-input"},
+					Input: nil,
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "empty-input", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{{
+						Target:   fnv1.Target_TARGET_COMPOSITE.Enum(),
+						Severity: fnv1.Severity_SEVERITY_FATAL,
+						Message:  "invalid function input: spec.source: Required value: kcl source cannot be empty",
+					}},
+				},
+			},
+		},
 		// TODO: disable the resource check, and fix the kcl dup resource evaluation issues.
 		// "MultipleResourceError": {
 		// 	reason: "The Function should return a fatal result if input resources have duplicate names",
@@ -425,6 +480,9 @@ func TestRunFunctionSimple(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
+			// NOTE: This means we can't run tests in parallel.
+			defaultSource = tc.defaultSource
+
 			// f := &Function{log: logging.NewNopLogger()}
 			f := &Function{log: logging.NewLogrLogger(testr.New(t))}
 			rsp, err := f.RunFunction(tc.args.ctx, tc.args.req)
