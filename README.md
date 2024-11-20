@@ -167,6 +167,44 @@ spec:
                 name: templates
 ```
 
+### Use as a Base Image
+
+This function can also be used as a base image to build complex functions in KCL. To do this, add your KCL code to the image and set the `FUNCTION_KCL_DEFAULT_SOURCE` environment variable to the path where you put your code.
+
+For example, if you have the following in `main.k`:
+
+```kcl
+# Read the XR
+oxr = option("params").oxr
+# Patch the XR with the status field
+dxr = {
+    **option("params").dxr
+    status.dummy = "cool-status"
+}
+# Construct a bucket
+bucket = {
+    apiVersion = "s3.aws.upbound.io/v1beta1"
+    kind = "Bucket"
+    metadata.annotations: {
+        "krm.kcl.dev/composition-resource-name" = "bucket"
+    }
+    spec.forProvider.region = option("oxr").spec.region
+}
+# Return the bucket and patched XR
+items = [bucket, dxr]
+```
+
+You can use the following Dockerfile to build a function that runs the code above and does not require any input:
+
+```dockerfile
+FROM xpkg.upbound.io/crossplane-contrib/function-kcl:latest
+
+ADD main.k /src/main.k
+ENV FUNCTION_KCL_DEFAULT_SOURCE=/src/main.k
+```
+
+You may also wish to replace the `/package.yaml` metadata file to give your new function a unique name and remove or replace the input CRD.
+
 ### Read the Function Requests and Values through the `option` Function
 
 + Read the [`ObservedCompositeResource`](https://docs.crossplane.io/latest/concepts/composition-functions/#observed-state) from `option("params").oxr`.
