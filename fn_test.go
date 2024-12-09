@@ -442,6 +442,62 @@ func TestRunFunctionSimple(t *testing.T) {
 				},
 			},
 		},
+		"SetConditions": {
+			reason: "The Function should return the conditions from the request.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "set-conditions"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [{ \n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"ConditionResouce\"\n    spec: {\n        forProvider: {\n            project: \"test-project\"\n            settings: [{databaseFlags: [{\n                name: \"log_checkpoints\"\n                value: \"on\"\n            }]}]\n        }\n    }\n}]\n"
+
+            			}
+          			}`),
+					ExtraResources: map[string]*fnv1.Resources{
+						"cool1": {
+							Items: []*fnv1.Resource{
+								{Resource: resource.MustStructJSON(xr)},
+								{Resource: resource.MustStructJSON(cd)},
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "extra-resources-in", Ttl: durationpb.New(response.DefaultTTL)},
+					Conditions: []*fnv1.Condition{
+						fnv1.Condition{
+							Type:    "",
+							Status:  0,
+							Reason:  "",
+							Message: nil,
+							Target:  nil,
+						},
+					},
+					Results: []*fnv1.Result{},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"","kind":""}`),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"cool-xr": {
+								Resource: resource.MustStructJSON(xr),
+							},
+							"cool-cd": {
+								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"CD","metadata":{"annotations":{},"name":"cool-cd"}}`),
+							},
+						},
+					},
+				},
+			},
+		},
 		// TODO: disable the resource check, and fix the kcl dup resource evaluation issues.
 		// "MultipleResourceError": {
 		// 	reason: "The Function should return a fatal result if input resources have duplicate names",

@@ -181,7 +181,9 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	}
 	log.Debug(fmt.Sprintf("Input resources: %v", resources))
 	extraResources := map[string]*fnv1.ResourceSelector{}
-	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, extraResources, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
+	var conditions pkgresource.ConditionResources
+	var events pkgresource.EventResources
+	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, extraResources, &conditions, &events, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
 		Basename:  in.Name,
 		Data:      data,
 		Overwrite: true,
@@ -196,6 +198,15 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 		}
 		rsp.Requirements = &fnv1.Requirements{ExtraResources: extraResources}
 	}
+
+	if len(conditions) > 0 {
+		pkgresource.SetConditions(rsp.Conditions, conditions, log)
+	}
+
+	if len(events) > 0 {
+		pkgresource.SetEvents(rsp.Results, events, log)
+	}
+
 	log.Debug(fmt.Sprintf("Set %d resource(s) to the desired state", result.MsgCount))
 	// Set dxr and desired state
 	log.Debug(fmt.Sprintf("Setting desired XR state to %+v", dxr.Resource))
