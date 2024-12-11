@@ -78,7 +78,7 @@ func transformTarget(t *BindingTarget) *fnv1.Target {
 	return fnv1.Target_TARGET_COMPOSITE.Enum()
 }
 
-func SetConditions(conditions []*fnv1.Condition, cr ConditionResources, log logging.Logger) {
+func SetConditions(rsp *fnv1.RunFunctionResponse, cr ConditionResources, log logging.Logger) {
 	conditionsSet := map[string]bool{}
 	// All matchConditions matched, set the desired conditions.
 	for _, cs := range cr {
@@ -91,7 +91,7 @@ func SetConditions(conditions []*fnv1.Condition, cr ConditionResources, log logg
 
 		c := transformCondition(cs)
 
-		conditions = append(conditions, c)
+		rsp.Conditions = append(rsp.Conditions, c)
 		conditionsSet[cs.Condition.Type] = true
 	}
 }

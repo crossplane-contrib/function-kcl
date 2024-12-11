@@ -200,11 +200,11 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	}
 
 	if len(conditions) > 0 {
-		pkgresource.SetConditions(rsp.Conditions, conditions, log)
+		pkgresource.SetConditions(rsp, conditions, log)
 	}
 
 	if len(events) > 0 {
-		pkgresource.SetEvents(rsp.Results, events, log)
+		pkgresource.SetEvents(rsp, events)
 	}
 
 	log.Debug(fmt.Sprintf("Set %d resource(s) to the desired state", result.MsgCount))

@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/go-logr/logr/testr"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"google.golang.org/protobuf/testing/protocmp"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
-
-	"github.com/crossplane/crossplane-runtime/pkg/logging"
+	"k8s.io/utils/ptr"
 
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/crossplane/function-sdk-go/resource"
@@ -94,7 +94,7 @@ func TestRunFunctionSimple(t *testing.T) {
 							"name": "basic"
 						},
 						"spec": {
-							"source": "items = [{ \n    apiVersion: \"sql.gcp.upbound.io/v1beta1\"\n    kind: \"DatabaseInstance\"\n    spec: {\n        forProvider: {\n            project: \"test-project\"\n            settings: [{databaseFlags: [{\n                name: \"log_checkpoints\"\n                value: \"on\"\n            }]}]\n        }\n    }\n}]\n"
+							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"ConditionsAndEvents\"\n    conditions = [{\n        target: \"CompositeAndClaim\"\n        force: False\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"FailedToCreate\"\n            message: \"Encountered an error creating the database\"\n        }\n    }]\n}]"
 						}
 					}`),
 					Observed: &fnv1.State{
@@ -345,7 +345,7 @@ func TestRunFunctionSimple(t *testing.T) {
 						},
 						"spec": {
 							"target": "Default",
-							"source": "items = [\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"cool-extra-resource\"\n    }\n  }\n}\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"another-cool-extra-resource\"\n    }\n  }\n}\n]\n"
+							"source": "items = [\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ConditionsAndEvents\"\n  conditions = [\n    {\n      target: \"CompositeAndClaim\"\n      force: False\n      condition = {\n        type: \"DatabaseReady\"\n        status: \"False\"\n        reason: \"FailedToCreate\"\n        message: \"Encountered an error creating the database\"\n      }\n    }\n  ]\n}]"
 						}
 					}`),
 					Observed: &fnv1.State{
@@ -455,30 +455,27 @@ func TestRunFunctionSimple(t *testing.T) {
 						},
 						"spec": {
 							"target": "Default",
-							"source": "items = [{ \n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"ConditionResouce\"\n    spec: {\n        forProvider: {\n            project: \"test-project\"\n            settings: [{databaseFlags: [{\n                name: \"log_checkpoints\"\n                value: \"on\"\n            }]}]\n        }\n    }\n}]\n"
-
+							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Conditions\"\n    conditions = [{\n        target: \"CompositeAndClaim\"\n        force: False\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"FailedToCreate\"\n            message: \"Encountered an error creating the database\"\n        }\n    },{\n        target: \"Composite\"\n        force: False\n        condition = {\n            type: \"ValidationError\"\n            status: \"False\"\n            reason: \"FailedToValidate\"\n            message: \"Encountered an error during validation\"\n        }\n    }]\n}]"
             			}
           			}`),
-					ExtraResources: map[string]*fnv1.Resources{
-						"cool1": {
-							Items: []*fnv1.Resource{
-								{Resource: resource.MustStructJSON(xr)},
-								{Resource: resource.MustStructJSON(cd)},
-							},
-						},
-					},
 				},
 			},
 			want: want{
 				rsp: &fnv1.RunFunctionResponse{
-					Meta: &fnv1.ResponseMeta{Tag: "extra-resources-in", Ttl: durationpb.New(response.DefaultTTL)},
+					Meta: &fnv1.ResponseMeta{Tag: "set-conditions", Ttl: durationpb.New(response.DefaultTTL)},
 					Conditions: []*fnv1.Condition{
-						fnv1.Condition{
-							Type:    "",
-							Status:  0,
-							Reason:  "",
-							Message: nil,
-							Target:  nil,
+						{
+							Type:    "DatabaseReady",
+							Status:  fnv1.Status_STATUS_CONDITION_FALSE,
+							Reason:  "FailedToCreate",
+							Message: ptr.To("Encountered an error creating the database"),
+							Target:  fnv1.Target_TARGET_COMPOSITE_AND_CLAIM.Enum(),
+						}, {
+							Type:    "ValidationError",
+							Status:  fnv1.Status_STATUS_CONDITION_FALSE,
+							Reason:  "FailedToValidate",
+							Message: ptr.To("Encountered an error during validation"),
+							Target:  fnv1.Target_TARGET_COMPOSITE.Enum(),
 						},
 					},
 					Results: []*fnv1.Result{},
@@ -486,14 +483,52 @@ func TestRunFunctionSimple(t *testing.T) {
 						Composite: &fnv1.Resource{
 							Resource: resource.MustStructJSON(`{"apiVersion":"","kind":""}`),
 						},
-						Resources: map[string]*fnv1.Resource{
-							"cool-xr": {
-								Resource: resource.MustStructJSON(xr),
-							},
-							"cool-cd": {
-								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"CD","metadata":{"annotations":{},"name":"cool-cd"}}`),
-							},
+						Resources: map[string]*fnv1.Resource{},
+					},
+				},
+			},
+		},
+		"SetEvents": {
+			reason: "The Function should return the events from the request.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "set-conditions"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
 						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Events\"\n    events = [{\n        target: \"CompositeAndClaim\"\n        event = {\n            type: \"Warning\"\n            reason: \"ResourceLimitExceeded\"\n            message: \"The resource limit has been exceeded\"\n        }\n    },{\n        target: \"Composite\"\n        event = {\n            type: \"Warning\"\n            reason: \"ValidationFailed\"\n            message: \"The validation failed\"\n        }\n    }]\n}]"
+            			}
+          			}`),
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta:       &fnv1.ResponseMeta{Tag: "set-conditions", Ttl: durationpb.New(response.DefaultTTL)},
+					Conditions: []*fnv1.Condition{},
+					Results: []*fnv1.Result{
+						{
+							Severity: 0,
+							Message:  "The resource limit has been exceeded",
+							Reason:   ptr.To("ResourceLimitExceeded"),
+							Target:   fnv1.Target_TARGET_COMPOSITE_AND_CLAIM.Enum(),
+						},
+						{
+							Severity: 0,
+							Message:  "The validation failed",
+							Reason:   ptr.To("ValidationFailed"),
+							Target:   fnv1.Target_TARGET_COMPOSITE.Enum(),
+						},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"","kind":""}`),
+						},
+						Resources: map[string]*fnv1.Resource{},
 					},
 				},
 			},

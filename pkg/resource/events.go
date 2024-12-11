@@ -1,7 +1,6 @@
 package resource
 
 import (
-	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"k8s.io/utils/ptr"
 )
@@ -41,11 +40,11 @@ type CreateEvent struct {
 	Event Event `json:"event"`
 }
 
-func SetEvents(results []*fnv1.Result, ers EventResources, log logging.Logger) {
+func SetEvents(rsp *fnv1.RunFunctionResponse, ers EventResources) {
 	for _, er := range ers {
 		r := transformEvent(er)
 
-		results = append(results, r)
+		rsp.Results = append(rsp.Results, r)
 	}
 }
 

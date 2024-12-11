@@ -383,7 +383,8 @@ func SetData(data any, path string, o any, overwrite bool) error {
 	return nil
 }
 
-func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired map[resource.Name]*resource.DesiredComposed, observed map[resource.Name]resource.ObservedComposed, extraResources map[string]*fnv1.ResourceSelector, conditions *ConditionResources, p *EventResources, target Target, resources ResourceList, opts *AddResourcesOptions) (AddResourcesResult, error) {
+func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired map[resource.Name]*resource.DesiredComposed, observed map[resource.Name]resource.ObservedComposed, extraResources map[string]*fnv1.ResourceSelector, conditions *ConditionResources,
+	events *EventResources, target Target, resources ResourceList, opts *AddResourcesOptions) (AddResourcesResult, error) {
 	result := AddResourcesResult{
 		Target: target,
 	}
@@ -478,6 +479,11 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 					// Returns conditions to add to the claim / composite
 					if err := cd.Resource.GetValueInto("conditions", conditions); err != nil {
 						return result, errors.Wrap(err, "cannot get condition resources")
+					}
+				case "Events":
+					// Returns events to add to the claim / composite
+					if err := cd.Resource.GetValueInto("events", events); err != nil {
+						return result, errors.Wrap(err, "cannot get event resources")
 					}
 				default:
 					return result, errors.Errorf("invalid kind %q for apiVersion %q - must be CompositeConnectionDetails or ExtraResources", obj.GetKind(), MetaApiVersion)
