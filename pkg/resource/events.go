@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"k8s.io/utils/ptr"
 )
@@ -40,28 +41,35 @@ type CreateEvent struct {
 	Event Event `json:"event"`
 }
 
-func SetEvents(rsp *fnv1.RunFunctionResponse, ers EventResources) {
+func SetEvents(rsp *fnv1.RunFunctionResponse, ers EventResources) error {
 	for _, er := range ers {
-		r := transformEvent(er)
-
+		r, err := transformEvent(er)
+		if err != nil {
+			return err
+		}
 		rsp.Results = append(rsp.Results, r)
 	}
+	return nil
 }
 
-func transformEvent(ec CreateEvent) *fnv1.Result {
+func transformEvent(ec CreateEvent) (*fnv1.Result, error) {
 	e := &fnv1.Result{
 		Reason: ec.Event.Reason,
 		Target: transformTarget(ec.Target),
 	}
 
-	switch ptr.Deref(ec.Event.Type, EventTypeNormal) {
+	deref := ptr.Deref(ec.Event.Type, EventTypeNormal)
+	switch deref {
 	case EventTypeNormal:
 		e.Severity = fnv1.Severity_SEVERITY_NORMAL
+		break
 	case EventTypeWarning:
-	default:
 		e.Severity = fnv1.Severity_SEVERITY_WARNING
+		break
+	default:
+		return &fnv1.Result{}, errors.Errorf("invalid type %s, must be one of [Normal, Warning]", *ec.Event.Type)
 	}
 
 	e.Message = ec.Event.Message
-	return e
+	return e, nil
 }

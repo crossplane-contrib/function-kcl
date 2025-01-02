@@ -94,7 +94,7 @@ func TestRunFunctionSimple(t *testing.T) {
 							"name": "basic"
 						},
 						"spec": {
-							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"ConditionsAndEvents\"\n    conditions = [{\n        target: \"CompositeAndClaim\"\n        force: False\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"FailedToCreate\"\n            message: \"Encountered an error creating the database\"\n        }\n    }]\n}]"
+							"source": "items = [{ \n    apiVersion: \"sql.gcp.upbound.io/v1beta1\"\n    kind: \"DatabaseInstance\"\n    spec: {\n        forProvider: {\n            project: \"test-project\"\n            settings: [{databaseFlags: [{\n                name: \"log_checkpoints\"\n                value: \"on\"\n            }]}]\n        }\n    }\n}]\n"
 						}
 					}`),
 					Observed: &fnv1.State{
@@ -345,7 +345,7 @@ func TestRunFunctionSimple(t *testing.T) {
 						},
 						"spec": {
 							"target": "Default",
-							"source": "items = [\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ConditionsAndEvents\"\n  conditions = [\n    {\n      target: \"CompositeAndClaim\"\n      force: False\n      condition = {\n        type: \"DatabaseReady\"\n        status: \"False\"\n        reason: \"FailedToCreate\"\n        message: \"Encountered an error creating the database\"\n      }\n    }\n  ]\n}]"
+							"source": "items = [\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"cool-extra-resource\"\n    }\n  }\n}\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"another-cool-extra-resource\"\n    }\n  }\n}\n]\n"
 						}
 					}`),
 					Observed: &fnv1.State{
@@ -455,7 +455,7 @@ func TestRunFunctionSimple(t *testing.T) {
 						},
 						"spec": {
 							"target": "Default",
-							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Conditions\"\n    conditions = [{\n        target: \"CompositeAndClaim\"\n        force: False\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"FailedToCreate\"\n            message: \"Encountered an error creating the database\"\n        }\n    },{\n        target: \"Composite\"\n        force: False\n        condition = {\n            type: \"ValidationError\"\n            status: \"False\"\n            reason: \"FailedToValidate\"\n            message: \"Encountered an error during validation\"\n        }\n    }]\n}]"
+							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Conditions\"\n    conditions = [{\n        target: \"CompositeAndClaim\"\n        force: False\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"FailedToCreate\"\n            message: \"Encountered an error creating the database\"\n        }\n    },{\n        target: \"Composite\"\n        force: False\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"FailedToValidate\"\n            message: \"Encountered an error during validation\"\n        }\n    }]\n}]"
             			}
           			}`),
 				},
@@ -470,10 +470,51 @@ func TestRunFunctionSimple(t *testing.T) {
 							Reason:  "FailedToCreate",
 							Message: ptr.To("Encountered an error creating the database"),
 							Target:  fnv1.Target_TARGET_COMPOSITE_AND_CLAIM.Enum(),
-						}, {
-							Type:    "ValidationError",
+						},
+					},
+					Results: []*fnv1.Result{},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"","kind":""}`),
+						},
+						Resources: map[string]*fnv1.Resource{},
+					},
+				},
+			},
+		},
+		"OberwriteCondition": {
+			reason: "The Function should overwrite the first condition with the same target.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "overwrite-conditions"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Conditions\"\n    conditions = [{\n        target: \"CompositeAndClaim\"\n        force: False\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"FailedToCreate\"\n            message: \"Encountered an error creating the database\"\n        }\n    },{\n        target: \"Composite\"\n        force: True\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"DatabaseValidation\"\n            message: \"Encountered an error during validation\"\n        }\n    }]\n}]"
+            			}
+          			}`),
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "overwrite-conditions", Ttl: durationpb.New(response.DefaultTTL)},
+					Conditions: []*fnv1.Condition{
+						{
+							Type:    "DatabaseReady",
 							Status:  fnv1.Status_STATUS_CONDITION_FALSE,
-							Reason:  "FailedToValidate",
+							Reason:  "FailedToCreate",
+							Message: ptr.To("Encountered an error creating the database"),
+							Target:  fnv1.Target_TARGET_COMPOSITE_AND_CLAIM.Enum(),
+						},
+						{
+							Type:    "DatabaseReady",
+							Status:  fnv1.Status_STATUS_CONDITION_FALSE,
+							Reason:  "DatabaseValidation",
 							Message: ptr.To("Encountered an error during validation"),
 							Target:  fnv1.Target_TARGET_COMPOSITE.Enum(),
 						},
@@ -512,13 +553,13 @@ func TestRunFunctionSimple(t *testing.T) {
 					Conditions: []*fnv1.Condition{},
 					Results: []*fnv1.Result{
 						{
-							Severity: 0,
+							Severity: fnv1.Severity_SEVERITY_WARNING,
 							Message:  "The resource limit has been exceeded",
 							Reason:   ptr.To("ResourceLimitExceeded"),
 							Target:   fnv1.Target_TARGET_COMPOSITE_AND_CLAIM.Enum(),
 						},
 						{
-							Severity: 0,
+							Severity: fnv1.Severity_SEVERITY_WARNING,
 							Message:  "The validation failed",
 							Reason:   ptr.To("ValidationFailed"),
 							Target:   fnv1.Target_TARGET_COMPOSITE.Enum(),
