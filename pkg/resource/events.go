@@ -35,13 +35,15 @@ type Event struct {
 // CreateEvent will create an event for the target(s).
 type CreateEvent struct {
 	// The target(s) to create an event for. Can be Composite or
-	// CompositeAndClaim.
+	// CompositeAndClaim. Defaults to Composite
 	Target *BindingTarget `json:"target"`
 
 	// Event to create.
 	Event Event `json:"event"`
 }
 
+// SetEvents processes a list of EventResources, transforms them into Results, and appends them to the RunFunctionResponse.
+// Returns an error if any transformation fails.
 func SetEvents(rsp *fnv1.RunFunctionResponse, ers EventResources) error {
 	for _, er := range ers {
 		r, err := transformEvent(er)
@@ -54,6 +56,8 @@ func SetEvents(rsp *fnv1.RunFunctionResponse, ers EventResources) error {
 	return nil
 }
 
+// transformEvent converts a CreateEvent into a fnv1.Result object, handling event severity, reason, message, and target.
+// Returns a fnv1.Result object or an error if the event type is invalid.
 func transformEvent(ec CreateEvent) (*fnv1.Result, error) {
 	e := &fnv1.Result{
 		Reason: ec.Event.Reason,

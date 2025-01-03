@@ -26,7 +26,7 @@ type ConditionResources []ConditionResource
 // ConditionResource will set a condition on the target.
 type ConditionResource struct {
 	// The target(s) to receive the condition. Can be Composite or
-	// CompositeAndClaim.
+	// CompositeAndClaim. Defaults to Composite
 	Target *BindingTarget `json:"target"`
 	// If true, the condition will override a condition of the same Type. Defaults
 	// to false.
@@ -50,6 +50,7 @@ type Condition struct {
 	Message *string `json:"message"`
 }
 
+// transformCondition converts a ConditionResource into an fnv1.Condition while mapping status and target accordingly.
 func transformCondition(cs ConditionResource) *fnv1.Condition {
 	c := &fnv1.Condition{
 		Type:   cs.Condition.Type,
@@ -81,6 +82,8 @@ func transformTarget(t *BindingTarget) *fnv1.Target {
 	return fnv1.Target_TARGET_COMPOSITE.Enum()
 }
 
+// SetConditions updates the RunFunctionResponse with specified conditions from ConditionResources, ensuring no duplicates.
+// It validates that system-reserved Crossplane condition types are not set and permits forced updates when specified.
 func SetConditions(rsp *fnv1.RunFunctionResponse, cr ConditionResources, log logging.Logger) error {
 	conditionsSet := map[string]bool{}
 	// All matchConditions matched, set the desired conditions.
