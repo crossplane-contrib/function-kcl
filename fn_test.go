@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/go-logr/logr/testr"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"google.golang.org/protobuf/testing/protocmp"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
-
-	"github.com/crossplane/crossplane-runtime/pkg/logging"
+	"k8s.io/utils/ptr"
 
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/crossplane/function-sdk-go/resource"
@@ -439,6 +439,138 @@ func TestRunFunctionSimple(t *testing.T) {
 						Severity: fnv1.Severity_SEVERITY_FATAL,
 						Message:  "invalid function input: spec.source: Required value: kcl source cannot be empty",
 					}},
+				},
+			},
+		},
+		"SetConditions": {
+			reason: "The Function should return the conditions from the request.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "set-conditions"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Conditions\"\n    conditions = [{\n        target: \"CompositeAndClaim\"\n        force: False\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"FailedToCreate\"\n            message: \"Encountered an error creating the database\"\n        }\n    },{\n        target: \"Composite\"\n        force: False\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"FailedToValidate\"\n            message: \"Encountered an error during validation\"\n        }\n    }]\n}]"
+            			}
+          			}`),
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "set-conditions", Ttl: durationpb.New(response.DefaultTTL)},
+					Conditions: []*fnv1.Condition{
+						{
+							Type:    "DatabaseReady",
+							Status:  fnv1.Status_STATUS_CONDITION_FALSE,
+							Reason:  "FailedToCreate",
+							Message: ptr.To("Encountered an error creating the database"),
+							Target:  fnv1.Target_TARGET_COMPOSITE_AND_CLAIM.Enum(),
+						},
+					},
+					Results: []*fnv1.Result{},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"","kind":""}`),
+						},
+						Resources: map[string]*fnv1.Resource{},
+					},
+				},
+			},
+		},
+		"OberwriteCondition": {
+			reason: "The Function should overwrite the first condition with the same target.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "overwrite-conditions"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Conditions\"\n    conditions = [{\n        target: \"CompositeAndClaim\"\n        force: False\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"FailedToCreate\"\n            message: \"Encountered an error creating the database\"\n        }\n    },{\n        target: \"Composite\"\n        force: True\n        condition = {\n            type: \"DatabaseReady\"\n            status: \"False\"\n            reason: \"DatabaseValidation\"\n            message: \"Encountered an error during validation\"\n        }\n    }]\n}]"
+            			}
+          			}`),
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "overwrite-conditions", Ttl: durationpb.New(response.DefaultTTL)},
+					Conditions: []*fnv1.Condition{
+						{
+							Type:    "DatabaseReady",
+							Status:  fnv1.Status_STATUS_CONDITION_FALSE,
+							Reason:  "FailedToCreate",
+							Message: ptr.To("Encountered an error creating the database"),
+							Target:  fnv1.Target_TARGET_COMPOSITE_AND_CLAIM.Enum(),
+						},
+						{
+							Type:    "DatabaseReady",
+							Status:  fnv1.Status_STATUS_CONDITION_FALSE,
+							Reason:  "DatabaseValidation",
+							Message: ptr.To("Encountered an error during validation"),
+							Target:  fnv1.Target_TARGET_COMPOSITE.Enum(),
+						},
+					},
+					Results: []*fnv1.Result{},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"","kind":""}`),
+						},
+						Resources: map[string]*fnv1.Resource{},
+					},
+				},
+			},
+		},
+		"SetEvents": {
+			reason: "The Function should return the events from the request.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "set-conditions"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Events\"\n    events = [{\n        target: \"CompositeAndClaim\"\n        event = {\n            type: \"Warning\"\n            reason: \"ResourceLimitExceeded\"\n            message: \"The resource limit has been exceeded\"\n        }\n    },{\n        target: \"Composite\"\n        event = {\n            type: \"Warning\"\n            reason: \"ValidationFailed\"\n            message: \"The validation failed\"\n        }\n    }]\n}]"
+            			}
+          			}`),
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta:       &fnv1.ResponseMeta{Tag: "set-conditions", Ttl: durationpb.New(response.DefaultTTL)},
+					Conditions: []*fnv1.Condition{},
+					Results: []*fnv1.Result{
+						{
+							Severity: fnv1.Severity_SEVERITY_WARNING,
+							Message:  "The resource limit has been exceeded",
+							Reason:   ptr.To("ResourceLimitExceeded"),
+							Target:   fnv1.Target_TARGET_COMPOSITE_AND_CLAIM.Enum(),
+						},
+						{
+							Severity: fnv1.Severity_SEVERITY_WARNING,
+							Message:  "The validation failed",
+							Reason:   ptr.To("ValidationFailed"),
+							Target:   fnv1.Target_TARGET_COMPOSITE.Enum(),
+						},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"","kind":""}`),
+						},
+						Resources: map[string]*fnv1.Resource{},
+					},
 				},
 			},
 		},

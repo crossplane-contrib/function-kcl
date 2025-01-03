@@ -513,6 +513,8 @@ bar:
     # Omitted for brevity
 ```
 You can access the retrieved resources in your code like this:
+> Note that Crossplane performs an additional reconciliation pass for extra resources.
+> Consequently, during the initial execution, these resources may be uninitialized. It is essential to implement checks to handle this scenario.
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
@@ -522,7 +524,8 @@ spec:
   source: |
     er = option("params")?.extraResources
     
-    name = er?.bar[0]?.Resource?.metadata?.name or ""
+    if er?.bar:
+      name = er?.bar[0]?.Resource?.metadata?.name or ""
     # Omit other logic
 ```
 
@@ -542,6 +545,89 @@ spec:
     # Patch the XR with the status field
     dxr.status.dummy = "cool-status"
     items = [dxr] # Omit other resources
+```
+
+### Settings conditions and events
+
+> This feature requires Crossplane v1.17 or newer.
+
+You can set conditions and events directly from KCL, either in the composite resource or both the composite and claim resources.
+To set one or more conditions, use the following approach:
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLInput
+metadata:
+  annotations:
+    "krm.kcl.dev/default_ready": "True"
+  name: basic
+spec:
+  source: |
+    oxr = option("params").oxr
+    
+    dxr = {
+      **oxr
+    }
+    
+    conditions = {
+      apiVersion: "meta.krm.kcl.dev/v1alpha1"
+      kind: "Conditions"
+      conditions = [
+        {
+          target: "CompositeAndClaim"
+          force: False
+          condition = {
+            type: "DatabaseReady"
+            status: "False"
+            reason: "FailedToCreate"
+            message: "Encountered an error creating the database"
+          }
+        }
+      ]
+    }
+    
+    items = [
+      conditions
+      dxr
+    ]
+```
+
+- **target**: Specifies whether the condition should be present in the composite resource or both the composite and claim resources. Possible values are `CompositeAndClaim` and `Composite`
+- **force**: Forces the overwrite of existing conditions. If a condition with the same `type` already exists, it will not be overwritten by default. Setting force to `True` will overwrite the first condition.
+
+You can also set events as follows:
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLInput
+metadata:
+  annotations:
+    "krm.kcl.dev/default_ready": "True"
+  name: basic
+spec:
+  source: |
+    oxr = option("params").oxr
+    
+    dxr = {
+      **oxr
+    }
+    
+    events = {
+      apiVersion: "meta.krm.kcl.dev/v1alpha1"
+      kind: "Events"
+      events = [
+        {
+          target: "CompositeAndClaim"
+          event = {
+            type: "Warning"
+            reason: "ResourceLimitExceeded"
+            message: "The resource limit has been exceeded"
+          }
+        }
+      ]
+    }
+    items = [
+      events
+      dxr
+    ]
 ```
 
 ## Library
