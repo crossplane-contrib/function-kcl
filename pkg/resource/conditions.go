@@ -1,8 +1,11 @@
 package resource
 
 import (
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
+	"github.com/crossplane/function-sdk-go/response"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 )
@@ -78,10 +81,14 @@ func transformTarget(t *BindingTarget) *fnv1.Target {
 	return fnv1.Target_TARGET_COMPOSITE.Enum()
 }
 
-func SetConditions(rsp *fnv1.RunFunctionResponse, cr ConditionResources, log logging.Logger) {
+func SetConditions(rsp *fnv1.RunFunctionResponse, cr ConditionResources, log logging.Logger) error {
 	conditionsSet := map[string]bool{}
 	// All matchConditions matched, set the desired conditions.
 	for _, cs := range cr {
+		if xpv1.IsSystemConditionType(xpv1.ConditionType(cs.Condition.Type)) {
+			response.Fatal(rsp, errors.Errorf("cannot set ClaimCondition type: %s is a reserved Crossplane Condition", cs.Condition.Type))
+			return errors.New("error updating response")
+		}
 		if conditionsSet[cs.Condition.Type] && (cs.Force == nil || !*cs.Force) {
 			// The condition is already set and this setter is not forceful.
 			log.Debug("skipping because condition is already set and setCondition is not forceful")
@@ -90,8 +97,8 @@ func SetConditions(rsp *fnv1.RunFunctionResponse, cr ConditionResources, log log
 		log.Debug("setting condition")
 
 		c := transformCondition(cs)
-
 		rsp.Conditions = append(rsp.Conditions, c)
 		conditionsSet[cs.Condition.Type] = true
 	}
+	return nil
 }

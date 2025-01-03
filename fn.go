@@ -200,13 +200,16 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	}
 
 	if len(conditions) > 0 {
-		pkgresource.SetConditions(rsp, conditions, log)
+		err := pkgresource.SetConditions(rsp, conditions, log)
+		if err != nil {
+			return rsp, nil
+		}
 	}
 
 	if len(events) > 0 {
 		err := pkgresource.SetEvents(rsp, events)
 		if err != nil {
-			return rsp, err
+			return rsp, nil
 		}
 	}
 

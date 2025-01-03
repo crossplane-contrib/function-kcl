@@ -3,6 +3,7 @@ package resource
 import (
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
+	"github.com/crossplane/function-sdk-go/response"
 	"k8s.io/utils/ptr"
 )
 
@@ -45,7 +46,8 @@ func SetEvents(rsp *fnv1.RunFunctionResponse, ers EventResources) error {
 	for _, er := range ers {
 		r, err := transformEvent(er)
 		if err != nil {
-			return err
+			response.Fatal(rsp, err)
+			return errors.New("error updating response")
 		}
 		rsp.Results = append(rsp.Results, r)
 	}
