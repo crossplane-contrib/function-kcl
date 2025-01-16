@@ -574,6 +574,42 @@ func TestRunFunctionSimple(t *testing.T) {
 				},
 			},
 		},
+		"SetContext": {
+			reason: "The Function should be able to set context.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "set-context"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Context\"\n    context = {contextField: \"contextValue\"}\n}]"
+            			}
+          			}`),
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta:    &fnv1.ResponseMeta{Tag: "set-context", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{},
+					Context: resource.MustStructJSON(
+						`{
+							"contextField": "contextValue"
+						  }`,
+					),
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"","kind":""}`),
+						},
+						Resources: map[string]*fnv1.Resource{},
+					},
+				},
+			},
+		},
 		// TODO: disable the resource check, and fix the kcl dup resource evaluation issues.
 		// "MultipleResourceError": {
 		// 	reason: "The Function should return a fatal result if input resources have duplicate names",
