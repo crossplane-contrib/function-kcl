@@ -8,6 +8,7 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
+	"google.golang.org/protobuf/types/known/structpb"
 	"k8s.io/apimachinery/pkg/runtime"
 	"kcl-lang.io/krm-kcl/pkg/api"
 	"kcl-lang.io/krm-kcl/pkg/api/v1alpha1"
@@ -183,7 +184,8 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	extraResources := map[string]*fnv1.ResourceSelector{}
 	var conditions pkgresource.ConditionResources
 	var events pkgresource.EventResources
-	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, extraResources, &conditions, &events, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
+	contextData := make(map[string]interface{})
+	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, extraResources, &conditions, &events, &contextData, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
 		Basename:  in.Name,
 		Data:      data,
 		Overwrite: true,
@@ -211,6 +213,24 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 		if err != nil {
 			return rsp, nil
 		}
+	}
+
+	if len(contextData) > 0 {
+		mergedCtx, err := pkgresource.MergeContext(req, contextData)
+		if err != nil {
+			response.Fatal(rsp, errors.Wrapf(err, "cannot merge Context"))
+			return rsp, nil
+		}
+		for key, v := range mergedCtx {
+			vv, err := structpb.NewValue(v)
+			if err != nil {
+				response.Fatal(rsp, errors.Wrap(err, "cannot convert value to structpb.Value"))
+				return rsp, nil
+			}
+			f.log.Debug("Updating Composition environment", "key", key, "data", v)
+			response.SetContextKey(rsp, key, vv)
+		}
+
 	}
 
 	log.Debug(fmt.Sprintf("Set %d resource(s) to the desired state", result.MsgCount))
