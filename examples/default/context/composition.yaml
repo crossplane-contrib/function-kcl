@@ -21,16 +21,19 @@ spec:
       spec:
         source: |
           oxr = option("params").oxr
-          
+
           dxr = {
             **oxr
           }
-          
+
           context = {
               apiVersion: "meta.krm.kcl.dev/v1alpha1"
               kind: "Context"
-              context = {
+              data = {
                 contextField = "contextValue"
+                moreComplexField = {
+                  test: "field"
+                }
               }
           }
           items = [

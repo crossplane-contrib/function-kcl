@@ -384,7 +384,7 @@ func SetData(data any, path string, o any, overwrite bool) error {
 }
 
 func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired map[resource.Name]*resource.DesiredComposed, observed map[resource.Name]resource.ObservedComposed, extraResources map[string]*fnv1.ResourceSelector, conditions *ConditionResources,
-	events *EventResources, context *map[string]interface{}, target Target, resources ResourceList, opts *AddResourcesOptions) (AddResourcesResult, error) {
+	events *EventResources, contextData *map[string]interface{}, target Target, resources ResourceList, opts *AddResourcesOptions) (AddResourcesResult, error) {
 	result := AddResourcesResult{
 		Target: target,
 	}
@@ -487,7 +487,7 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 					}
 				case "Context":
 					// Returns events to add to the claim / composite
-					if err := cd.Resource.GetValueInto("context", context); err != nil {
+					if err := cd.Resource.GetValueInto("data", contextData); err != nil {
 						return result, errors.Wrap(err, "cannot get context resource")
 					}
 				default:

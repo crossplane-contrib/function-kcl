@@ -587,7 +587,7 @@ func TestRunFunctionSimple(t *testing.T) {
 						},
 						"spec": {
 							"target": "Default",
-							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Context\"\n    context = {contextField: \"contextValue\"}\n}]"
+							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Context\"\n    data = {contextField: \"contextValue\"}\n}]"
             			}
           			}`),
 				},
@@ -600,6 +600,48 @@ func TestRunFunctionSimple(t *testing.T) {
 						`{
 							"contextField": "contextValue"
 						  }`,
+					),
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"","kind":""}`),
+						},
+						Resources: map[string]*fnv1.Resource{},
+					},
+				},
+			},
+		},
+		"MergeContext": {
+			reason: "The Function should be able to set context merging with the input one.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "merge-context"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [{\n    apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n    kind: \"Context\"\n    data = {contextField: \"contextValue\"}\n}]"
+            			}
+          			}`),
+					Context: resource.MustStructJSON(
+						`{
+                            "inputContext": "valueFromPreviousContext"
+                        }`,
+					),
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta:    &fnv1.ResponseMeta{Tag: "merge-context", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{},
+					Context: resource.MustStructJSON(
+						`{
+							"contextField": "contextValue",
+							"inputContext": "valueFromPreviousContext"
+						 }`,
 					),
 					Desired: &fnv1.State{
 						Composite: &fnv1.Resource{

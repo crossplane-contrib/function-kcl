@@ -184,8 +184,8 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	extraResources := map[string]*fnv1.ResourceSelector{}
 	var conditions pkgresource.ConditionResources
 	var events pkgresource.EventResources
-	context := make(map[string]interface{})
-	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, extraResources, &conditions, &events, &context, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
+	contextData := make(map[string]interface{})
+	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, extraResources, &conditions, &events, &contextData, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
 		Basename:  in.Name,
 		Data:      data,
 		Overwrite: true,
@@ -214,13 +214,23 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 			return rsp, nil
 		}
 	}
-	if len(context) > 0 {
-		// Convert the updated context back into structpb.Struct
-		updatedContext, err := structpb.NewStruct(context)
+
+	if len(contextData) > 0 {
+		mergedCtx, err := f.MergeContext(req, contextData)
 		if err != nil {
-			return rsp, errors.Wrap(err, "failed to serialize updated context")
+			response.Fatal(rsp, errors.Wrapf(err, "cannot merge Context"))
+			return rsp, nil
 		}
-		rsp.Context = updatedContext
+		for key, v := range mergedCtx {
+			vv, err := structpb.NewValue(v)
+			if err != nil {
+				response.Fatal(rsp, errors.Wrap(err, "cannot convert value to structpb.Value"))
+				return rsp, nil
+			}
+			f.log.Debug("Updating Composition environment", "key", key, "data", v)
+			response.SetContextKey(rsp, key, vv)
+		}
+
 	}
 
 	log.Debug(fmt.Sprintf("Set %d resource(s) to the desired state", result.MsgCount))
