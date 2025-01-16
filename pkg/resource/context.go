@@ -1,4 +1,4 @@
-package main
+package resource
 
 import (
 	"dario.cat/mergo"
@@ -7,7 +7,7 @@ import (
 )
 
 // MergeContext merges existing Context with new values provided
-func (f *Function) MergeContext(req *fnv1.RunFunctionRequest, val map[string]interface{}) (map[string]interface{}, error) {
+func MergeContext(req *fnv1.RunFunctionRequest, val map[string]interface{}) (map[string]interface{}, error) {
 	mergedContext := req.GetContext().AsMap()
 	if len(val) == 0 {
 		return mergedContext, nil

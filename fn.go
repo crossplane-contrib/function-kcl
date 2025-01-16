@@ -216,7 +216,7 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	}
 
 	if len(contextData) > 0 {
-		mergedCtx, err := f.MergeContext(req, contextData)
+		mergedCtx, err := pkgresource.MergeContext(req, contextData)
 		if err != nil {
 			response.Fatal(rsp, errors.Wrapf(err, "cannot merge Context"))
 			return rsp, nil

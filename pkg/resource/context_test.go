@@ -1,9 +1,8 @@
-package main
+package resource
 
 import (
 	"testing"
 
-	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/crossplane/function-sdk-go/resource"
 	"github.com/google/go-cmp/cmp"
@@ -75,10 +74,7 @@ func TestMergeContext(t *testing.T) {
 	}
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			f := &Function{
-				log: logging.NewNopLogger(),
-			}
-			rsp, err := f.MergeContext(tc.args.req, tc.args.val)
+			rsp, err := MergeContext(tc.args.req, tc.args.val)
 
 			if diff := cmp.Diff(tc.want.us, rsp, protocmp.Transform()); diff != "" {
 				t.Errorf("%s\nf.MergeContext(...): -want rsp, +got rsp:\n%s", tc.reason, diff)
