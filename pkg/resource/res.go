@@ -251,10 +251,14 @@ func AddResourcesTo(o any, opts *AddResourcesOptions) error {
 	case map[resource.Name]*resource.DesiredComposed:
 		// Resources
 		desired := val
+		checked := make(map[resource.Name]string)
 		for _, d := range opts.Data {
 			cd := resource.NewDesiredComposed()
 			cd.Resource.Unstructured = d
 			name := resource.Name(GetResourceName(cd))
+			if err := checkDuplicateName(cd, checked, name); err != nil {
+				return err
+			}
 			d := cd.Resource.Unstructured
 			// If the value exists, merge its existing value with the patches
 			if v, ok := desired[name]; ok {
@@ -520,12 +524,19 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 // Check the set the resource into the desired resource map.
 func CheckAndSetDesired(desired map[resource.Name]*resource.DesiredComposed, checked map[resource.Name]string, cd *resource.DesiredComposed) error {
 	name := resource.Name(GetResourceName(cd))
+	if err := checkDuplicateName(cd, checked, name); err != nil {
+		return err
+	}
+	desired[name] = cd
+	return nil
+}
+
+func checkDuplicateName(cd *resource.DesiredComposed, checked map[resource.Name]string, name resource.Name) error {
 	kindAndName := cd.Resource.GetKind() + "/" + cd.Resource.GetName()
 	if _, existed := checked[name]; existed {
 		return errors.Errorf("multiple composed resources with name %q returned: %s and %s. Set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish them.", name, checked[name], kindAndName)
 	}
 	checked[name] = kindAndName
-	desired[name] = cd
 	return nil
 }
 

@@ -725,6 +725,41 @@ func TestRunFunctionSimple(t *testing.T) {
 				},
 			},
 		},
+		"ResourcesTargetDuplicateNameError": {
+			reason: "The Function should return a fatal result if composed resources have duplicate name",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "duplicate-name-error"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Resources",
+							"source": "items = [\n{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n metadata = {\n  name = \"metadata-name\"\n  annotations = {\"krm.kcl.dev/composition-resource-name\": \"duplicate-resource-name\"}}\n}\n{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n metadata.name = \"duplicate-resource-name\"\n}\n]\n"
+						}
+					}`),
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "duplicate-name-error", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{
+						{
+							Severity: fnv1.Severity_SEVERITY_FATAL,
+							Target:   fnv1.Target_TARGET_COMPOSITE.Enum(),
+							Message:  "cannot process xr and state with the pipeline output in *v1.RunFunctionResponse: multiple composed resources with name \"duplicate-resource-name\" returned: Generated/metadata-name and Generated/duplicate-resource-name. Set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish them.",
+						},
+					}},
+			},
+		},
 	}
 
 	for name, tc := range cases {
