@@ -432,7 +432,7 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 		result.Object = data
 		result.MsgCount = len(data)
 	case Default:
-		checked := make(map[string]struct{})
+		checked := make(map[resource.Name]string)
 		for _, obj := range data {
 			cd := resource.NewDesiredComposed()
 			cd.Resource.Unstructured = obj
@@ -518,13 +518,14 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 }
 
 // Check the set the resource into the desired resource map.
-func CheckAndSetDesired(desired map[resource.Name]*resource.DesiredComposed, checked map[string]struct{}, cd *resource.DesiredComposed) error {
-	name := GetResourceName(cd)
+func CheckAndSetDesired(desired map[resource.Name]*resource.DesiredComposed, checked map[resource.Name]string, cd *resource.DesiredComposed) error {
+	name := resource.Name(GetResourceName(cd))
+	kindAndName := cd.Resource.GetKind() + "/" + cd.Resource.GetName()
 	if _, existed := checked[name]; existed {
-		return errors.Errorf("duplicate resource names %s found, when returning multiple resources, you need to set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish between different resources in the composition functions.", name)
+		return errors.Errorf("multiple composed resources with name %q returned: %s and %s. Set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish them.", name, checked[name], kindAndName)
 	}
-	checked[name] = struct{}{}
-	desired[resource.Name(name)] = cd
+	checked[name] = kindAndName
+	desired[name] = cd
 	return nil
 }
 
