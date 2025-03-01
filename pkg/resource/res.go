@@ -523,8 +523,7 @@ func CheckAndSetDesired(desired map[resource.Name]*resource.DesiredComposed, che
 	if _, existed := checked[name]; existed {
 		return errors.Errorf("duplicate resource names %s found, when returning multiple resources, you need to set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish between different resources in the composition functions.", name)
 	}
-	// TODO: disable the resource check, and fix the kcl dup resource evaluation issues.
-	// checked[name] = struct{}{}
+	checked[name] = struct{}{}
 	desired[resource.Name(name)] = cd
 	return nil
 }
