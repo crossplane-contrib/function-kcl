@@ -251,12 +251,12 @@ func AddResourcesTo(o any, opts *AddResourcesOptions) error {
 	case map[resource.Name]*resource.DesiredComposed:
 		// Resources
 		desired := val
-		checked := make(map[resource.Name]string)
+		checker := newDuplicateChecker()
 		for _, d := range opts.Data {
 			cd := resource.NewDesiredComposed()
 			cd.Resource.Unstructured = d
 			name := resource.Name(GetResourceName(cd))
-			if err := checkDuplicateName(cd, checked, name); err != nil {
+			if err := checker.CheckDuplicateName(cd, name); err != nil {
 				return err
 			}
 			d := cd.Resource.Unstructured
@@ -436,7 +436,7 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 		result.Object = data
 		result.MsgCount = len(data)
 	case Default:
-		checked := make(map[resource.Name]string)
+		checker := newDuplicateChecker()
 		for _, obj := range data {
 			cd := resource.NewDesiredComposed()
 			cd.Resource.Unstructured = obj
@@ -507,7 +507,7 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 				// Remove meta annotation.
 				meta.RemoveAnnotations(cd.Resource, AnnotationKeyReady)
 			}
-			err := CheckAndSetDesired(desired, checked, cd)
+			err := checker.CheckAndSetDesired(desired, cd)
 			if err != nil {
 				return result, err
 			}
@@ -521,22 +521,28 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 	return result, nil
 }
 
-// Check the set the resource into the desired resource map.
-func CheckAndSetDesired(desired map[resource.Name]*resource.DesiredComposed, checked map[resource.Name]string, cd *resource.DesiredComposed) error {
+type duplicateChecker map[resource.Name]string
+
+func newDuplicateChecker() duplicateChecker {
+	return make(duplicateChecker)
+}
+
+// CheckAndSetDesired checks for duplicate names and then sets the resource into the desired resource map.
+func (c *duplicateChecker) CheckAndSetDesired(desired map[resource.Name]*resource.DesiredComposed, cd *resource.DesiredComposed) error {
 	name := resource.Name(GetResourceName(cd))
-	if err := checkDuplicateName(cd, checked, name); err != nil {
+	if err := c.CheckDuplicateName(cd, name); err != nil {
 		return err
 	}
 	desired[name] = cd
 	return nil
 }
 
-func checkDuplicateName(cd *resource.DesiredComposed, checked map[resource.Name]string, name resource.Name) error {
+func (c *duplicateChecker) CheckDuplicateName(cd *resource.DesiredComposed, name resource.Name) error {
 	kindAndName := cd.Resource.GetKind() + "/" + cd.Resource.GetName()
-	if _, existed := checked[name]; existed {
-		return errors.Errorf("multiple composed resources with name %q returned: %s and %s. Set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish them.", name, checked[name], kindAndName)
+	if _, existed := (*c)[name]; existed {
+		return errors.Errorf("multiple composed resources with name %q returned: %s and %s. Set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish them.", name, (*c)[name], kindAndName)
 	}
-	checked[name] = kindAndName
+	(*c)[name] = kindAndName
 	return nil
 }
 
