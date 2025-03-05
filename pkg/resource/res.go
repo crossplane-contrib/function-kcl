@@ -251,10 +251,14 @@ func AddResourcesTo(o any, opts *AddResourcesOptions) error {
 	case map[resource.Name]*resource.DesiredComposed:
 		// Resources
 		desired := val
+		checker := newDuplicateChecker()
 		for _, d := range opts.Data {
 			cd := resource.NewDesiredComposed()
 			cd.Resource.Unstructured = d
 			name := resource.Name(GetResourceName(cd))
+			if err := checker.CheckDuplicateName(cd, name); err != nil {
+				return err
+			}
 			d := cd.Resource.Unstructured
 			// If the value exists, merge its existing value with the patches
 			if v, ok := desired[name]; ok {
@@ -432,7 +436,7 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 		result.Object = data
 		result.MsgCount = len(data)
 	case Default:
-		checked := make(map[string]struct{})
+		checker := newDuplicateChecker()
 		for _, obj := range data {
 			cd := resource.NewDesiredComposed()
 			cd.Resource.Unstructured = obj
@@ -503,7 +507,7 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 				// Remove meta annotation.
 				meta.RemoveAnnotations(cd.Resource, AnnotationKeyReady)
 			}
-			err := CheckAndSetDesired(desired, checked, cd)
+			err := checker.CheckAndSetDesired(desired, cd)
 			if err != nil {
 				return result, err
 			}
@@ -517,15 +521,28 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 	return result, nil
 }
 
-// Check the set the resource into the desired resource map.
-func CheckAndSetDesired(desired map[resource.Name]*resource.DesiredComposed, checked map[string]struct{}, cd *resource.DesiredComposed) error {
-	name := GetResourceName(cd)
-	if _, existed := checked[name]; existed {
-		return errors.Errorf("duplicate resource names %s found, when returning multiple resources, you need to set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish between different resources in the composition functions.", name)
+type duplicateChecker map[resource.Name]string
+
+func newDuplicateChecker() duplicateChecker {
+	return make(duplicateChecker)
+}
+
+// CheckAndSetDesired checks for duplicate names and then sets the resource into the desired resource map.
+func (c *duplicateChecker) CheckAndSetDesired(desired map[resource.Name]*resource.DesiredComposed, cd *resource.DesiredComposed) error {
+	name := resource.Name(GetResourceName(cd))
+	if err := c.CheckDuplicateName(cd, name); err != nil {
+		return err
 	}
-	// TODO: disable the resource check, and fix the kcl dup resource evaluation issues.
-	// checked[name] = struct{}{}
-	desired[resource.Name(name)] = cd
+	desired[name] = cd
+	return nil
+}
+
+func (c *duplicateChecker) CheckDuplicateName(cd *resource.DesiredComposed, name resource.Name) error {
+	kindAndName := cd.Resource.GetKind() + "/" + cd.Resource.GetName()
+	if _, existed := (*c)[name]; existed {
+		return errors.Errorf("multiple composed resources with name %q returned: %s and %s. Set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish them.", name, (*c)[name], kindAndName)
+	}
+	(*c)[name] = kindAndName
 	return nil
 }
 
