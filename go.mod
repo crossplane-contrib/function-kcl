@@ -14,7 +14,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.36.5
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/apimachinery v0.32.2
+	k8s.io/apimachinery v0.32.3
 	k8s.io/utils v0.0.0-20241210054802-24370beab758
 	kcl-lang.io/krm-kcl v0.11.1
 	sigs.k8s.io/controller-tools v0.17.2
