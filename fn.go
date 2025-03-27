@@ -29,7 +29,8 @@ var defaultSource = os.Getenv("FUNCTION_KCL_DEFAULT_SOURCE")
 type Function struct {
 	fnv1.UnimplementedFunctionRunnerServiceServer
 
-	log logging.Logger
+	log          logging.Logger
+	dependencies string
 }
 
 // RunFunction runs the Function.
@@ -54,6 +55,10 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	// Set default params
 	if in.Spec.Params == nil {
 		in.Spec.Params = make(map[string]runtime.RawExtension)
+	}
+	// Add base dependencies
+	if f.dependencies != "" {
+		in.Spec.Dependencies = f.dependencies + "\n" + in.Spec.Dependencies
 	}
 	if err := in.Validate(); err != nil {
 		response.Fatal(rsp, errors.Wrap(err, "invalid function input"))
