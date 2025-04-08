@@ -205,6 +205,32 @@ ENV FUNCTION_KCL_DEFAULT_SOURCE=/src/main.k
 
 You may also wish to replace the `/package.yaml` metadata file to give your new function a unique name and remove or replace the input CRD.
 
+#### Including modules in the base image
+
+You may include KCL modules in a custom base image. First, copy the module directories into the image:
+
+```dockerfile
+ADD kcl /kcl
+```
+
+Next, add a file specifying the dependencies to be added to all functions, using
+the syntax of the `[dependencies]` section of `kcl.mod`, for example:
+
+```dockerfile
+ADD dependencies /dependecies
+```
+where the file `dependencies` contains:
+
+```kcl
+example = { path = "/kcl/example" }
+```
+
+Finally, specify the location of the `dependencies` file in the ENTRYPOINT:
+
+```dockerfile
+CMD ["--dependencies", "/dependencies"]
+```
+
 ### Read the Function Requests and Values through the `option` Function
 
 + Read the [`ObservedCompositeResource`](https://docs.crossplane.io/latest/concepts/composition-functions/#observed-state) from `option("params").oxr`.
