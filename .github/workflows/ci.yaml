@@ -95,16 +95,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # We ask Docker to use GitHub Action's native caching support to speed up
-      # the build, per https://docs.docker.com/build/cache/backends/gha/.
       - name: Build Runtime
         id: image
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/${{ matrix.arch }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           target: image
           build-args:
             GO_VERSION=${{ env.GO_VERSION }}
