@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.24.2
 
 require (
-	dario.cat/mergo v1.0.1
+	dario.cat/mergo v1.0.2
 	github.com/alecthomas/kong v1.10.0
 	github.com/crossplane/crossplane-runtime v1.19.0
 	github.com/crossplane/function-sdk-go v0.4.0
