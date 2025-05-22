@@ -748,8 +748,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6N
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/creack/pty v1.1.18 h1:n56/Zwd5o6whRC5PMGretI4IdRLlmBXYNjScPaBgsbY=
 github.com/creack/pty v1.1.18/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
-github.com/crossplane/crossplane-runtime v1.19.0 h1:yZmF8cYy8/PYiA+aF3ONjVinfuV06Vi3hHQwjYR2Qak=
-github.com/crossplane/crossplane-runtime v1.19.0/go.mod h1:z8CV6dXxO5yxzfJGa4bgnWuyAnjZ3hY19cqGDcr5Bg0=
+github.com/crossplane/crossplane-runtime v1.20.0 h1:I54uipRIecqZyms+vz1J/l62yjVQ7HV5w+Nh3RMrUtc=
+github.com/crossplane/crossplane-runtime v1.20.0/go.mod h1:lfV1VJenDc9PNVLxDC80YjPoTm+JdSZ13xlS2h37Dvg=
 github.com/crossplane/function-sdk-go v0.4.0 h1:1jd+UIaZlVNQCUO4hLAgUqWBRnUKw2ObF9ZuMw5CpKk=
 github.com/crossplane/function-sdk-go v0.4.0/go.mod h1:jLnzUG8pt8tn/U6/uvtNStAhDjhIq4wCR31yECT54NM=
 github.com/crossplane/upjet v1.4.1-0.20240911184956-3afbb7796d46 h1:2IH1YPTBrNmBj0Z1OCjEBTrQCuRaLutZbWLaswFeCFQ=
@@ -817,8 +817,8 @@ github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7
 github.com/envoyproxy/protoc-gen-validate v0.6.7/go.mod h1:dyJXwwfPK2VSqiB9Klm1J6romD608Ba7Hij42vrOBCo=
 github.com/envoyproxy/protoc-gen-validate v0.9.1/go.mod h1:OKNgG7TCp5pF4d6XftA0++PMirau2/yoOwVac3AbF2w=
 github.com/envoyproxy/protoc-gen-validate v0.10.1/go.mod h1:DRjgyB0I43LtJapqN6NiRwroiAU2PaFuvk/vjgh61ss=
-github.com/evanphx/json-patch v5.9.0+incompatible h1:fBXyNpNMuTTDdquAq/uisOr2lShz4oaXpDTX2bLe7ls=
-github.com/evanphx/json-patch v5.9.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
+github.com/evanphx/json-patch v5.9.11+incompatible h1:ixHHqfcGvxhWkniF1tWxBHA0yb4Z+d1UQi45df52xW8=
+github.com/evanphx/json-patch v5.9.11+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch/v5 v5.9.0 h1:kcBlZQbplgElYIlo/n1hJbls2z/1awpXxpRi0/FOJfg=
 github.com/evanphx/json-patch/v5 v5.9.0/go.mod h1:VNkHZ/282BpEyt/tObQO8s5CMPmYYq14uClGH4abBuQ=
 github.com/fatih/camelcase v1.0.0 h1:hxNvNX/xYBp0ovncs8WyWZrOrpBNub/JfaMvbURyft8=
