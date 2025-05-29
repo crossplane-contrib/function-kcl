@@ -228,7 +228,7 @@ example = { path = "/kcl/example" }
 Finally, specify the location of the `dependencies` file in the ENTRYPOINT:
 
 ```dockerfile
-CMD ["--dependencies", "/dependencies"]
+CMD ["--dependencies=/dependencies"]
 ```
 
 ### Read the Function Requests and Values through the `option` Function
