@@ -4,7 +4,7 @@ metadata:
   name: function-template-go
 spec:
   compositeTypeRef:
-    apiVersion: example.crossplane.io/v1
+    apiVersion: example.crossplane.io/v1beta1
     kind: XR
   mode: Pipeline
   pipeline:
@@ -35,6 +35,9 @@ spec:
               }
               cpv1beta1.DeploymentRuntimeConfig {
                   metadata.name = "provider-helm"
+                  metadata.annotations: {
+                    "krm.kcl.dev/composition-resource-name" = "provider-helm-config"
+                  }
                   spec: {
                       serviceAccountTemplate: {metadata.name = "provider-helm"}
                   }

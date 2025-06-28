@@ -8,7 +8,7 @@ spec:
   writeConnectionSecretsToNamespace: crossplane-system
   compositeTypeRef:
     apiVersion: fn-demo.crossplane.io/v1alpha1
-    kind: XNetwork
+    kind: Network
   mode: Pipeline
   pipeline:
   - step: normal
