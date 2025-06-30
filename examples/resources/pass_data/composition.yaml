@@ -4,8 +4,8 @@ metadata:
   name: function-template-go
 spec:
   compositeTypeRef:
-    apiVersion: example.crossplane.io/v1
-    kind: XR
+    apiVersion: nopexample.org/v1
+    kind: XSubnetwork
   mode: Pipeline
   pipeline:
   - step: normal1

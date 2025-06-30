@@ -4,7 +4,7 @@ metadata:
   name: function-template-go
 spec:
   compositeTypeRef:
-    apiVersion: example.crossplane.io/v1
+    apiVersion: example.crossplane.io/v1beta1
     kind: XR
   mode: Pipeline
   pipeline:
