@@ -18,7 +18,7 @@ require (
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
 	kcl-lang.io/krm-kcl v0.11.2
 	sigs.k8s.io/controller-tools v0.17.3
-	sigs.k8s.io/yaml v1.5.0
+	sigs.k8s.io/yaml v1.6.0
 )
 
 require (
