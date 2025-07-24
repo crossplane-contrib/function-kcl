@@ -2,11 +2,11 @@ module github.com/crossplane-contrib/function-kcl
 
 go 1.24.0
 
-toolchain go1.24.4
+toolchain go1.24.5
 
 require (
 	dario.cat/mergo v1.0.1
-	github.com/alecthomas/kong v1.12.0
+	github.com/alecthomas/kong v1.12.1
 	github.com/crossplane/crossplane-runtime v1.20.0
 	github.com/crossplane/function-sdk-go v0.4.0
 	github.com/go-logr/logr v1.4.3
@@ -14,7 +14,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	google.golang.org/protobuf v1.36.6
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/apimachinery v0.33.2
+	k8s.io/apimachinery v0.33.3
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
 	kcl-lang.io/krm-kcl v0.11.2
 	sigs.k8s.io/controller-tools v0.17.3
