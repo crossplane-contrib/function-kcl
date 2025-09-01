@@ -60,6 +60,23 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	if f.dependencies != "" {
 		in.Spec.Dependencies = f.dependencies + "\n" + in.Spec.Dependencies
 	}
+	// Add credentials
+	if creds, ok := req.Credentials["kcl-registry"]; ok {
+		data := creds.GetCredentialData()
+		if data != nil {
+			if password, ok := data.Data["password"]; ok {
+				in.Spec.Credentials.Password = string(password)
+				if username, ok := data.Data["username"]; ok {
+					in.Spec.Credentials.Username = string(username)
+				}
+				if url, ok := data.Data["url"]; ok {
+					in.Spec.Credentials.Url = string(url)
+				}
+			} else {
+				log.Info("Warning: required password not found in the credentials")
+			}
+		}
+	}
 	if err := in.Validate(); err != nil {
 		response.Fatal(rsp, errors.Wrap(err, "invalid function input"))
 		return rsp, nil

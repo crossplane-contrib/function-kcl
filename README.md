@@ -276,6 +276,69 @@ spec:
     password: <password> # or KCL_SRC_PASSWORD environment variable
 ```
 
+You can provide credentials in a Secret to your pipeline step under the name `kcl-registry`.
+
+```yaml
+# composition.yaml
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: example
+spec:
+  compositeTypeRef:
+    apiVersion: example.crossplane.io/v1beta1
+    kind: XR
+  mode: Pipeline
+  pipeline:
+    - step: basic
+      functionRef:
+        name: function-kcl
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        source: |
+          # Read the XR
+          oxr = option("params").oxr
+          # Patch the XR with the status field
+          dxr = {
+              **option("params").dxr
+              status.dummy = "cool-status"
+          }
+          # Construct a bucket
+          bucket = {
+              apiVersion = "s3.aws.upbound.io/v1beta1"
+              kind = "Bucket"
+              metadata.annotations: {
+                  "krm.kcl.dev/composition-resource-name" = "bucket"
+              }
+              spec.forProvider.region = option("oxr").spec.region
+          }
+          # Return the bucket and patched XR
+          items = [bucket, dxr]
+      credentials: # If private OCI registry
+        - name: kcl-registry
+          source: Secret
+          secretRef:
+            namespace: default
+            name: default
+```
+
+And your secret:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: default
+  namsepace: default
+data:
+  username: dXNlcm5hbWU=
+  password: cGFzc3dvcmQ=
+  url: aHR0cHM6Ly9leGFtcGxlLmNvbQ==
+```
+
+You can use these credentials with `crossplane render --function-credentials=secret.yaml xr.yaml composition.yaml functions.yaml`.
+
 ### Run Config
 
 ```yaml
