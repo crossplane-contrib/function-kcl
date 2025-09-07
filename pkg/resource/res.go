@@ -408,6 +408,17 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 		if err := AddResourcesTo(desiredMatches, opts); err != nil {
 			return result, err
 		}
+		// Process ready annotations
+		for _, cd := range desired {
+			if v, found := cd.Resource.GetAnnotations()[AnnotationKeyReady]; found {
+				if v != string(resource.ReadyTrue) && v != string(resource.ReadyUnspecified) && v != string(resource.ReadyFalse) {
+					return result, errors.Errorf("invalid function input: invalid %q annotation value %q: must be True, False, or Unspecified", AnnotationKeyReady, v)
+				}
+				cd.Ready = resource.Ready(v)
+				// Remove meta annotation.
+				meta.RemoveAnnotations(cd.Resource, AnnotationKeyReady)
+			}
+		}
 		result.Object = data
 		result.MsgCount = len(data)
 	case PatchResources:
@@ -425,11 +436,33 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 		if err := AddResourcesTo(desiredMatches, opts); err != nil {
 			return result, err
 		}
+		// Process ready annotations
+		for _, cd := range desired {
+			if v, found := cd.Resource.GetAnnotations()[AnnotationKeyReady]; found {
+				if v != string(resource.ReadyTrue) && v != string(resource.ReadyUnspecified) && v != string(resource.ReadyFalse) {
+					return result, errors.Errorf("invalid function input: invalid %q annotation value %q: must be True, False, or Unspecified", AnnotationKeyReady, v)
+				}
+				cd.Ready = resource.Ready(v)
+				// Remove meta annotation.
+				meta.RemoveAnnotations(cd.Resource, AnnotationKeyReady)
+			}
+		}
 		result.Object = data
 		result.MsgCount = len(data)
 	case Resources:
 		if err := AddResourcesTo(desired, opts); err != nil {
 			return result, err
+		}
+		// Process ready annotations
+		for _, cd := range desired {
+			if v, found := cd.Resource.GetAnnotations()[AnnotationKeyReady]; found {
+				if v != string(resource.ReadyTrue) && v != string(resource.ReadyUnspecified) && v != string(resource.ReadyFalse) {
+					return result, errors.Errorf("invalid function input: invalid %q annotation value %q: must be True, False, or Unspecified", AnnotationKeyReady, v)
+				}
+				cd.Ready = resource.Ready(v)
+				// Remove meta annotation.
+				meta.RemoveAnnotations(cd.Resource, AnnotationKeyReady)
+			}
 		}
 		// Pass data here instead of desired
 		// This is because there already may be desired objects
