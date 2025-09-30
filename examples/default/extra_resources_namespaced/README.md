@@ -10,7 +10,7 @@ $ go run . --insecure --debug
 
 ```shell
 # Then, in another terminal, call it with these example manifests
-$ crossplane render --verbose xr.yaml composition.yaml functions.yaml -r --extra-resources extra_resources.yaml
+$ crossplane render --verbose xr.yaml composition.yaml functions.yaml -r --extra-resources extra_resources_namespaced.yaml
 ---
 ---
 apiVersion: example.crossplane.io/v1beta1

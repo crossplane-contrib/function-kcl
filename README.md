@@ -540,6 +540,7 @@ By defining one or more special `ExtraResources`, you can ask Crossplane to retr
 
 > With ExtraResources, you can fetch cluster-scoped resources, but not namespaced resources such as claims.
 > If you need to get a composite resource via its claim name you can use `matchLabels` with `crossplane.io/claim-name: <claimname>`
+> Crossplane namespace scoped resources can be queried with the `matchNamespace` field.
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
@@ -564,6 +565,20 @@ spec:
                 apiVersion: "example.com/v1beta1",
                 kind: "Bar",
                 matchName: "my-bar"
+            },
+            baz = {
+                apiVersion: "example.com/v1beta1",
+                kind: "Bar",
+                matchName: "my-bar"
+                matchNamespace: "my-baz-ns"
+            },
+            quux = {
+                apiVersion: "example.com/v1beta1",
+                kind: "Quux",
+                matchLabels: {
+                    "baz": "quux"
+                }
+                matchNamespace: "my-quux-ns"
             }
         }
     }

@@ -21,6 +21,8 @@ type ExtraResourcesRequirement struct {
 	// MatchName defines the name to match the resource, if MatchLabels is
 	// empty.
 	MatchName string `json:"matchName,omitempty"`
+	// MatchNamespace defines the namespace to match a namespace scoped resource, if set.
+	MatchNamespace string `json:"matchNamespace,omitempty"`
 }
 
 // ToResourceSelector converts the ExtraResourcesRequirement to a fnv1.ResourceSelector.
@@ -28,6 +30,9 @@ func (e *ExtraResourcesRequirement) ToResourceSelector() *fnv1.ResourceSelector 
 	out := &fnv1.ResourceSelector{
 		ApiVersion: e.APIVersion,
 		Kind:       e.Kind,
+	}
+	if e.MatchNamespace != "" {
+		out.Namespace = &e.MatchNamespace
 	}
 	if e.MatchName == "" {
 		out.Match = &fnv1.ResourceSelector_MatchLabels{
