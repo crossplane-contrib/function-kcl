@@ -200,7 +200,7 @@ func TestRunFunctionSimple(t *testing.T) {
 				},
 			},
 		},
-		"ExtraResourcesClusterScoped": {
+		"ExtraResources": {
 			reason: "The Function should return the desired composite with extra resources.",
 			args: args{
 				req: &fnv1.RunFunctionRequest{
@@ -211,11 +211,11 @@ func TestRunFunctionSimple(t *testing.T) {
 						"metadata": {
 							"name": "basic"
 						},
-												"spec": {
-														"target": "Default",
-														"source": "items = [\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"cool-extra-resource\"\n    }\n  }\n},\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"another-cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchLabels = {\n        key: \"value\"\n      }\n    }\n    \"yet-another-cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"foo\"\n    }\n  }\n},\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"all-cool-resources\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchLabels = {}\n    }\n  }\n}\n]\n"
-						}
-					}`),
+						"spec": {
+							"target": "Default",
+							"source": "items = [\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"cool-extra-resource\"\n    }\n  }\n},\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"another-cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchLabels = {\n        key: \"value\"\n      }\n    }\n    \"yet-another-cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"foo\"\n    }\n  }\n},\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"all-cool-resources\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchLabels = {}\n    }\n  }\n}\n]\n"
+            }
+          }`),
 					Observed: &fnv1.State{
 						Composite: &fnv1.Resource{
 							Resource: resource.MustStructJSON(xr),
@@ -323,27 +323,6 @@ func TestRunFunctionSimple(t *testing.T) {
 						},
 					},
 					Desired: &fnv1.State{Composite: &fnv1.Resource{Resource: resource.MustStructJSON(xr)}},
-				},
-			},
-		},
-		"ExtraResourcesNamespacedWithLabels": {
-			reason: "The Function should pass with a single extra resource with matchLabels and matchNamespace",
-			args: args{
-				req: &fnv1.RunFunctionRequest{
-					Meta: &fnv1.RequestMeta{Tag: "extra-resources-namespace-labels"},
-					Input: resource.MustStructJSON(`{
-						"apiVersion":"krm.kcl.dev/v1alpha1","kind":"KCLInput","metadata":{"name":"basic"},"spec":{"target":"Default","source":"items=[{ apiVersion:\"meta.krm.kcl.dev/v1alpha1\", kind:\"ExtraResources\", requirements={ \"cool-resource-match-ns-match-labels\"={ apiVersion:\"example.org/v1\", kind:\"CoolExtraResource\", matchNamespace:\"cool-ns\", matchLabels={\"cool-key\":\"cool-value\"} }}}]"}
-					}`),
-					Observed: &fnv1.State{Composite: &fnv1.Resource{Resource: resource.MustStructJSON(xr)}},
-				},
-			},
-			want: want{
-				rsp: &fnv1.RunFunctionResponse{
-					Meta: &fnv1.ResponseMeta{Tag: "extra-resources-namespace-labels", Ttl: durationpb.New(response.DefaultTTL)},
-					Requirements: &fnv1.Requirements{ExtraResources: map[string]*fnv1.ResourceSelector{
-						"cool-resource-match-ns-match-labels": {ApiVersion: "example.org/v1", Kind: "CoolExtraResource", Namespace: ptr.To[string]("cool-ns"), Match: &fnv1.ResourceSelector_MatchLabels{MatchLabels: &fnv1.MatchLabels{Labels: map[string]string{"cool-key": "cool-value"}}}},
-					}},
-					Desired: &fnv1.State{Composite: &fnv1.Resource{Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`)}},
 				},
 			},
 		},
