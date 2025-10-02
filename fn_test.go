@@ -214,8 +214,8 @@ func TestRunFunctionSimple(t *testing.T) {
 						"spec": {
 							"target": "Default",
 							"source": "items = [\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"cool-extra-resource\"\n    }\n  }\n},\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"another-cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchLabels = {\n        key: \"value\"\n      }\n    }\n    \"yet-another-cool-extra-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchName: \"foo\"\n    }\n  }\n},\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"ExtraResources\"\n  requirements = {\n    \"all-cool-resources\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolExtraResource\"\n      matchLabels = {}\n    }\n  }\n}\n]\n"
-            }
-          }`),
+						}
+					}`),
 					Observed: &fnv1.State{
 						Composite: &fnv1.Resource{
 							Resource: resource.MustStructJSON(xr),
@@ -283,6 +283,46 @@ func TestRunFunctionSimple(t *testing.T) {
 							},
 						},
 					},
+				},
+			},
+		},
+		"ExtraResourcesNamespacedMatchName": {
+			reason: "The Function should pass through a single extra namespaced resource with matchName and matchNamespace",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "extra-resources-namespace-matchname"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {"name": "basic"},
+						"spec": {
+							"target": "Default",
+							"source": "items = [{ apiVersion: \"meta.krm.kcl.dev/v1alpha1\", kind: \"ExtraResources\", requirements = { \"cool-ns-resource-matchname\" = { apiVersion: \"example.m.org/v1\", kind: \"CoolExtraResource\", matchNamespace: \"cool-ns-scoped-ns\", matchName: \"cool-ns-scoped-resource\" } } }]"
+						}
+					}`),
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{Resource: resource.MustStructJSON(xr)},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{Resource: resource.MustStructJSON(xr)},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta:    &fnv1.ResponseMeta{Tag: "extra-resources-namespace-matchname", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{},
+					Requirements: &fnv1.Requirements{
+						ExtraResources: map[string]*fnv1.ResourceSelector{
+							"cool-ns-resource-matchname": {
+								ApiVersion: "example.m.org/v1",
+								Kind:       "CoolExtraResource",
+								Namespace:  ptr.To[string]("cool-ns-scoped-ns"),
+								Match:      &fnv1.ResourceSelector_MatchName{MatchName: "cool-ns-scoped-resource"},
+							},
+						},
+					},
+					Desired: &fnv1.State{Composite: &fnv1.Resource{Resource: resource.MustStructJSON(xr)}},
 				},
 			},
 		},
