@@ -541,7 +541,7 @@ By defining one or more special `ExtraResources`, you can ask Crossplane to retr
 > With ExtraResources, you can fetch cluster-scoped resources, but not namespaced resources such as claims.
 > If you need to get a composite resource via its claim name you can use `matchLabels` with `crossplane.io/claim-name: <claimname>`.
 
-> Crossplane namespace scoped managed resources can be queried with the `matchNamespace` field. Leaving the `matchNamespace` field empty will query a Cluster scoped resource.
+> Namespace scoped resources can be queried with the `matchNamespace` field. Leaving the `matchNamespace` field empty or not defining it will query a cluster scoped resource.
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
