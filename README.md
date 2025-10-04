@@ -539,7 +539,9 @@ spec:
 By defining one or more special `ExtraResources`, you can ask Crossplane to retrieve additional resources from the local cluster and make them available to your templates. See the [docs](https://github.com/crossplane/crossplane/blob/main/design/design-doc-composition-functions-extra-resources.md) for more information.
 
 > With ExtraResources, you can fetch cluster-scoped resources, but not namespaced resources such as claims.
-> If you need to get a composite resource via its claim name you can use `matchLabels` with `crossplane.io/claim-name: <claimname>`
+> If you need to get a composite resource via its claim name you can use `matchLabels` with `crossplane.io/claim-name: <claimname>`.
+
+> Namespace scoped resources can be queried with the `matchNamespace` field. Leaving the `matchNamespace` field empty or not defining it will query a cluster scoped resource.
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
@@ -564,6 +566,20 @@ spec:
                 apiVersion: "example.com/v1beta1",
                 kind: "Bar",
                 matchName: "my-bar"
+            },
+            baz = {
+                apiVersion: "example.m.com/v1beta1",
+                kind: "Bar",
+                matchName: "my-bar"
+                matchNamespace: "my-baz-ns"
+            },
+            quux = {
+                apiVersion: "example.m.com/v1beta1",
+                kind: "Quux",
+                matchLabels: {
+                    "baz": "quux"
+                }
+                matchNamespace: "my-quux-ns"
             }
         }
     }
