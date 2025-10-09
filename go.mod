@@ -7,7 +7,7 @@ toolchain go1.24.6
 require (
 	dario.cat/mergo v1.0.1
 	github.com/alecthomas/kong v1.12.1
-	github.com/crossplane/crossplane-runtime v1.20.0
+	github.com/crossplane/crossplane-runtime/v2 v2.0.0
 	github.com/crossplane/function-sdk-go v0.5.0-rc.0.0.20250805171053-2910b68d255d
 	github.com/go-logr/logr v1.4.3
 	github.com/google/go-cmp v0.7.0
@@ -54,6 +54,7 @@ require (
 	github.com/containers/libtrust v0.0.0-20230121012942-c1716e8a8d01 // indirect
 	github.com/containers/ocicrypt v1.2.1 // indirect
 	github.com/containers/storage v1.57.2 // indirect
+	github.com/crossplane/crossplane-runtime v1.18.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dchest/siphash v1.2.3 // indirect
