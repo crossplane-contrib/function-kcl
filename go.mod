@@ -2,7 +2,7 @@ module github.com/crossplane-contrib/function-kcl
 
 go 1.24.0
 
-toolchain go1.24.6
+toolchain go1.25.3
 
 require (
 	dario.cat/mergo v1.0.1
