@@ -1,40 +1,38 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: function-template-go
+  name: kcl-function
 spec:
   compositeTypeRef:
     apiVersion: nopexample.org/v1
     kind: XNopResource
   mode: Pipeline
   pipeline:
-  - step: normal
-    functionRef:
-      name: kcl-function
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: basic
-      spec:
-        target: Resources
-        params:
-          name_suffix: 1
-        source: |
-          name_suffix: str = str(option("params").name_suffix) or ""
-          name_suffix_with_line: str = "-{}".format(name_suffix) if name_suffix else ""
-          items = [
-              {
-                  apiVersion = "eks.nobu.dev/v1beta"
-                  kind = "XNodepool"
-                  metadata.name = "pool" + name_suffix_with_line
-                  spec.parameters: {
-                  	  autoscaling: [{
-                  	  	  maxNodeCount: 1
-                  	  	  minNodeCount: 1
-                  	  }]
-                  	  clusterName: "example-injections"
-                  	  region: "us-east-2"
-                  }
-              }
-          ]
+    - step: normal
+      functionRef:
+        name: kcl-function
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        spec:
+          target: Resources
+          params:
+            name_suffix: 1
+          source: |
+            name_suffix: str = str(option("params").name_suffix) or ""
+            name_suffix_with_line: str = "-{}".format(name_suffix) if name_suffix else ""
+            items = [
+                {
+                    apiVersion = "eks.nobu.dev/v1beta"
+                    kind = "XNodepool"
+                    metadata.name = "pool" + name_suffix_with_line
+                    spec.parameters: {
+                    	  autoscaling: [{
+                    	  	  maxNodeCount: 1
+                    	  	  minNodeCount: 1
+                    	  }]
+                    	  clusterName: "example-injections"
+                    	  region: "us-east-2"
+                    }
+                }
+            ]
