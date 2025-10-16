@@ -1,49 +1,48 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: function-template-go
+  name: kcl-function
 spec:
   compositeTypeRef:
     apiVersion: example.crossplane.io/v1beta1
     kind: XR
   mode: Pipeline
   pipeline:
-  - step: normal
-    functionRef:
-      name: kcl-function
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        annotations:
-          "krm.kcl.dev/default_ready": "True"
-        name: basic
-      spec:
-        source: |
-          oxr = option("params").oxr
-          
-          dxr = {
-            **oxr
-          }
-          
-          conditions = {
-              apiVersion: "meta.krm.kcl.dev/v1alpha1"
-              kind: "Conditions"
-              conditions = [
-                {
-                  target: "CompositeAndClaim"
-                  force: False
-                  condition = {
-                    type: "DatabaseReady"
-                    status: "False"
-                    reason: "FailedToCreate"
-                    message: "Encountered an error creating the database"
+    - step: normal
+      functionRef:
+        name: kcl-function
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        metadata:
+          annotations:
+            "krm.kcl.dev/default_ready": "True"
+        spec:
+          source: |
+            oxr = option("params").oxr
+
+            dxr = {
+              **oxr
+            }
+
+            conditions = {
+                apiVersion: "meta.krm.kcl.dev/v1alpha1"
+                kind: "Conditions"
+                conditions = [
+                  {
+                    target: "CompositeAndClaim"
+                    force: False
+                    condition = {
+                      type: "DatabaseReady"
+                      status: "False"
+                      reason: "FailedToCreate"
+                      message: "Encountered an error creating the database"
+                    }
                   }
-                }
-              ]
-            
-          }
-          items = [
-              conditions
-              dxr
-          ]
+                ]
+
+            }
+            items = [
+                conditions
+                dxr
+            ]

@@ -18,7 +18,7 @@ import (
 	"github.com/crossplane/function-sdk-go/request"
 	"github.com/crossplane/function-sdk-go/response"
 
-	"github.com/crossplane-contrib/function-kcl/input/v1beta1"
+	fkcl "github.com/crossplane-contrib/function-kcl/input/v1alpha1"
 	pkgresource "github.com/crossplane-contrib/function-kcl/pkg/resource"
 	"sigs.k8s.io/yaml"
 )
@@ -39,7 +39,7 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	log.Info("Running Function")
 
 	rsp := response.To(req, response.DefaultTTL)
-	in := &v1beta1.KCLInput{}
+	in := &fkcl.KCLInput{}
 	if err := request.GetInput(req, in); err != nil {
 		response.Fatal(rsp, errors.Wrapf(err, "cannot get Function input from %T", req))
 		return rsp, nil

@@ -1,42 +1,41 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: function-template-go
+  name: kcl-function
 spec:
   compositeTypeRef:
     apiVersion: example.crossplane.io/v1beta1
     kind: XR
   mode: Pipeline
   pipeline:
-  - step: normal
-    functionRef:
-      name: kcl-function
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        annotations:
-          "krm.kcl.dev/default_ready": "True"
-        name: basic
-      spec:
-        source: |
-          oxr = option("params").oxr
+    - step: normal
+      functionRef:
+        name: kcl-function
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        metadata:
+          annotations:
+            "krm.kcl.dev/default_ready": "True"
+        spec:
+          source: |
+            oxr = option("params").oxr
 
-          dxr = {
-            **oxr
-          }
+            dxr = {
+              **oxr
+            }
 
-          context = {
-              apiVersion: "meta.krm.kcl.dev/v1alpha1"
-              kind: "Context"
-              data = {
-                contextField = "contextValue"
-                moreComplexField = {
-                  test: "field"
+            context = {
+                apiVersion: "meta.krm.kcl.dev/v1alpha1"
+                kind: "Context"
+                data = {
+                  contextField = "contextValue"
+                  moreComplexField = {
+                    test: "field"
+                  }
                 }
-              }
-          }
-          items = [
-              context
-              dxr
-          ]
+            }
+            items = [
+                context
+                dxr
+            ]

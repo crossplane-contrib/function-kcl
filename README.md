@@ -6,7 +6,10 @@
 
 ## Introduction
 
-Crossplane KCL function allows developers to use [KCL](https://kcl-lang.io/) (a DSL) to write composite logic without the need for repeated packaging of crossplane functions, and we support package management and the [KRM KCL specification](https://github.com/kcl-lang/krm-kcl), which allows for OCI/Git source and the reuse of [KCL's module ecosystem](https://artifacthub.io/packages/search?org=kcl&sort=relevance&page=1).
+Crossplane KCL function allows developers to use [KCL](https://kcl-lang.io/) (a DSL) 
+to write composite logic without the need for repeated packaging of crossplane functions, 
+and we support package management and the [KRM KCL specification](https://github.com/kcl-lang/krm-kcl), 
+which allows for OCI/Git source and the reuse of [KCL's module ecosystem](https://artifacthub.io/packages/search?org=kcl&sort=relevance&page=1).
 
 Check out these following blogs to learn more. 
 
@@ -32,25 +35,26 @@ spec:
       input:
         apiVersion: krm.kcl.dev/v1alpha1
         kind: KCLInput
-        source: |
-          # Read the XR
-          oxr = option("params").oxr
-          # Patch the XR with the status field
-          dxr = {
-              **option("params").dxr
-              status.dummy = "cool-status"
-          }
-          # Construct a bucket
-          bucket = {
-              apiVersion = "s3.aws.upbound.io/v1beta1"
-              kind = "Bucket"
-              metadata.annotations: {
-                  "krm.kcl.dev/composition-resource-name" = "bucket"
-              }
-              spec.forProvider.region = option("oxr").spec.region
-          }
-          # Return the bucket and patched XR
-          items = [bucket, dxr]
+        spec:
+          source: |
+            # Read the XR
+            oxr = option("params").oxr
+            # Patch the XR with the status field
+            dxr = {
+                **option("params").dxr
+                status.dummy = "cool-status"
+            }
+            # Construct a bucket
+            bucket = {
+                apiVersion = "s3.aws.upbound.io/v1beta1"
+                kind = "Bucket"
+                metadata.annotations: {
+                    "krm.kcl.dev/composition-resource-name" = "bucket"
+                }
+                spec.forProvider.region = option("oxr").spec.region
+            }
+            # Return the bucket and patched XR
+            items = [bucket, dxr]
     - step: automatically-detect-ready-composed-resources
       functionRef:
         name: function-auto-ready
@@ -80,8 +84,6 @@ To use a `KCLInput` as the function config, the KCL source must be specified in 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   source: |
     {
@@ -99,8 +101,6 @@ spec:
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   source: oci://ghcr.io/kcl-lang/crossplane-xnetwork-kcl-function
 ```
@@ -110,8 +110,6 @@ spec:
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   source: github.com/kcl-lang/modules/crossplane-xnetwork-kcl-function
 ```
@@ -121,8 +119,6 @@ spec:
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   source: ./path/to/kcl/file.k
 ```
@@ -136,6 +132,7 @@ kubectl create configmap templates --from-file=templates.k -n crossplane-system
 This `ConfigMap` will be mounted to the function pod and the templates will be available in the `/templates` directory. See the following function config for details.
 
 ```yaml
+---
 apiVersion: pkg.crossplane.io/v1beta1
 kind: Function
 metadata:
@@ -169,7 +166,8 @@ spec:
 
 ### Use as a Base Image
 
-This function can also be used as a base image to build complex functions in KCL. To do this, add your KCL code to the image and set the `FUNCTION_KCL_DEFAULT_SOURCE` environment variable to the path where you put your code.
+This function can also be used as a base image to build complex functions in KCL. 
+To do this, add your KCL code to the image and set the `FUNCTION_KCL_DEFAULT_SOURCE` environment variable to the path where you put your code.
 
 For example, if you have the following in `main.k`:
 
@@ -217,7 +215,7 @@ Next, add a file specifying the dependencies to be added to all functions, using
 the syntax of the `[dependencies]` section of `kcl.mod`, for example:
 
 ```dockerfile
-ADD dependencies /dependecies
+ADD dependencies /dependencies
 ```
 where the file `dependencies` contains:
 
@@ -250,8 +248,6 @@ You can define your custom parameters in the `params` field and use `option("par
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   params:
     custom_key: custom_value
@@ -263,8 +259,6 @@ spec:
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: kcl-xnetwork
 spec:
   params:
     annotations:
@@ -296,25 +290,26 @@ spec:
       input:
         apiVersion: krm.kcl.dev/v1alpha1
         kind: KCLInput
-        source: |
-          # Read the XR
-          oxr = option("params").oxr
-          # Patch the XR with the status field
-          dxr = {
-              **option("params").dxr
-              status.dummy = "cool-status"
-          }
-          # Construct a bucket
-          bucket = {
-              apiVersion = "s3.aws.upbound.io/v1beta1"
-              kind = "Bucket"
-              metadata.annotations: {
-                  "krm.kcl.dev/composition-resource-name" = "bucket"
-              }
-              spec.forProvider.region = option("oxr").spec.region
-          }
-          # Return the bucket and patched XR
-          items = [bucket, dxr]
+        spec:
+          source: |
+            # Read the XR
+            oxr = option("params").oxr
+            # Patch the XR with the status field
+            dxr = {
+                **option("params").dxr
+                status.dummy = "cool-status"
+            }
+            # Construct a bucket
+            bucket = {
+                apiVersion = "s3.aws.upbound.io/v1beta1"
+                kind = "Bucket"
+                metadata.annotations: {
+                    "krm.kcl.dev/composition-resource-name" = "bucket"
+                }
+                spec.forProvider.region = option("oxr").spec.region
+            }
+            # Return the bucket and patched XR
+            items = [bucket, dxr]
       credentials: # If private OCI registry
         - name: kcl-registry
           source: Secret
@@ -330,7 +325,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: default
-  namsepace: default
+  namespace: default
 data:
   username: dXNlcm5hbWU=
   password: cGFzc3dvcmQ=
@@ -384,8 +379,6 @@ A KRM YAML list means that each document must have an `apiVersion`, `kind` throu
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   source: |
     items = [{
@@ -406,8 +399,6 @@ spec:
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   source: |
     {
@@ -420,7 +411,9 @@ spec:
     }
 ```
 
-> Note that when returning multiple resources, we need to set different `metadata.name` or `metadata.annotations."krm.kcl.dev/composition-resource-name" ` to distinguish between different resources in the composition functions.
+> [!NOTE]
+> When returning multiple resources, we need to set different `metadata.name` or `metadata.annotations."krm.kcl.dev/composition-resource-name" ` 
+> to distinguish between different resources in the composition functions.
 
 ### Target Support
 
@@ -437,8 +430,6 @@ This is controlled by fields on the `KCInput`
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   # default: Default
   target: Default | PatchDesired | PatchResources | Resources | XR
@@ -449,13 +440,14 @@ spec:
 
 ### Extract Data from a Specific Composed Resource
 
-To extract data from a specific composed resource by using the resource name, we can use the `option("params").ocds` variable, `ocds` is a mapping that its key is the resource name and its value is the [`observed composed resource`](https://pkg.go.dev/github.com/crossplane/function-sdk-go@v0.2.0/resource#ObservedComposed) like [the example](./examples/default/read_ocds_resource/composition.yaml).
+To extract data from a specific composed resource by using the resource name, we can use the `option("params").ocds` variable, 
+`ocds` is a mapping that its key is the resource name and its value is 
+the [`observed composed resource`](https://pkg.go.dev/github.com/crossplane/function-sdk-go@v0.2.0/resource#ObservedComposed) 
+like [the example](./examples/default/read_ocds_resource/composition.yaml).
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: show-ocds
 spec:
   source: |
     {
@@ -469,7 +461,8 @@ spec:
 
 ### Composite Resource Connection Details
 
-To return desired composite resource connection details, include a KCL config that produces the special CompositeConnectionDetails resource like [the example](./examples/default/connection_details/composition.yaml):
+To return desired composite resource connection details, include a KCL config that produces the special CompositeConnectionDetails resource 
+like [the example](./examples/default/connection_details/composition.yaml):
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
@@ -493,13 +486,14 @@ spec:
     ]
 ```
 
-> Note: The value of the connection secret value must be base64 encoded. This is already the case if you are referencing a key from a managed resource's connectionDetails field. However, if you want to include a connection secret value from somewhere else, you will need to use the `base64.encode` function:
+> [!NOTE]
+> The value of the connection secret value must be base64 encoded. 
+> This is already the case if you are referencing a key from a managed resource's connectionDetails field. 
+> However, if you want to include a connection secret value from somewhere else, you will need to use the `base64.encode` function:
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   source: |
     import base64
@@ -520,8 +514,6 @@ To mark a desired composed resource as ready, use the `krm.kcl.dev/ready` annota
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   source: |
     # Omit other logic
@@ -536,18 +528,19 @@ spec:
 ```
 
 ### Extra resources
-By defining one or more special `ExtraResources`, you can ask Crossplane to retrieve additional resources from the local cluster and make them available to your templates. See the [docs](https://github.com/crossplane/crossplane/blob/main/design/design-doc-composition-functions-extra-resources.md) for more information.
+By defining one or more special `ExtraResources`, you can ask Crossplane to retrieve additional resources from the local cluster 
+and make them available to your templates. 
+See the [docs](https://github.com/crossplane/crossplane/blob/main/design/design-doc-composition-functions-extra-resources.md) for more information.
 
+> [!NOTE]
 > With ExtraResources, you can fetch cluster-scoped resources, but not namespaced resources such as claims.
 > If you need to get a composite resource via its claim name you can use `matchLabels` with `crossplane.io/claim-name: <claimname>`.
-
-> Namespace scoped resources can be queried with the `matchNamespace` field. Leaving the `matchNamespace` field empty or not defining it will query a cluster scoped resource.
+> Namespace scoped resources can be queried with the `matchNamespace` field. 
+> Leaving the `matchNamespace` field empty or not defining it will query a cluster scoped resource.
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   source: |
     # Omit other logic
@@ -593,6 +586,7 @@ spec:
 You can retrieve the extra resources either via labels with `matchLabels` or via name with `matchName: somename`.
 
 This will result in Crossplane receiving the requested resources and make them available with the following format.
+
 ```yaml
 foo:
 - Resource:
@@ -617,14 +611,17 @@ bar:
       name: my-bar
     # Omitted for brevity
 ```
+
 You can access the retrieved resources in your code like this:
-> Note that Crossplane performs an additional reconciliation pass for extra resources.
-> Consequently, during the initial execution, these resources may be uninitialized. It is essential to implement checks to handle this scenario.
+
+> [!NOTE]
+> Crossplane performs an additional reconciliation pass for extra resources.
+> Consequently, during the initial execution, these resources may be uninitialized.
+> It is essential to implement checks to handle this scenario.
+
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   source: |
     er = option("params")?.extraResources
@@ -641,8 +638,6 @@ You can read the XR, patch it with the status field and return the new patched X
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
-metadata:
-  name: basic
 spec:
   source: |
     # Read the XR
@@ -654,17 +649,18 @@ spec:
 
 ### Settings conditions and events
 
+> [!NOTE]
 > This feature requires Crossplane v1.17 or newer.
 
 You can set conditions and events directly from KCL, either in the composite resource or both the composite and claim resources.
 To set one or more conditions, use the following approach:
+
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
 metadata:
   annotations:
     "krm.kcl.dev/default_ready": "True"
-  name: basic
 spec:
   source: |
     oxr = option("params").oxr
@@ -696,17 +692,19 @@ spec:
     ]
 ```
 
-- **target**: Specifies whether the condition should be present in the composite resource or both the composite and claim resources. Possible values are `CompositeAndClaim` and `Composite`
-- **force**: Forces the overwrite of existing conditions. If a condition with the same `type` already exists, it will not be overwritten by default. Setting force to `True` will overwrite the first condition.
+- **target**: Specifies whether the condition should be present in the composite resource or both the composite and claim resources. 
+    Possible values are `CompositeAndClaim` and `Composite`
+- **force**: Forces the overwrite of existing conditions. If a condition with the same `type` already exists, it will not be overwritten by default. 
+    Setting force to `True` will overwrite the first condition.
 
 You can also set events as follows:
+
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
 kind: KCLInput
 metadata:
   annotations:
     "krm.kcl.dev/default_ready": "True"
-  name: basic
 spec:
   source: |
     oxr = option("params").oxr

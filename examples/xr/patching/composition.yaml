@@ -1,29 +1,27 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: function-template-go
+  name: kcl-function
 spec:
   compositeTypeRef:
     apiVersion: nopexample.org/v1
     kind: XSubnetwork
   mode: Pipeline
   pipeline:
-  - step: normal
-    functionRef:
-      name: kcl-function
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: basic
-      spec:
-        target: XR
-        source: |
-          {
-              metadata.annotations: {
-                  "nobu.dev/cueified": "true",
-                  "nobu.dev/app": "someapp",
-              }
-              spec.forProvider.network: "somenetwork"
-              status.is_ok = True
-          }
+    - step: normal
+      functionRef:
+        name: kcl-function
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        spec:
+          target: XR
+          source: |
+            {
+                metadata.annotations: {
+                    "nobu.dev/cueified": "true",
+                    "nobu.dev/app": "someapp",
+                }
+                spec.forProvider.network: "somenetwork"
+                status.is_ok = True
+            }
