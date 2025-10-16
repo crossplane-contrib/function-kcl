@@ -1,0 +1,18 @@
+{
+  "version": "0.2",
+  "words": [
+    "Crossplane",
+    "apiextensions",
+    "claimname",
+    "configmap",
+    "dcds",
+    "kcllang",
+    "ocds",
+    "somename",
+    "upbound",
+    "xnetwork",
+    "xpkg"
+  ],
+  "language": "en",
+  "flagWords": []
+}
