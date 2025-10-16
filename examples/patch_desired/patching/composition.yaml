@@ -1,43 +1,39 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: function-template-go
+  name: kcl-function
 spec:
   compositeTypeRef:
     apiVersion: nopexample.org/v1
     kind: XSubnetwork
   mode: Pipeline
   pipeline:
-  - step: generate desired resources
-    functionRef:
-      name: kcl-function
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: kcl-function-1
-      spec:
-        source: |
-          {
-              apiVersion: "v1"
-              kind: "XR"
-              metadata.annotations: {
-                  "krm.kcl.dev/composition-resource-name" = "bucket"
-              }
-              spec.forProvider.network: "some-network"
-          }
-  - step: patch desired resources
-    functionRef:
-      name: kcl-function
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: kcl-function-2
-      spec:
-        target: PatchDesired
-        source: |
-          {
-              metadata.name = "bucket"
-              spec.forProvider.network: "some-override-network"
-          }
+    - step: generate desired resources
+      functionRef:
+        name: kcl-function
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        spec:
+          source: |
+            {
+                apiVersion: "v1"
+                kind: "XR"
+                metadata.annotations: {
+                    "krm.kcl.dev/composition-resource-name" = "bucket"
+                }
+                spec.forProvider.network: "some-network"
+            }
+    - step: patch desired resources
+      functionRef:
+        name: kcl-function
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        spec:
+          target: PatchDesired
+          source: |
+            {
+                metadata.name = "bucket"
+                spec.forProvider.network: "some-override-network"
+            }

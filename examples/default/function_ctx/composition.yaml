@@ -1,23 +1,21 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: function-template-go
+  name: kcl-function
 spec:
   compositeTypeRef:
     apiVersion: example.crossplane.io/v1beta1
     kind: XR
   mode: Pipeline
   pipeline:
-  - step: normal
-    functionRef:
-      name: kcl-function
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: basic
-      spec:
-        source: |
-          ctx = option("params").ctx
-          # Show function pipeline's context.
-          items = [{ctx = ctx}]
+    - step: normal
+      functionRef:
+        name: kcl-function
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        spec:
+          source: |
+            ctx = option("params").ctx
+            # Show function pipeline's context.
+            items = [{ctx = ctx}]
