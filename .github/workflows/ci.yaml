@@ -31,7 +31,7 @@ env:
   XPKG_ACCESS_ID: ${{ secrets.XPKG_ACCESS_ID }}
 
   # The package to push, without a version tag. The default matches GitHub. For
-  # example xpkg.upbound.io/crossplane/function-template-go.
+  # example xpkg.upbound.io/crossplane/kcl-function.
   XPKG: xpkg.upbound.io/${{ github.repository}}
   CROSSPLANE_REGORG: ghcr.io/${{ github.repository}} # xpkg.crossplane.io/crossplane-contrib
 

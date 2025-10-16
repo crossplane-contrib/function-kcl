@@ -1,29 +1,26 @@
 apiVersion: apiextensions.crossplane.io/v1
 kind: Composition
 metadata:
-  name: function-template-go
+  name: kcl-function
 spec:
   compositeTypeRef:
     apiVersion: example.crossplane.io/v1beta1
     kind: XR
   mode: Pipeline
   pipeline:
-
-  # Just for test
-  - step: normal
-    functionRef:
-      name: kcl-function
-    input:
-      apiVersion: krm.kcl.dev/v1alpha1
-      kind: KCLInput
-      metadata:
-        name: show-ocds
-      spec:
-        source: |
-          {
-              metadata.name = "ocds"
-              spec.ocds = option("params").ocds
-              spec.user_kind = option("params").ocds["test-user"]?.Resource.Kind
-              spec.user_metadata = option("params").ocds["test-user"]?.Resource.metadata
-              spec.user_status = option("params").ocds["test-user"]?.Resource.status
-          }
+    # Just for test
+    - step: normal
+      functionRef:
+        name: kcl-function
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        spec:
+          source: |
+            {
+                metadata.name = "ocds"
+                spec.ocds = option("params").ocds
+                spec.user_kind = option("params").ocds["test-user"]?.Resource.Kind
+                spec.user_metadata = option("params").ocds["test-user"]?.Resource.metadata
+                spec.user_status = option("params").ocds["test-user"]?.Resource.status
+            }
