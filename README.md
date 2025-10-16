@@ -123,7 +123,9 @@ spec:
   source: ./path/to/kcl/file.k
 ```
 
-> Note: You can't run the FileSystem example using `crossplane render` because it loads templates from a ConfigMap in the cluster. You can create a `ConfigMap` with the templates using the following command.
+> [!NOTE]
+> You can't run the FileSystem example using `crossplane render` because it loads templates from a ConfigMap in the cluster.
+> You can create a `ConfigMap` with the templates using the following command.
 
 ```shell
 kubectl create configmap templates --from-file=templates.k -n crossplane-system
