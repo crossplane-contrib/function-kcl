@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.19.0
-  name: kclinputs.template.fn.crossplane.io
+  name: kclinputs.krm.kcl.dev
 spec:
-  group: template.fn.crossplane.io
+  group: krm.kcl.dev
   names:
     categories:
     - crossplane
@@ -16,7 +16,7 @@ spec:
     singular: kclinput
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - name: v1alpha1
     schema:
       openAPIV3Schema:
         description: KCLInput can be used to provide input to this Function.
