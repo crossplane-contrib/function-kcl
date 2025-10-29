@@ -387,8 +387,7 @@ func SetData(data any, path string, o any, overwrite bool) error {
 	return nil
 }
 
-func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired map[resource.Name]*resource.DesiredComposed, observed map[resource.Name]resource.ObservedComposed, extraResources map[string]*fnv1.ResourceSelector, conditions *ConditionResources,
-	events *EventResources, contextData *map[string]interface{}, target Target, resources ResourceList, opts *AddResourcesOptions) (AddResourcesResult, error) {
+func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired map[resource.Name]*resource.DesiredComposed, observed map[resource.Name]resource.ObservedComposed, extraResources map[string]*fnv1.ResourceSelector, requiredResources map[string]*fnv1.ResourceSelector, conditions *ConditionResources, events *EventResources, contextData *map[string]interface{}, target Target, resources ResourceList, opts *AddResourcesOptions) (AddResourcesResult, error) {
 	result := AddResourcesResult{
 		Target: target,
 	}
@@ -511,6 +510,18 @@ func ProcessResources(dxr *resource.Composite, oxr *resource.Composite, desired 
 							return result, errors.Errorf("duplicate extra resource key %q", k)
 						}
 						extraResources[k] = v.ToResourceSelector()
+					}
+				case "RequiredResources":
+					// Set required resources requirements.
+					rrs := make(RequiredResourcesRequirements)
+					if err := cd.Resource.GetValueInto("requirements", &rrs); err != nil {
+						return result, errors.Wrap(err, "cannot get required resources requirements")
+					}
+					for k, v := range rrs {
+						if _, found := requiredResources[k]; found {
+							return result, errors.Errorf("duplicate required resource key %q", k)
+						}
+						requiredResources[k] = v.ToResourceSelector()
 					}
 				case "Conditions":
 					// Returns conditions to add to the claim / composite

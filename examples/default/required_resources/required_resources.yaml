@@ -1,0 +1,29 @@
+apiVersion: s3.aws.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  annotations:
+    crossplane.io/external-name: my-awesome-dev-bucket
+  labels:
+    foo: bar
+  name: my-awesome-dev-bucket
+spec:
+  forProvider:
+    region: us-west-1
+status:
+  atProvider:
+    id: random-bucket-id
+---
+apiVersion: s3.aws.upbound.io/v1beta1
+kind: Bucket
+metadata:
+  annotations:
+    crossplane.io/external-name: my-awesome-dev-bucket
+  labels:
+    foo: bar
+  name: another-awesome-dev-bucket
+spec:
+  forProvider:
+    region: us-west-1
+status:
+  atProvider:
+    id: random-bucket-id
