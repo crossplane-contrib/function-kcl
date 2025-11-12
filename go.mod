@@ -16,7 +16,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.34.1
 	k8s.io/utils v0.0.0-20251002143259-bc988d571ff4
-	kcl-lang.io/krm-kcl v0.11.3
+	kcl-lang.io/krm-kcl v0.11.4
 	sigs.k8s.io/controller-tools v0.19.0
 	sigs.k8s.io/yaml v1.6.0
 )
@@ -57,10 +57,10 @@ require (
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
-	github.com/containers/image/v5 v5.34.3 // indirect
+	github.com/containers/image/v5 v5.36.1 // indirect
 	github.com/containers/libtrust v0.0.0-20230121012942-c1716e8a8d01 // indirect
 	github.com/containers/ocicrypt v1.2.1 // indirect
-	github.com/containers/storage v1.57.2 // indirect
+	github.com/containers/storage v1.59.1 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dchest/siphash v1.2.3 // indirect
@@ -145,7 +145,7 @@ require (
 	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/sys/capability v0.4.0 // indirect
 	github.com/moby/sys/mountinfo v0.7.2 // indirect
-	github.com/moby/sys/user v0.3.0 // indirect
+	github.com/moby/sys/user v0.4.0 // indirect
 	github.com/moby/term v0.5.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
@@ -157,14 +157,14 @@ require (
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/opencontainers/runtime-spec v1.2.0 // indirect
+	github.com/opencontainers/runtime-spec v1.2.1 // indirect
 	github.com/otiai10/copy v1.14.1 // indirect
 	github.com/otiai10/mint v1.6.3 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pjbgf/sha1cd v0.3.2 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/prometheus/client_golang v1.22.0 // indirect
-	github.com/prometheus/client_model v0.6.1 // indirect
+	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/protocolbuffers/txtpbfmt v0.0.0-20240416193709-1e18ef0a7fdc // indirect
@@ -220,10 +220,10 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.34.0 // indirect
+	k8s.io/api v0.34.1 // indirect
 	k8s.io/apiextensions-apiserver v0.34.0 // indirect
 	k8s.io/apiserver v0.34.0 // indirect
-	k8s.io/client-go v0.34.0 // indirect
+	k8s.io/client-go v0.34.1 // indirect
 	k8s.io/code-generator v0.34.0 // indirect
 	k8s.io/component-base v0.34.0 // indirect
 	k8s.io/gengo/v2 v2.0.0-20250604051438-85fd79dbfd9f // indirect
@@ -232,11 +232,11 @@ require (
 	kcl-lang.io/cli v0.11.3 // indirect
 	kcl-lang.io/kcl-go v0.11.3 // indirect
 	kcl-lang.io/kcl-openapi v0.10.0 // indirect
-	kcl-lang.io/kpm v0.11.3 // indirect
+	kcl-lang.io/kpm v0.11.4 // indirect
 	kcl-lang.io/lib v0.11.2 // indirect
 	oras.land/oras-go v1.2.6 // indirect
 	oras.land/oras-go/v2 v2.5.0 // indirect
-	sigs.k8s.io/controller-runtime v0.22.0 // indirect
+	sigs.k8s.io/controller-runtime v0.22.1 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/kustomize/kyaml v0.20.1 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
