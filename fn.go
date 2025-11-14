@@ -163,6 +163,18 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 		response.Fatal(rsp, err)
 		return rsp, nil
 	}
+	// The required resources by myself or any previous Functions in the pipeline.
+	required, err := request.GetRequiredResources(req)
+	if err != nil {
+		response.Fatal(rsp, errors.Wrapf(err, "cannot get required resources from %T", req))
+		return rsp, nil
+	}
+	log.Debug(fmt.Sprintf("Required resources: %d", len(required)))
+	in.Spec.Params["requiredResources"], err = pkgresource.ObjToRawExtension(required)
+	if err != nil {
+		response.Fatal(rsp, err)
+		return rsp, nil
+	}
 	inputBytes, outputBytes := bytes.NewBuffer([]byte{}), bytes.NewBuffer([]byte{})
 	// Convert the function-kcl KCLInput to the KRM-KCL spec and run function pipelines.
 	// Input Example: https://github.com/kcl-lang/krm-kcl/blob/main/examples/mutation/set-annotations/suite/good.yaml
@@ -204,10 +216,11 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	}
 	log.Debug(fmt.Sprintf("Input resources: %v", resources))
 	extraResources := map[string]*fnv1.ResourceSelector{}
+	requiredResources := map[string]*fnv1.ResourceSelector{}
 	var conditions pkgresource.ConditionResources
 	var events pkgresource.EventResources
 	contextData := make(map[string]interface{})
-	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, extraResources, &conditions, &events, &contextData, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
+	result, err := pkgresource.ProcessResources(dxr, oxr, desired, observed, extraResources, requiredResources, &conditions, &events, &contextData, in.Spec.Target, resources, &pkgresource.AddResourcesOptions{
 		Basename:  in.Name,
 		Data:      data,
 		Overwrite: true,
@@ -216,11 +229,14 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 		response.Fatal(rsp, errors.Wrapf(err, "cannot process xr and state with the pipeline output in %T", rsp))
 		return rsp, nil
 	}
-	if len(extraResources) > 0 {
+	if len(extraResources) > 0 || len(requiredResources) > 0 {
 		for n, d := range extraResources {
 			log.Debug(fmt.Sprintf("Requesting ExtraResources from %s named %s", d.String(), n))
 		}
-		rsp.Requirements = &fnv1.Requirements{ExtraResources: extraResources}
+		for n, d := range requiredResources {
+			log.Debug(fmt.Sprintf("Requesting RequiredResources from %s named %s", d.String(), n))
+		}
+		rsp.Requirements = &fnv1.Requirements{ExtraResources: extraResources, Resources: requiredResources}
 	}
 
 	if len(conditions) > 0 {

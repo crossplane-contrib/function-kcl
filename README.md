@@ -529,16 +529,165 @@ spec:
     }
 ```
 
-### Extra resources
-By defining one or more special `ExtraResources`, you can ask Crossplane to retrieve additional resources from the local cluster 
+### Required resources
+
+By defining one or more "required resources", you can ask Crossplane to retrieve additional resources from the local cluster 
 and make them available to your templates. 
-See the [docs](https://github.com/crossplane/crossplane/blob/main/design/design-doc-composition-functions-extra-resources.md) for more information.
+See the [docs](https://docs.crossplane.io/latest/composition/compositions/#required-resources) for more information.
+
+This feature only works with Crossplane v2. Crossplane v1 must use [Extra Resources](#extra-resources), described in the section below.
+
+There are two ways to request required resources:
+
+One, you can list the resources to retrieve in the `requirements.requiredResources` field
+of the pipeline step:
+
+```yaml
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: example
+spec:
+  compositeTypeRef:
+    apiVersion: example.crossplane.io/v1beta1
+    kind: XR
+  mode: Pipeline
+  pipeline:
+    - step: basic
+      functionRef:
+        name: function-kcl
+        requirements:
+          requiredResources:
+          - requirementName: foo
+            apiVersion: example.com/v1beta1
+            kind: Foo
+            matchLabels:
+              foo: bar
+          - requirementName: bar
+            apiVersion: example.com/v1beta1
+            kind: Bar
+            name: my-bar
+          - requirementName: baz
+            apiVersion: example.m.com/v1beta1
+            kind: Bar
+            name: my-bar
+            namespace: my-baz-ns
+          - requirementName: quux
+            apiVersion: example.m.com/v1beta1
+            kind: Quux
+            matchLabels:
+              baz: quux
+            namespace: my-quux-ns
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        spec:
+          source: "..."
+```
+
+Two, the composition can dynamically request resources by returning a special
+`RequiredResources` item:
+
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLInput
+spec:
+  source: |
+    # Omit other logic
+    details = {
+        apiVersion: "meta.krm.kcl.dev/v1alpha1"
+        kind: "RequiredResources"
+        requirements = {
+            foo = {
+                apiVersion: "example.com/v1beta1",
+                kind: "Foo",
+                matchLabels: {
+                    "foo": "bar"
+                }
+            },
+            bar = {
+                apiVersion: "example.com/v1beta1",
+                kind: "Bar",
+                name: "my-bar"
+            },
+            baz = {
+                apiVersion: "example.m.com/v1beta1",
+                kind: "Bar",
+                name: "my-bar"
+                namespace: "my-baz-ns"
+            },
+            quux = {
+                apiVersion: "example.m.com/v1beta1",
+                kind: "Quux",
+                matchLabels: {
+                    "baz": "quux"
+                }
+                namespace: "my-quux-ns"
+            }
+        }
+    }
+
+    # Omit other composite logics.
+    items = [
+        details
+        # Omit other return resources.
+    ]
+```
+
+Either way will result in Crossplane retrieving the requested resources and making them available with the following format:
+
+```yaml
+foo:
+- Resource:
+    apiVersion: example.com/v1beta1
+    kind: Foo
+    metadata:
+      labels:
+        foo: bar
+    # Omitted for brevity
+- Resource:
+    apiVersion: example.com/v1beta1
+    kind: Foo
+    metadata:
+      labels:
+        foo: bar
+    # Omit for brevity
+bar:
+- Resource:
+    apiVersion: example.com/v1beta1
+    kind: Bar
+    metadata:
+      name: my-bar
+    # Omitted for brevity
+```
+
+You can access the retrieved resources in your code like this:
 
 > [!NOTE]
-> With ExtraResources, you can fetch cluster-scoped resources, but not namespaced resources such as claims.
-> If you need to get a composite resource via its claim name you can use `matchLabels` with `crossplane.io/claim-name: <claimname>`.
-> Namespace scoped resources can be queried with the `matchNamespace` field. 
-> Leaving the `matchNamespace` field empty or not defining it will query a cluster scoped resource.
+> Crossplane performs an additional reconciliation pass for dynamic required resources.
+> Consequently, during the initial execution, these resources might not be present.
+> It is essential to implement checks to handle this scenario.
+
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLInput
+spec:
+  source: |
+    er = option("params")?.requiredResources
+    
+    if er?.bar:
+      name = er?.bar[0]?.Resource?.metadata?.name or ""
+    # Omit other logic
+```
+
+### Extra resources
+
+Extra resources are Crossplane v1's mechanism for retrieving additional resources from the local cluster.
+It is deprecated in Crossplane v2.
+
+Unlike required resources, there is no mechanism for requesting extra resources in the
+pipeline step definition. They can only be requested dynamically, by returning a special
+`ExtraResources` item:
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
@@ -587,7 +736,9 @@ spec:
 ```
 You can retrieve the extra resources either via labels with `matchLabels` or via name with `matchName: somename`.
 
-This will result in Crossplane receiving the requested resources and make them available with the following format.
+See the [docs](https://github.com/crossplane/crossplane/blob/main/design/design-doc-composition-functions-extra-resources.md) for more information.
+
+This will result in Crossplane receiving the requested resources and making them available using the following format:
 
 ```yaml
 foo:
@@ -618,7 +769,7 @@ You can access the retrieved resources in your code like this:
 
 > [!NOTE]
 > Crossplane performs an additional reconciliation pass for extra resources.
-> Consequently, during the initial execution, these resources may be uninitialized.
+> Consequently, during the initial execution, these resources might not be present.
 > It is essential to implement checks to handle this scenario.
 
 ```yaml

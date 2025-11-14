@@ -428,6 +428,234 @@ func TestRunFunctionSimple(t *testing.T) {
 				},
 			},
 		},
+		"RequiredResources": {
+			reason: "The Function should return the desired composite with required resources.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "required-resources"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"RequiredResources\"\n  requirements = {\n    \"cool-required-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolRequiredResource\"\n      name: \"cool-required-resource\"\n    }\n  }\n},\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"RequiredResources\"\n  requirements = {\n    \"another-cool-required-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolRequiredResource\"\n      matchLabels = {\n        key: \"value\"\n      }\n    }\n    \"yet-another-cool-required-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolRequiredResource\"\n      name: \"foo\"\n    }\n  }\n},\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"RequiredResources\"\n  requirements = {\n    \"all-cool-resources\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolRequiredResource\"\n      matchLabels = {}\n    }\n  }\n}\n]\n"
+						}
+					}`),
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"cool-cd": {
+								Resource: resource.MustStructJSON(cd),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta:    &fnv1.ResponseMeta{Tag: "required-resources", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{},
+					Requirements: &fnv1.Requirements{
+						Resources: map[string]*fnv1.ResourceSelector{
+							"cool-required-resource": {
+								ApiVersion: "example.org/v1",
+								Kind:       "CoolRequiredResource",
+								Match: &fnv1.ResourceSelector_MatchName{
+									MatchName: "cool-required-resource",
+								},
+							},
+							"another-cool-required-resource": {
+								ApiVersion: "example.org/v1",
+								Kind:       "CoolRequiredResource",
+								Match: &fnv1.ResourceSelector_MatchLabels{
+									MatchLabels: &fnv1.MatchLabels{
+										Labels: map[string]string{"key": "value"},
+									},
+								},
+							},
+							"yet-another-cool-required-resource": {
+								ApiVersion: "example.org/v1",
+								Kind:       "CoolRequiredResource",
+								Match: &fnv1.ResourceSelector_MatchName{
+									MatchName: "foo",
+								},
+							},
+							"all-cool-resources": {
+								ApiVersion: "example.org/v1",
+								Kind:       "CoolRequiredResource",
+								Match: &fnv1.ResourceSelector_MatchLabels{
+									MatchLabels: &fnv1.MatchLabels{
+										Labels: map[string]string{},
+									},
+								},
+							},
+						},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"cool-cd": {
+								Resource: resource.MustStructJSON(cd),
+							},
+						},
+					},
+				},
+			},
+		},
+		"RequiredResourcesNamespacedName": {
+			reason: "The Function should pass through a single required namespaced resource with name and namespace",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "required-resources-namespace-matchname"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {"name": "basic"},
+						"spec": {
+							"target": "Default",
+							"source": "items = [{ apiVersion: \"meta.krm.kcl.dev/v1alpha1\", kind: \"RequiredResources\", requirements = { \"cool-ns-resource-matchname\" = { apiVersion: \"example.m.org/v1\", kind: \"CoolRequiredResource\", namespace: \"cool-ns-scoped-ns\", name: \"cool-ns-scoped-resource\" } } }]"
+						}
+					}`),
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{Resource: resource.MustStructJSON(xr)},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{Resource: resource.MustStructJSON(xr)},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta:    &fnv1.ResponseMeta{Tag: "required-resources-namespace-matchname", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{},
+					Requirements: &fnv1.Requirements{
+						Resources: map[string]*fnv1.ResourceSelector{
+							"cool-ns-resource-matchname": {
+								ApiVersion: "example.m.org/v1",
+								Kind:       "CoolRequiredResource",
+								Namespace:  ptr.To[string]("cool-ns-scoped-ns"),
+								Match:      &fnv1.ResourceSelector_MatchName{MatchName: "cool-ns-scoped-resource"},
+							},
+						},
+					},
+					Desired: &fnv1.State{Composite: &fnv1.Resource{Resource: resource.MustStructJSON(xr)}},
+				},
+			},
+		},
+		"RequiredResourcesIn": {
+			reason: "The Function should return the required resources from the request.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "required-resources-in"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+            "source": "items = [v.Resource for v in option(\"params\").requiredResources[\"cool1\"]]\n"
+            }
+          }`),
+					RequiredResources: map[string]*fnv1.Resources{
+						"cool1": {
+							Items: []*fnv1.Resource{
+								{Resource: resource.MustStructJSON(xr)},
+								{Resource: resource.MustStructJSON(cd)},
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta:    &fnv1.ResponseMeta{Tag: "required-resources-in", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"","kind":""}`),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"cool-xr": {
+								Resource: resource.MustStructJSON(xr),
+							},
+							"cool-cd": {
+								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"CD","metadata":{"annotations":{},"name":"cool-cd"}}`),
+							},
+						},
+					},
+				},
+			},
+		},
+		"DuplicateRequiredResourceKey": {
+			reason: "The Function should return a fatal result if the required resource key is duplicated.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "duplicate-required-resources"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Default",
+							"source": "items = [\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"RequiredResources\"\n  requirements = {\n    \"cool-required-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolRequiredResource\"\n      name: \"cool-required-resource\"\n    }\n  }\n}\n{\n  apiVersion: \"meta.krm.kcl.dev/v1alpha1\"\n  kind: \"RequiredResources\"\n  requirements = {\n    \"cool-required-resource\" = {\n      apiVersion: \"example.org/v1\"\n      kind: \"CoolRequiredResource\"\n      name: \"another-cool-required-resource\"\n    }\n  }\n}\n]\n"
+						}
+					}`),
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"cool-cd": {
+								Resource: resource.MustStructJSON(cd),
+							},
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "duplicate-required-resources", Ttl: durationpb.New(response.DefaultTTL)},
+					Results: []*fnv1.Result{
+						{
+							Severity: fnv1.Severity_SEVERITY_FATAL,
+							Target:   fnv1.Target_TARGET_COMPOSITE.Enum(),
+							Message:  "cannot process xr and state with the pipeline output in *v1.RunFunctionResponse: duplicate required resource key \"cool-required-resource\"",
+						},
+					},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(xr),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"cool-cd": {
+								Resource: resource.MustStructJSON(cd),
+							},
+						},
+					},
+				},
+			},
+		},
 		"EmptyInputWithDefaultSource": {
 			reason:        "The function should use the default source when input is not provided and default source is set",
 			defaultSource: "{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n}",
