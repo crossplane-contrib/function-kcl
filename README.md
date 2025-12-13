@@ -6,12 +6,12 @@
 
 ## Introduction
 
-Crossplane KCL function allows developers to use [KCL](https://kcl-lang.io/) (a DSL) 
-to write composite logic without the need for repeated packaging of crossplane functions, 
-and we support package management and the [KRM KCL specification](https://github.com/kcl-lang/krm-kcl), 
+Crossplane KCL function allows developers to use [KCL](https://kcl-lang.io/) (a DSL)
+to write composite logic without the need for repeated packaging of crossplane functions,
+and we support package management and the [KRM KCL specification](https://github.com/kcl-lang/krm-kcl),
 which allows for OCI/Git source and the reuse of [KCL's module ecosystem](https://artifacthub.io/packages/search?org=kcl&sort=relevance&page=1).
 
-Check out these following blogs to learn more. 
+Check out these following blogs to learn more.
 
 + [Using KCL Programming Language to Write Crossplane Composition Functions](https://blog.crossplane.io/function-kcl/)
 + [KCL: The Game-Changer for Crossplane Composition Building](https://blog.upbound.io/kcl-benefits-crossplane-composition-building)
@@ -64,7 +64,7 @@ spec:
 
 ```yaml
 cat <<EOF | kubectl apply -f -
-apiVersion: pkg.crossplane.io/v1beta1
+apiVersion: pkg.crossplane.io/v1
 kind: Function
 metadata:
   name: kcl-function
@@ -135,7 +135,7 @@ This `ConfigMap` will be mounted to the function pod and the templates will be a
 
 ```yaml
 ---
-apiVersion: pkg.crossplane.io/v1beta1
+apiVersion: pkg.crossplane.io/v1
 kind: Function
 metadata:
   name: function-kcl
@@ -168,7 +168,7 @@ spec:
 
 ### Use as a Base Image
 
-This function can also be used as a base image to build complex functions in KCL. 
+This function can also be used as a base image to build complex functions in KCL.
 To do this, add your KCL code to the image and set the `FUNCTION_KCL_DEFAULT_SOURCE` environment variable to the path where you put your code.
 
 For example, if you have the following in `main.k`:
@@ -414,7 +414,7 @@ spec:
 ```
 
 > [!NOTE]
-> When returning multiple resources, we need to set different `metadata.name` or `metadata.annotations."krm.kcl.dev/composition-resource-name" ` 
+> When returning multiple resources, we need to set different `metadata.name` or `metadata.annotations."krm.kcl.dev/composition-resource-name" `
 > to distinguish between different resources in the composition functions.
 
 ### Target Support
@@ -442,9 +442,9 @@ spec:
 
 ### Extract Data from a Specific Composed Resource
 
-To extract data from a specific composed resource by using the resource name, we can use the `option("params").ocds` variable, 
-`ocds` is a mapping that its key is the resource name and its value is 
-the [`observed composed resource`](https://pkg.go.dev/github.com/crossplane/function-sdk-go@v0.2.0/resource#ObservedComposed) 
+To extract data from a specific composed resource by using the resource name, we can use the `option("params").ocds` variable,
+`ocds` is a mapping that its key is the resource name and its value is
+the [`observed composed resource`](https://pkg.go.dev/github.com/crossplane/function-sdk-go@v0.2.0/resource#ObservedComposed)
 like [the example](./examples/default/read_ocds_resource/composition.yaml).
 
 ```yaml
@@ -463,7 +463,7 @@ spec:
 
 ### Composite Resource Connection Details
 
-To return desired composite resource connection details, include a KCL config that produces the special CompositeConnectionDetails resource 
+To return desired composite resource connection details, include a KCL config that produces the special CompositeConnectionDetails resource
 like [the example](./examples/default/connection_details/composition.yaml):
 
 ```yaml
@@ -489,8 +489,8 @@ spec:
 ```
 
 > [!NOTE]
-> The value of the connection secret value must be base64 encoded. 
-> This is already the case if you are referencing a key from a managed resource's connectionDetails field. 
+> The value of the connection secret value must be base64 encoded.
+> This is already the case if you are referencing a key from a managed resource's connectionDetails field.
 > However, if you want to include a connection secret value from somewhere else, you will need to use the `base64.encode` function:
 
 ```yaml
@@ -530,14 +530,14 @@ spec:
 ```
 
 ### Extra resources
-By defining one or more special `ExtraResources`, you can ask Crossplane to retrieve additional resources from the local cluster 
-and make them available to your templates. 
+By defining one or more special `ExtraResources`, you can ask Crossplane to retrieve additional resources from the local cluster
+and make them available to your templates.
 See the [docs](https://github.com/crossplane/crossplane/blob/main/design/design-doc-composition-functions-extra-resources.md) for more information.
 
 > [!NOTE]
 > With ExtraResources, you can fetch cluster-scoped resources, but not namespaced resources such as claims.
 > If you need to get a composite resource via its claim name you can use `matchLabels` with `crossplane.io/claim-name: <claimname>`.
-> Namespace scoped resources can be queried with the `matchNamespace` field. 
+> Namespace scoped resources can be queried with the `matchNamespace` field.
 > Leaving the `matchNamespace` field empty or not defining it will query a cluster scoped resource.
 
 ```yaml
@@ -627,7 +627,7 @@ kind: KCLInput
 spec:
   source: |
     er = option("params")?.extraResources
-    
+
     if er?.bar:
       name = er?.bar[0]?.Resource?.metadata?.name or ""
     # Omit other logic
@@ -666,11 +666,11 @@ metadata:
 spec:
   source: |
     oxr = option("params").oxr
-    
+
     dxr = {
       **oxr
     }
-    
+
     conditions = {
       apiVersion: "meta.krm.kcl.dev/v1alpha1"
       kind: "Conditions"
@@ -687,16 +687,16 @@ spec:
         }
       ]
     }
-    
+
     items = [
       conditions
       dxr
     ]
 ```
 
-- **target**: Specifies whether the condition should be present in the composite resource or both the composite and claim resources. 
+- **target**: Specifies whether the condition should be present in the composite resource or both the composite and claim resources.
     Possible values are `CompositeAndClaim` and `Composite`
-- **force**: Forces the overwrite of existing conditions. If a condition with the same `type` already exists, it will not be overwritten by default. 
+- **force**: Forces the overwrite of existing conditions. If a condition with the same `type` already exists, it will not be overwritten by default.
     Setting force to `True` will overwrite the first condition.
 
 You can also set events as follows:
@@ -710,11 +710,11 @@ metadata:
 spec:
   source: |
     oxr = option("params").oxr
-    
+
     dxr = {
       **oxr
     }
-    
+
     events = {
       apiVersion: "meta.krm.kcl.dev/v1alpha1"
       kind: "Events"
