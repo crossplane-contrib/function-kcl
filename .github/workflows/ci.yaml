@@ -36,7 +36,7 @@ env:
   CROSSPLANE_REGORG: ghcr.io/${{ github.repository}} # xpkg.crossplane.io/crossplane-contrib
 
   # The package version to push. The default is 0.0.0-gitsha.
-  XPKG_VERSION: v0.11.6
+  XPKG_VERSION: v0.12.0
 
 jobs:
   lint:
