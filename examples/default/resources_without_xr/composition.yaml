@@ -25,9 +25,15 @@ spec:
                 **option("params").dxr
                 status.dummy = "cool-status"
             }
-            details = {
-                apiVersion: "meta.krm.kcl.dev/v1alpha1"
-                kind: "CompositeConnectionDetails"
+            secret = {
+                apiVersion: "v1"
+                kind: "Secret"
+                metadata: {
+                    name: oxr.spec.writeConnectionSecretToRef?.name or ""
+                    annotations: {
+                        "krm.kcl.dev/composition-resource-name": "connection-secret"
+                    }
+                }
                 if "sample-access-key-0" in ocds:
                     data: {
                         username = ocds["sample-access-key-0"].ConnectionDetails.username
@@ -61,5 +67,5 @@ spec:
                     namespace: "crossplane-system"
                 }
             }] for i in range(count)], []) + [
-                details
+                secret
             ]

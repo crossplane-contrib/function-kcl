@@ -463,8 +463,11 @@ spec:
 
 ### Composite Resource Connection Details
 
-To return desired composite resource connection details, include a KCL config that produces the special CompositeConnectionDetails resource
-like [the example](./examples/default/connection_details/composition.yaml):
+#### v1 Composite Resources (Legacy)
+
+For **legacy v1 XRs only**, you can return desired composite resource connection
+details by including a KCL config that produces the special
+`CompositeConnectionDetails` resource:
 
 ```yaml
 apiVersion: krm.kcl.dev/v1alpha1
@@ -510,6 +513,46 @@ spec:
         }
     }
 ```
+
+#### v2 Composite Resources
+
+For **v2 composite resources**, the `CompositeConnectionDetails` resource is not
+supported. Instead, you should compose an explicit Kubernetes `Secret` resource
+that aggregates connection details from the other composed resources.
+
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLInput
+spec:
+  source: |
+    import base64
+
+    oxr = option("params").oxr
+    ocds = option("params").ocds
+
+    secret = {
+        apiVersion: "v1"
+        kind: "Secret"
+        metadata: {
+            name: oxr.spec.writeConnectionSecretToRef?.name or ""
+            annotations: {
+                "krm.kcl.dev/composition-resource-name": "connection-secret"
+            }
+        }
+        if "my-server" in ocds:
+            data: {
+                "server-endpoint" = base64.encode(ocds["my-server"].Resource.status.atProvider.endpoint)
+            }
+        else:
+            data: {}
+    }
+    items = [secret]
+```
+
+For a detailed walkthrough and full example, please see the
+[Connection Details Compositions guide] in the Crossplane docs.
+
+### Readiness
 
 To mark a desired composed resource as ready, use the `krm.kcl.dev/ready` annotation:
 
@@ -776,3 +819,5 @@ $ crossplane xpkg build -f package --embed-runtime-image=kcllang/crossplane-kcl
 # Push a function package to the registry
 $ crossplane --verbose xpkg push -f package/*.xpkg xpkg.upbound.io/crossplane-contrib/function-kcl:latest
 ```
+
+[Connection Details Compositions guide]: https://docs.crossplane.io/latest/guides/connection-details-composition/
