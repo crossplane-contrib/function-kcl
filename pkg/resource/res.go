@@ -142,6 +142,10 @@ func DataResourcesFromYaml(in []byte) (result []unstructured.Unstructured, err e
 			return nil, err
 		}
 
+		if normalizedData == nil {
+			continue
+		}
+
 		result = append(result, unstructured.Unstructured{
 			Object: normalizedData.(map[string]interface{}),
 		})
