@@ -36,7 +36,7 @@ type Function struct {
 // RunFunction runs the Function.
 func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) (*fnv1.RunFunctionResponse, error) {
 	log := f.log.WithValues("tag", req.GetMeta().GetTag())
-	log.Info("Running Function")
+	log.Debug("Running Function")
 
 	rsp := response.To(req, response.DefaultTTL)
 	in := &fkcl.KCLInput{}
@@ -269,6 +269,6 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 		response.Fatal(rsp, errors.Wrapf(err, "cannot set desired composed resources in %T", rsp))
 		return rsp, nil
 	}
-	log.Info("Successfully processed crossplane KCL function resources", "input", in.Name)
+	log.Debug("Successfully processed crossplane KCL function resources", "input", in.Name)
 	return rsp, nil
 }
