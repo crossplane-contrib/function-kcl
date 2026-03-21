@@ -5,6 +5,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
+	"sync"
+	"time"
 
 	"github.com/crossplane/crossplane-runtime/v2/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/logging"
@@ -13,6 +16,7 @@ import (
 	"kcl-lang.io/krm-kcl/pkg/api"
 	"kcl-lang.io/krm-kcl/pkg/api/v1alpha1"
 	"kcl-lang.io/krm-kcl/pkg/kio"
+	remoteauth "oras.land/oras-go/v2/registry/remote/auth"
 
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/crossplane/function-sdk-go/request"
@@ -24,6 +28,13 @@ import (
 )
 
 var defaultSource = os.Getenv("FUNCTION_KCL_DEFAULT_SOURCE")
+
+const ociCacheMaxAge = 30 * time.Minute
+
+var (
+	ociCacheMu      sync.Mutex
+	ociCacheCreated time.Time
+)
 
 // Function returns whatever response you ask it to.
 type Function struct {
@@ -47,6 +58,9 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	// Set default source
 	if in.Spec.Source == "" {
 		in.Spec.Source = defaultSource
+	}
+	if strings.HasPrefix(in.Spec.Source, "oci://") {
+		resetOCITokenCacheIfNeeded(log)
 	}
 	// Set default target
 	if in.Spec.Target == "" {
@@ -272,3 +286,21 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	log.Debug("Successfully processed crossplane KCL function resources", "input", in.Name)
 	return rsp, nil
 }
+
+// resetOCITokenCacheIfNeeded replaces the global ORAS auth token cache when
+// it is older than ociCacheMaxAge.  This prevents long-lived gRPC servers from
+// using stale Bearer tokens that expired server-side.
+//
+// ociCacheCreated starts as zero-value, so the very first call always resets.
+func resetOCITokenCacheIfNeeded(log logging.Logger) {
+	ociCacheMu.Lock()
+	defer ociCacheMu.Unlock()
+
+	age := time.Since(ociCacheCreated)
+	if ociCacheCreated.IsZero() || age >= ociCacheMaxAge {
+		remoteauth.DefaultCache = remoteauth.NewCache()
+		ociCacheCreated = time.Now()
+		log.Debug("Reset ORAS OCI token cache", "age", age.Round(time.Second), "maxAge", ociCacheMaxAge)
+	}
+}
+
