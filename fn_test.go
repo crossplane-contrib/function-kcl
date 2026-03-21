@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/crossplane/crossplane-runtime/v2/pkg/logging"
 	"github.com/go-logr/logr/testr"
@@ -14,6 +15,7 @@ import (
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
 	"k8s.io/utils/ptr"
+	remoteauth "oras.land/oras-go/v2/registry/remote/auth"
 
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/crossplane/function-sdk-go/resource"
@@ -21,6 +23,67 @@ import (
 
 	"kcl-lang.io/krm-kcl/pkg/kube"
 )
+
+func TestResetOCITokenCacheIfNeeded(t *testing.T) {
+	ctx := context.Background()
+	registry := "registry.example.com"
+	scheme := remoteauth.SchemeBearer
+	scopeKey := "repository:my-package:pull"
+	staleToken := "fake-expired-bearer-token"
+	log := logging.NewLogrLogger(testr.New(t))
+
+	populateCache := func() {
+		remoteauth.DefaultCache = remoteauth.NewCache()
+		remoteauth.DefaultCache.Set(ctx, registry, scheme, scopeKey, func(_ context.Context) (string, error) {
+			return staleToken, nil
+		})
+	}
+
+	t.Run("first call always resets (zero ociCacheCreated)", func(t *testing.T) {
+		populateCache()
+		ociCacheMu.Lock()
+		ociCacheCreated = time.Time{}
+		ociCacheMu.Unlock()
+
+		resetOCITokenCacheIfNeeded(log)
+
+		_, err := remoteauth.DefaultCache.GetToken(ctx, registry, scheme, scopeKey)
+		if err == nil {
+			t.Fatal("expected cache miss after first-call reset, but stale token still present")
+		}
+	})
+
+	t.Run("skips reset when cache is fresh", func(t *testing.T) {
+		populateCache()
+		ociCacheMu.Lock()
+		ociCacheCreated = time.Now()
+		ociCacheMu.Unlock()
+
+		resetOCITokenCacheIfNeeded(log)
+
+		got, err := remoteauth.DefaultCache.GetToken(ctx, registry, scheme, scopeKey)
+		if err != nil {
+			t.Fatalf("cache should still have the token, got error: %v", err)
+		}
+		if got != staleToken {
+			t.Fatalf("expected %q, got %q", staleToken, got)
+		}
+	})
+
+	t.Run("resets when maxAge exceeded", func(t *testing.T) {
+		populateCache()
+		ociCacheMu.Lock()
+		ociCacheCreated = time.Now().Add(-ociCacheMaxAge - time.Second)
+		ociCacheMu.Unlock()
+
+		resetOCITokenCacheIfNeeded(log)
+
+		_, err := remoteauth.DefaultCache.GetToken(ctx, registry, scheme, scopeKey)
+		if err == nil {
+			t.Fatal("expected cache miss after reset, but stale token still present")
+		}
+	})
+}
 
 func TestRunFunctionSimple(t *testing.T) {
 	type args struct {
