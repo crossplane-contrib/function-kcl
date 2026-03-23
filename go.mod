@@ -1,6 +1,6 @@
 module github.com/crossplane-contrib/function-kcl
 
-go 1.24.9
+go 1.25.8
 
 toolchain go1.26.1
 
