@@ -1,0 +1,54 @@
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: kcl-function
+spec:
+  compositeTypeRef:
+    apiVersion: example.crossplane.io/v1beta1
+    kind: XR
+  mode: Pipeline
+  pipeline:
+    - step: normal
+      functionRef:
+        name: kcl-function
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        metadata:
+          annotations:
+            "krm.kcl.dev/default_ready": "True"
+        spec:
+          source: |
+            oxr = option("params").oxr
+            rr = option("params")?.requiredResources
+
+            foo = [{
+              apiVersion: "example/v1alpha1"
+              kind: "Foo"
+              metadata = {
+                name: k.Resource.metadata.name
+              }
+            } for k in rr?.bucket] if rr?.bucket else []
+
+            dxr = {
+                **oxr
+            }
+
+            details = {
+                apiVersion: "meta.krm.kcl.dev/v1alpha1"
+                kind: "RequiredResources"
+                requirements = {
+                    bucket = {
+                        apiVersion: "s3.aws.m.upbound.io/v1beta1",
+                        kind: "Bucket",
+                        matchLabels: {
+                            "foo": "bar"
+                        }
+                        matchNamespace: "awesome-namespace"
+                    }
+                }
+            }
+            items = [
+                details
+                dxr
+            ] + foo
