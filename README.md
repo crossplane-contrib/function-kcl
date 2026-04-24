@@ -105,6 +105,41 @@ spec:
   source: oci://ghcr.io/kcl-lang/crossplane-xnetwork-kcl-function
 ```
 
+### Run a Composition with OCI tags
+
+For production-like workflows, publish the KCL module as a versioned OCI artifact and pin the `tag` in `Composition` instead of embedding large inline templates.
+
+```yaml
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: machine-deployment
+spec:
+  mode: Pipeline
+  pipeline:
+    - step: render-machine-deployment
+      functionRef:
+        name: function-kcl
+      input:
+        apiVersion: krm.kcl.dev/v1alpha1
+        kind: KCLInput
+        spec:
+          source: oci://registry.example.com/machine-deployment?tag=0.2.0
+```
+
+Build and publish the module:
+
+```shell
+kcl mod pkg --vendor --target build
+kcl mod push --vendor "oci://registry.example.com/machine-deployment?tag=0.2.0"
+```
+
+Render the composition locally:
+
+```shell
+crossplane render xr.yaml composition.yaml functions.yaml
+```
+
 + Git source example
 
 ```yaml
@@ -946,6 +981,10 @@ See [here](https://kcl-lang.io/docs/reference/lang/tour) to study more features 
 ## Examples
 
 More examples can be found [here](./examples/)
+
+## Composition design guide
+
+For a production-oriented structure (typed schemas, `main.k`/`params.k`/`asserts.k`/`dxr.k` , tests, and OCI tag rollout), see [Proposed Crossplane KCL Composition Structure](./docs/crossplane-kcl-composition-proposal.md).
 
 ## Debugging the KCL Function in Cluster
 
