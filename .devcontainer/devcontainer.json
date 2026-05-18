@@ -2,7 +2,7 @@
     "name": "function-kcl",
     "image": "mcr.microsoft.com/devcontainers/go:2-1.24-bookworm",
     "features": {
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+        "ghcr.io/devcontainers/features/docker-in-docker:3": {
             "version": "latest",
             "enableNonRootDocker": "true",
             "moby": "false"
