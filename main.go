@@ -36,7 +36,18 @@ func (c *CLI) Run() error {
 	if err != nil {
 		return err
 	}
-	return function.Serve(&Function{dependencies: dependencies, log: log},
+	// Watchdog that recycles the process before the KCL native memory leak can
+	// OOMKill it mid-reconcile. Configured via FUNCTION_KCL_MAX_* env vars;
+	// no-op when no trigger is enabled.
+	rec := newRecycler(log, recycleConfigFromEnv())
+	rec.run()
+	// Optional render cache: memoise KCL output for byte-identical reconciles to
+	// skip recompilation (CPU + leak). Enabled via FUNCTION_KCL_RENDER_CACHE_SIZE.
+	cache := newRenderCacheFromEnv()
+	if cache.enabled() {
+		log.Info("render cache enabled", "maxEntries", cache.max, "ttl", cache.ttl.String())
+	}
+	return function.Serve(&Function{dependencies: dependencies, log: log, recycler: rec, cache: cache},
 		function.Listen(c.Network, c.Address),
 		function.MTLSCertificates(c.TLSCertsDir),
 		function.Insecure(c.Insecure),
