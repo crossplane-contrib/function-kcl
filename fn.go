@@ -11,6 +11,8 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/v2/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/logging"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/structpb"
 	"k8s.io/apimachinery/pkg/runtime"
 	"kcl-lang.io/krm-kcl/pkg/api"
@@ -42,10 +44,20 @@ type Function struct {
 
 	log          logging.Logger
 	dependencies string
+	recycler     *recycler
+	cache        *renderCache
 }
 
 // RunFunction runs the Function.
 func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) (*fnv1.RunFunctionResponse, error) {
+	// Reject new work while the process is draining for a memory recycle so
+	// Crossplane retries this reconcile elsewhere instead of having it cut off
+	// mid-render. begin() also bounds the recycle drain to in-flight calls.
+	if !f.recycler.begin() {
+		return nil, status.Error(codes.Unavailable, "function-kcl is recycling to release native memory; retry")
+	}
+	defer f.recycler.end()
+
 	log := f.log.WithValues("tag", req.GetMeta().GetTag())
 	log.Debug("Running Function")
 
@@ -189,7 +201,6 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 		response.Fatal(rsp, err)
 		return rsp, nil
 	}
-	inputBytes, outputBytes := bytes.NewBuffer([]byte{}), bytes.NewBuffer([]byte{})
 	// Convert the function-kcl KCLInput to the KRM-KCL spec and run function pipelines.
 	// Input Example: https://github.com/kcl-lang/krm-kcl/blob/main/examples/mutation/set-annotations/suite/good.yaml
 	in.APIVersion = v1alpha1.KCLRunAPIVersion
@@ -200,16 +211,28 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 		response.Fatal(rsp, errors.Wrap(err, "cannot marshal input to yaml"))
 		return rsp, nil
 	}
-	inputBytes.Write(kclRunBytes)
-	// Run pipeline to get the result mutated or validated by the KCL source.
-	pipeline := kio.NewPipeline(inputBytes, outputBytes, false)
-
-	if err := pipeline.Execute(); err != nil {
-		response.Fatal(rsp, errors.Wrap(err, "failed to run kcl function pipelines"))
-		return rsp, nil
+	// The KCL render is deterministic over kclRunBytes (source + dependencies +
+	// all params + config). Reuse the previous output for byte-identical inputs
+	// to skip recompiling the module — this avoids both the CPU cost and a native
+	// memory-leak increment on no-op re-syncs. See rendercache.go.
+	var outputData []byte
+	if cached, ok := f.cache.lookup(kclRunBytes); ok {
+		outputData = cached
+		hits, misses := f.cache.stats()
+		log.Debug("render cache hit", "hits", hits, "misses", misses)
+	} else {
+		inputBytes, outputBytes := bytes.NewBuffer(kclRunBytes), bytes.NewBuffer([]byte{})
+		// Run pipeline to get the result mutated or validated by the KCL source.
+		pipeline := kio.NewPipeline(inputBytes, outputBytes, false)
+		if err := pipeline.Execute(); err != nil {
+			response.Fatal(rsp, errors.Wrap(err, "failed to run kcl function pipelines"))
+			return rsp, nil
+		}
+		outputData = outputBytes.Bytes()
+		f.cache.store(kclRunBytes, outputData)
 	}
-	log.Debug(fmt.Sprintf("Pipeline output: %v", outputBytes.String()))
-	data, err := pkgresource.DataResourcesFromYaml(outputBytes.Bytes())
+	log.Debug(fmt.Sprintf("Pipeline output: %v", string(outputData)))
+	data, err := pkgresource.DataResourcesFromYaml(outputData)
 	if err != nil {
 		response.Fatal(rsp, errors.Wrapf(err, "cannot parse data resources from the pipeline output in %T", rsp))
 		return rsp, nil
