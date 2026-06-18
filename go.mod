@@ -16,7 +16,7 @@ require (
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.35.4
-	k8s.io/utils v0.0.0-20260319190234-28399d86e0b5
+	k8s.io/utils v0.0.0-20260617174310-a95e086a2553
 	kcl-lang.io/krm-kcl v0.12.4
 	oras.land/oras-go/v2 v2.6.1
 	sigs.k8s.io/controller-tools v0.20.1
