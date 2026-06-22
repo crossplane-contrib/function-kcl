@@ -7,7 +7,7 @@ toolchain go1.26.4
 require (
 	dario.cat/mergo v1.0.2
 	github.com/alecthomas/kong v1.15.0
-	github.com/crossplane/crossplane-runtime/v2 v2.2.0
+	github.com/crossplane/crossplane-runtime/v2 v2.3.3
 	github.com/crossplane/function-sdk-go v0.5.0
 	github.com/go-logr/logr v1.4.3
 	github.com/google/go-cmp v0.7.0
