@@ -205,31 +205,51 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	// Input Example: https://github.com/kcl-lang/krm-kcl/blob/main/examples/mutation/set-annotations/suite/good.yaml
 	in.APIVersion = v1alpha1.KCLRunAPIVersion
 	in.Kind = api.KCLRunKind
-	// Note use "sigs.k8s.io/yaml" here.
-	kclRunBytes, err := yaml.Marshal(in)
-	if err != nil {
-		response.Fatal(rsp, errors.Wrap(err, "cannot marshal input to yaml"))
-		return rsp, nil
+	// The KCL render is deterministic over the input (source + dependencies +
+	// all params + config), so renderKey identifies it. Reuse the previous output
+	// for byte-identical inputs to skip recompiling the module — this avoids both
+	// the CPU cost and a native memory-leak increment on no-op re-syncs. See
+	// rendercache.go.
+	var key []byte
+	if f.cache.enabled() {
+		if key, err = renderKey(in); err != nil {
+			response.Fatal(rsp, errors.Wrap(err, "cannot derive render cache key"))
+			return rsp, nil
+		}
 	}
-	// The KCL render is deterministic over kclRunBytes (source + dependencies +
-	// all params + config). Reuse the previous output for byte-identical inputs
-	// to skip recompiling the module — this avoids both the CPU cost and a native
-	// memory-leak increment on no-op re-syncs. See rendercache.go.
+
 	var outputData []byte
-	if cached, ok := f.cache.lookup(kclRunBytes); ok {
+	if cached, ok := f.cache.lookup(key); ok {
 		outputData = cached
 		hits, misses := f.cache.stats()
 		log.Debug("render cache hit", "hits", hits, "misses", misses)
 	} else {
-		inputBytes, outputBytes := bytes.NewBuffer(kclRunBytes), bytes.NewBuffer([]byte{})
-		// Run pipeline to get the result mutated or validated by the KCL source.
-		pipeline := kio.NewPipeline(inputBytes, outputBytes, false)
-		if err := pipeline.Execute(); err != nil {
+		// Fast path: feed the KCL runtime the JSON we already hold, skipping the
+		// JSON -> YAML -> RNode -> JSON round trip. Falls back to the krm-kcl
+		// pipeline for non-inline sources (oci://, git, http, local path).
+		out, ok, err := renderInline(in)
+		if err != nil {
 			response.Fatal(rsp, errors.Wrap(err, "failed to run kcl function pipelines"))
 			return rsp, nil
 		}
-		outputData = outputBytes.Bytes()
-		f.cache.store(kclRunBytes, outputData)
+		if !ok {
+			// Note use "sigs.k8s.io/yaml" here.
+			kclRunBytes, err := yaml.Marshal(in)
+			if err != nil {
+				response.Fatal(rsp, errors.Wrap(err, "cannot marshal input to yaml"))
+				return rsp, nil
+			}
+			inputBytes, outputBytes := bytes.NewBuffer(kclRunBytes), bytes.NewBuffer([]byte{})
+			// Run pipeline to get the result mutated or validated by the KCL source.
+			pipeline := kio.NewPipeline(inputBytes, outputBytes, false)
+			if err := pipeline.Execute(); err != nil {
+				response.Fatal(rsp, errors.Wrap(err, "failed to run kcl function pipelines"))
+				return rsp, nil
+			}
+			out = outputBytes.Bytes()
+		}
+		outputData = out
+		f.cache.store(key, outputData)
 	}
 	log.Debug(fmt.Sprintf("Pipeline output: %v", string(outputData)))
 	data, err := pkgresource.DataResourcesFromYaml(outputData)
