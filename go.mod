@@ -17,7 +17,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.35.4
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
-	kcl-lang.io/cli v0.12.4
+	kcl-lang.io/cli v0.12.5
 	kcl-lang.io/kpm v0.12.6
 	kcl-lang.io/krm-kcl v0.12.4
 	oras.land/oras-go/v2 v2.6.2
@@ -98,7 +98,7 @@ require (
 	github.com/envoyproxy/go-control-plane/envoy v1.37.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
-	github.com/fatih/color v1.18.0 // indirect
+	github.com/fatih/color v1.19.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/getkin/kin-openapi v0.133.0 // indirect
