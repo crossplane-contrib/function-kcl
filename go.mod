@@ -18,7 +18,7 @@ require (
 	k8s.io/apimachinery v0.35.4
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 	kcl-lang.io/cli v0.12.4
-	kcl-lang.io/kpm v0.12.5
+	kcl-lang.io/kpm v0.12.6
 	kcl-lang.io/krm-kcl v0.12.4
 	oras.land/oras-go/v2 v2.6.2
 	sigs.k8s.io/controller-tools v0.20.1
