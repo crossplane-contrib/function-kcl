@@ -1,6 +1,6 @@
 module github.com/crossplane-contrib/function-kcl
 
-go 1.25.8
+go 1.26.0
 
 toolchain go1.26.5
 
@@ -13,13 +13,13 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.82.1
-	google.golang.org/protobuf v1.36.11
+	google.golang.org/protobuf v1.36.12-0.20260120151049-f2248ac996af
 	gopkg.in/yaml.v2 v2.4.0
-	k8s.io/apimachinery v0.35.4
+	k8s.io/apimachinery v0.36.1
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
-	kcl-lang.io/cli v0.12.5
-	kcl-lang.io/kpm v0.12.6
-	kcl-lang.io/krm-kcl v0.12.4
+	kcl-lang.io/cli v0.12.6
+	kcl-lang.io/kpm v0.12.7
+	kcl-lang.io/krm-kcl v0.12.6
 	oras.land/oras-go/v2 v2.6.2
 	sigs.k8s.io/controller-tools v0.20.1
 	sigs.k8s.io/kustomize/kyaml v0.21.1
@@ -69,7 +69,6 @@ require (
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
-	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/chai2010/jsonv v1.1.3 // indirect
 	github.com/chai2010/protorpc v1.1.4 // indirect
@@ -146,7 +145,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.17.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0 // indirect
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.0 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3 // indirect
 	github.com/hashicorp/aws-sdk-go-base/v2 v2.0.0-beta.72 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-getter v1.8.6 // indirect
@@ -215,8 +214,8 @@ require (
 	go.mongodb.org/mongo-driver v1.14.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.43.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.63.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.64.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.65.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.65.0 // indirect
 	go.opentelemetry.io/otel v1.43.0 // indirect
 	go.opentelemetry.io/otel/metric v1.43.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.43.0 // indirect
@@ -228,7 +227,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
-	golang.org/x/mod v0.37.0 // indirect
+	golang.org/x/mod v0.38.0 // indirect
 	golang.org/x/net v0.56.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
@@ -236,7 +235,7 @@ require (
 	golang.org/x/term v0.44.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
-	golang.org/x/tools v0.45.0 // indirect
+	golang.org/x/tools v0.47.0 // indirect
 	google.golang.org/api v0.271.0 // indirect
 	google.golang.org/genproto v0.0.0-20260128011058-8636f8732409 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260414002931-afd174a4e478 // indirect
@@ -244,20 +243,20 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.35.2 // indirect
-	k8s.io/apiextensions-apiserver v0.35.0 // indirect
-	k8s.io/apiserver v0.35.0 // indirect
-	k8s.io/client-go v0.35.2 // indirect
-	k8s.io/code-generator v0.35.0 // indirect
-	k8s.io/component-base v0.35.0 // indirect
+	k8s.io/api v0.36.1 // indirect
+	k8s.io/apiextensions-apiserver v0.36.0 // indirect
+	k8s.io/apiserver v0.36.0 // indirect
+	k8s.io/client-go v0.36.1 // indirect
+	k8s.io/code-generator v0.36.0 // indirect
+	k8s.io/component-base v0.36.0 // indirect
 	k8s.io/gengo/v2 v2.0.0-20251215205346-5ee0d033ba5b // indirect
-	k8s.io/klog/v2 v2.130.1 // indirect
-	k8s.io/kube-openapi v0.0.0-20260127142750-a19766b6e2d4 // indirect
+	k8s.io/klog/v2 v2.140.0 // indirect
+	k8s.io/kube-openapi v0.0.0-20260317180543-43fb72c5454a // indirect
 	kcl-lang.io/kcl-go v0.12.3 // indirect
 	kcl-lang.io/kcl-openapi v0.10.2 // indirect
 	kcl-lang.io/lib v0.12.3 // indirect
-	sigs.k8s.io/controller-runtime v0.23.3 // indirect
+	sigs.k8s.io/controller-runtime v0.24.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
-	sigs.k8s.io/structured-merge-diff/v6 v6.3.2-0.20260122202528-d9cc6641c482 // indirect
+	sigs.k8s.io/structured-merge-diff/v6 v6.3.2 // indirect
 )
