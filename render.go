@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"kcl-lang.io/cli/pkg/options"
+	"kcl-lang.io/kcl-go/pkg/kcl"
 	"kcl-lang.io/kpm/pkg/client"
 	"kcl-lang.io/krm-kcl/pkg/edit"
 	"kcl-lang.io/krm-kcl/pkg/source"
@@ -53,23 +54,73 @@ func renderInline(in *fkcl.KCLInput) (out []byte, ok bool, err error) {
 		}
 	}
 
-	dir, err := os.MkdirTemp("", "kcl-sandbox")
-	if err != nil {
-		return nil, true, err
-	}
-	defer os.RemoveAll(dir)
-
-	prog := filepath.Join(dir, "prog.k")
-	if err := os.WriteFile(prog, []byte(in.Spec.Source), 0o600); err != nil {
-		return nil, true, err
-	}
-
 	args, err := kclArguments(in)
 	if err != nil {
 		return nil, true, err
 	}
 
 	buf := bytes.NewBuffer(nil)
+	if !in.Spec.Config.Vendor {
+		opts := []kcl.Option{
+			kcl.WithCode(in.Spec.Source),
+			kcl.WithOptions(args...),
+			kcl.WithExternalPkgs(dependencies...),
+		}
+		for _, setting := range in.Spec.Config.Settings {
+			opts = append(opts, kcl.WithSettings(setting))
+		}
+		exec := kcl.NewOption()
+		exec.Overrides = in.Spec.Config.Overrides
+		exec.PathSelector = in.Spec.Config.PathSelectors
+		exec.DisableNone = in.Spec.Config.DisableNone
+		exec.Debug = boolToInt32(in.Spec.Config.Debug)
+		exec.SortKeys = in.Spec.Config.SortKeys
+		exec.ShowHidden = in.Spec.Config.ShowHidden
+		exec.StrictRangeCheck = in.Spec.Config.StrictRangeCheck
+		opts = append(opts, *exec)
+
+		result, err := kcl.Run("prog.k", opts...)
+		if err != nil {
+			return nil, true, err
+		}
+		buf.WriteString(result.GetRawYamlResult())
+	} else {
+		if err := renderInlineVendor(in, dependencies, args, buf); err != nil {
+			return nil, true, err
+		}
+	}
+
+	// KCL emits every top-level variable; krm-kcl's contract is that the resources
+	// live under `items`. Unwrap exactly as SimpleTransformer.Transform does. This
+	// operates on the output, which is small — the saving is all on the input side.
+	nodes, err := (&kio.ByteReader{Reader: buf, OmitReaderAnnotations: true}).Read()
+	if err != nil {
+		return nil, true, err
+	}
+	items, _, err := edit.UnwrapResources(nodes)
+	if err != nil {
+		return nil, true, err
+	}
+
+	res := bytes.NewBuffer(nil)
+	if err := (&kio.ByteWriter{Writer: res}).Write(items); err != nil {
+		return nil, true, err
+	}
+	return res.Bytes(), true, nil
+}
+
+func renderInlineVendor(in *fkcl.KCLInput, dependencies, args []string, buf *bytes.Buffer) error {
+	dir, err := os.MkdirTemp("", "kcl-sandbox")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(dir)
+
+	prog := filepath.Join(dir, "prog.k")
+	if err := os.WriteFile(prog, []byte(in.Spec.Source), 0o600); err != nil {
+		return err
+	}
+
 	opts := options.NewRunOptions()
 	opts.NoStyle = true
 	opts.Entries = []string{prog}
@@ -92,32 +143,22 @@ func renderInline(in *fkcl.KCLInput) (out []byte, ok bool, err error) {
 	}
 
 	if err := opts.Complete([]string{}); err != nil {
-		return nil, true, err
+		return err
 	}
 	if err := opts.Validate(); err != nil {
-		return nil, true, err
+		return err
 	}
 	if err := opts.Run(); err != nil {
-		return nil, true, err
+		return err
 	}
+	return nil
+}
 
-	// KCL emits every top-level variable; krm-kcl's contract is that the resources
-	// live under `items`. Unwrap exactly as SimpleTransformer.Transform does. This
-	// operates on the output, which is small — the saving is all on the input side.
-	nodes, err := (&kio.ByteReader{Reader: buf, OmitReaderAnnotations: true}).Read()
-	if err != nil {
-		return nil, true, err
+func boolToInt32(v bool) int32 {
+	if v {
+		return 1
 	}
-	items, _, err := edit.UnwrapResources(nodes)
-	if err != nil {
-		return nil, true, err
-	}
-
-	res := bytes.NewBuffer(nil)
-	if err := (&kio.ByteWriter{Writer: res}).Write(items); err != nil {
-		return nil, true, err
-	}
-	return res.Bytes(), true, nil
+	return 0
 }
 
 // renderKey returns bytes that uniquely identify a render: source, dependencies,

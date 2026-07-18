@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"testing"
@@ -210,6 +212,25 @@ func TestRenderInlineDeclinesNonInlineSources(t *testing.T) {
 				t.Errorf("expected fall back to the pipeline, got ok=%v err=%v", ok, err)
 			}
 		})
+	}
+}
+
+func TestRenderInlineDoesNotCreateTempFile(t *testing.T) {
+	notDir := filepath.Join(t.TempDir(), "not-a-directory")
+	if err := os.WriteFile(notDir, []byte("block temp files"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("TMPDIR", notDir)
+
+	got, ok, err := renderInline(testInput(t, srcEmit, 0))
+	if err != nil {
+		t.Fatalf("renderInline: %v", err)
+	}
+	if !ok {
+		t.Fatal("renderInline declined an inline source")
+	}
+	if canonical(t, got) == "" {
+		t.Fatal("renderInline returned no resources")
 	}
 }
 
