@@ -18,6 +18,7 @@ require (
 	k8s.io/apimachinery v0.36.2
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 	kcl-lang.io/cli v0.12.7
+	kcl-lang.io/kcl-go v0.12.3
 	kcl-lang.io/kpm v0.12.8
 	kcl-lang.io/krm-kcl v0.12.7
 	oras.land/oras-go/v2 v2.6.2
@@ -252,7 +253,6 @@ require (
 	k8s.io/gengo/v2 v2.0.0-20251215205346-5ee0d033ba5b // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260427204847-8949caaa1199 // indirect
-	kcl-lang.io/kcl-go v0.12.3 // indirect
 	kcl-lang.io/kcl-openapi v0.10.2 // indirect
 	kcl-lang.io/lib v0.12.3 // indirect
 	sigs.k8s.io/controller-runtime v0.24.0 // indirect
