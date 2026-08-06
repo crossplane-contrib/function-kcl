@@ -17,7 +17,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.36.3
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
-	kcl-lang.io/cli v0.12.7
+	kcl-lang.io/cli v0.12.8
 	kcl-lang.io/kcl-go v0.12.4
 	kcl-lang.io/kpm v0.12.8
 	kcl-lang.io/krm-kcl v0.12.7
