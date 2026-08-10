@@ -13,7 +13,7 @@ require (
 	github.com/google/go-cmp v0.7.0
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.83.0
-	google.golang.org/protobuf v1.36.12-0.20260806062936-644d0267c26e
+	google.golang.org/protobuf v1.36.12-0.20260810132945-cdd4c5f7406e
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.36.3
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
