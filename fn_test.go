@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -1110,6 +1111,158 @@ func TestRunFunctionSimple(t *testing.T) {
 				t.Errorf("%s\nf.RunFunction(...): -want err, +got err:\n%s", tc.reason, diff)
 			}
 		})
+	}
+}
+
+// TestNestedIfAugAssignNoDuplicate is a regression test for issue #437.
+//
+// KCL 0.12.0–0.12.4 contained a lazy-evaluation replay bug: statements inside
+// an `if` body whose block had an `else` branch were executed more than once,
+// and `_items += [...]` accumulated on every replay. The result was two
+// resources with the same `krm.kcl.dev/composition-resource-name` annotation,
+// which the duplicate-name check rejects as a fatal result:
+//
+//	multiple composed resources with name "versioning" returned: ...
+//
+// Fixed upstream by kcl-lang/kcl#2120, #2139, #2142 (merged 2026-08), shipped
+// via kcl-go / lib v0.12.5. This test asserts the bug stays fixed.
+func TestNestedIfAugAssignNoDuplicate(t *testing.T) {
+	// The inner `if` must have an `else` branch for the replay to trigger
+	// (verified by Peefy in #437). With both outer and inner conditions true,
+	// only the inner-`if`-then branch is logically taken, so the expected
+	// output is three distinct resources: bucket, policy, versioning.
+	src := "_items = [{\"apiVersion\": \"example.org/v1\", \"kind\": \"Bucket\", \"metadata\": {\"annotations\": {\"krm.kcl.dev/composition-resource-name\": \"bucket\"}}}]\n" +
+		"if True:\n" +
+		"    _items += [{\"apiVersion\": \"example.org/v1\", \"kind\": \"BucketPolicy\", \"metadata\": {\"annotations\": {\"krm.kcl.dev/composition-resource-name\": \"policy\"}}}]\n" +
+		"    if True:\n" +
+		"        _items += [{\"apiVersion\": \"example.org/v1\", \"kind\": \"BucketVersioning\", \"metadata\": {\"annotations\": {\"krm.kcl.dev/composition-resource-name\": \"versioning\"}}}]\n" +
+		"    else:\n" +
+		"        _items += [{\"apiVersion\": \"example.org/v1\", \"kind\": \"BucketOther\", \"metadata\": {\"annotations\": {\"krm.kcl.dev/composition-resource-name\": \"other\"}}}]\n" +
+		"items = _items\n"
+
+	srcJSON, err := json.Marshal(src)
+	if err != nil {
+		t.Fatalf("marshal source: %v", err)
+	}
+
+	req := &fnv1.RunFunctionRequest{
+		Meta: &fnv1.RequestMeta{Tag: "nested-if-aug-assign"},
+		Input: resource.MustStructJSON(`{
+			"apiVersion": "krm.kcl.dev/v1alpha1",
+			"kind": "KCLInput",
+			"metadata": {"name": "basic"},
+			"spec": {
+				"target": "Default",
+				"source": ` + string(srcJSON) + `
+			}
+		}`),
+		Observed: &fnv1.State{
+			Composite: &fnv1.Resource{
+				Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+			},
+		},
+	}
+
+	f := &Function{log: logging.NewLogrLogger(testr.New(t))}
+	rsp, err := f.RunFunction(context.Background(), req)
+	if err != nil {
+		t.Fatalf("f.RunFunction: unexpected error: %v", err)
+	}
+
+	// No fatal result: the bug surfaces as a duplicate-resource-name fatal
+	// from the crossplane-runtime pipeline, so an empty Results slice proves
+	// the KCL runtime produced a non-duplicate `items` list.
+	for _, r := range rsp.GetResults() {
+		if r.GetSeverity() == fnv1.Severity_SEVERITY_FATAL {
+			t.Fatalf("unexpected fatal result: %s", r.GetMessage())
+		}
+	}
+
+	// Exact key set, in any order. A duplicate would push "versioning" twice
+	// into the map (Go collapses duplicates silently, so the bug shows up as a
+	// missing "policy" key with one of the resources lost), and would also
+	// have triggered the fatal check above.
+	gotKeys := make([]string, 0, len(rsp.GetDesired().GetResources()))
+	for k := range rsp.GetDesired().GetResources() {
+		gotKeys = append(gotKeys, k)
+	}
+	want := []string{"bucket", "policy", "versioning"}
+	if diff := cmp.Diff(want, gotKeys, cmpopts.SortSlices(func(a, b string) bool { return a < b })); diff != "" {
+		t.Errorf("unexpected resource keys (-want, +got):\n%s", diff)
+	}
+}
+
+// TestListCompInsideLambdaIfElse is a regression test for issue #285.
+//
+// The original report described a "v0.11.4 duplicate-name" error with direct
+// list comprehensions in KCL compositions. The reporter's program used a
+// lambda (`_metadata`) whose body had an `if/else` assigning to a schema
+// key, then built a list of resources via `_items += [...] for idx, s in
+// subnets`. The KCL evaluator's lazy-evaluation replay applied the lambda
+// body more than once, producing duplicate entries in `_items`, and the
+// duplicate-name check in the crossplane-runtime pipeline rejected them.
+//
+// Same root cause as #437 (kcl-lang/kcl#1833 lazy-replay), same fix
+// (kcl-lang/kcl#2120, #2139, #2142, shipped via kcl-go / lib v0.12.5).
+func TestListCompInsideLambdaIfElse(t *testing.T) {
+	// Mirrors the reproduction in #285, simplified to inline data.
+	src := "_metadata = lambda id: str, suffix: str -> any {\n" +
+		"    {\n" +
+		"        metadata.annotations = {\n" +
+		"            if suffix == \"\":\n" +
+		"                \"krm.kcl.dev/composition-resource-name\" = id\n" +
+		"            else:\n" +
+		"                \"krm.kcl.dev/composition-resource-name\" = id + \"-\" + suffix\n" +
+		"        }\n" +
+		"    }\n" +
+		"}\n" +
+		"_items: [any] = []\n" +
+		"_items += [_metadata(\"net\", \"public-${idx}\") for idx in [0, 1]]\n" +
+		"_items += [_metadata(\"net\", \"private-${idx}\") for idx in [0, 1]]\n" +
+		"items = _items\n"
+
+	srcJSON, err := json.Marshal(src)
+	if err != nil {
+		t.Fatalf("marshal source: %v", err)
+	}
+
+	req := &fnv1.RunFunctionRequest{
+		Meta: &fnv1.RequestMeta{Tag: "list-comp-lambda-if-else"},
+		Input: resource.MustStructJSON(`{
+			"apiVersion": "krm.kcl.dev/v1alpha1",
+			"kind": "KCLInput",
+			"metadata": {"name": "basic"},
+			"spec": {
+				"target": "Default",
+				"source": ` + string(srcJSON) + `
+			}
+		}`),
+		Observed: &fnv1.State{
+			Composite: &fnv1.Resource{
+				Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+			},
+		},
+	}
+
+	f := &Function{log: logging.NewLogrLogger(testr.New(t))}
+	rsp, err := f.RunFunction(context.Background(), req)
+	if err != nil {
+		t.Fatalf("f.RunFunction: unexpected error: %v", err)
+	}
+
+	for _, r := range rsp.GetResults() {
+		if r.GetSeverity() == fnv1.Severity_SEVERITY_FATAL {
+			t.Fatalf("unexpected fatal result: %s", r.GetMessage())
+		}
+	}
+
+	gotKeys := make([]string, 0, len(rsp.GetDesired().GetResources()))
+	for k := range rsp.GetDesired().GetResources() {
+		gotKeys = append(gotKeys, k)
+	}
+	want := []string{"net-private-0", "net-private-1", "net-public-0", "net-public-1"}
+	if diff := cmp.Diff(want, gotKeys, cmpopts.SortSlices(func(a, b string) bool { return a < b })); diff != "" {
+		t.Errorf("unexpected resource keys (-want, +got):\n%s", diff)
 	}
 }
 
