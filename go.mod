@@ -17,7 +17,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.36.4
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
-	kcl-lang.io/cli v0.12.8
+	kcl-lang.io/cli v0.12.9
 	kcl-lang.io/kcl-go v0.12.5
 	kcl-lang.io/kpm v0.12.9
 	kcl-lang.io/krm-kcl v0.12.8
@@ -225,7 +225,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.55.0 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
-	golang.org/x/mod v0.39.0 // indirect
+	golang.org/x/mod v0.40.0 // indirect
 	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
@@ -250,7 +250,7 @@ require (
 	k8s.io/gengo/v2 v2.0.0-20251215205346-5ee0d033ba5b // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260427204847-8949caaa1199 // indirect
-	kcl-lang.io/kcl-openapi v0.10.2 // indirect
+	kcl-lang.io/kcl-openapi v0.11.0 // indirect
 	kcl-lang.io/lib v0.12.5 // indirect
 	sigs.k8s.io/controller-runtime v0.24.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
