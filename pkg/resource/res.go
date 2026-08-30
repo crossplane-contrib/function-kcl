@@ -587,6 +587,14 @@ func (c *duplicateChecker) CheckAndSetDesired(desired map[resource.Name]*resourc
 
 func (c *duplicateChecker) CheckDuplicateName(cd *resource.DesiredComposed, name resource.Name) error {
 	kindAndName := cd.Resource.GetKind() + "/" + cd.Resource.GetName()
+	// A composed resource with neither metadata.name nor the composition
+	// resource name annotation would be keyed on the empty string here, and
+	// Crossplane later rejects it with an opaque "composed resource without
+	// required composition-resource-name" error. Fail fast instead, naming
+	// the resource that is missing a name.
+	if name == "" {
+		return errors.Errorf("composed resource of kind %q has no composition resource name: set metadata.name or metadata.annotations.%q to give it a stable identity", cd.Resource.GetKind(), AnnotationKeyCompositionResourceName)
+	}
 	if _, existed := (*c)[name]; existed {
 		return errors.Errorf("multiple composed resources with name %q returned: %s and %s. Set different metadata.name or metadata.annotations.\"krm.kcl.dev/composition-resource-name\" to distinguish them.", name, (*c)[name], kindAndName)
 	}
