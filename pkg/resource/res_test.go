@@ -1,6 +1,7 @@
 package resource
 
 import (
+	"strings"
 	"testing"
 
 	res "github.com/crossplane/function-sdk-go/resource"
@@ -122,6 +123,83 @@ func TestSetData(t *testing.T) {
 			}
 			if diff := cmp.Diff(tt.args.o, tt.expected); diff != "" {
 				t.Errorf("SetData(): -want rsp, +got rsp:\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestCheckDuplicateName(t *testing.T) {
+	newCD := func(kind, name, annotation string) *res.DesiredComposed {
+		metadata := map[string]interface{}{}
+		if name != "" {
+			metadata["name"] = name
+		}
+		if annotation != "" {
+			metadata["annotations"] = map[string]interface{}{
+				AnnotationKeyCompositionResourceName: annotation,
+			}
+		}
+		return &res.DesiredComposed{
+			Resource: &composed.Unstructured{
+				Unstructured: unstructured.Unstructured{
+					Object: map[string]interface{}{
+						"apiVersion": "example.org/v1",
+						"kind":       kind,
+						"metadata":   metadata,
+					},
+				},
+			},
+		}
+	}
+
+	tests := []struct {
+		name    string
+		kind    string
+		objName string
+		annot   string
+		wantErr string
+	}{
+		{
+			name:    "Named via metadata.name is accepted",
+			kind:    "Bucket",
+			objName: "my-bucket",
+		},
+		{
+			name:  "Named via the composition resource name annotation is accepted",
+			kind:  "Bucket",
+			annot: "bucket",
+		},
+		{
+			// Without this guard the resource is keyed on "" and Crossplane
+			// later fails with an opaque "composed resource without required
+			// composition-resource-name" error. See issue #199.
+			name:    "Unnamed resource is rejected with an actionable error",
+			kind:    "Release",
+			wantErr: `composed resource of kind "Release" has no composition resource name`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cd := newCD(tt.kind, tt.objName, tt.annot)
+			checker := newDuplicateChecker()
+			err := checker.CheckDuplicateName(cd, res.Name(GetResourceName(cd)))
+
+			if tt.wantErr == "" {
+				if err != nil {
+					t.Fatalf("CheckDuplicateName() unexpected error: %v", err)
+				}
+				return
+			}
+			if err == nil {
+				t.Fatalf("CheckDuplicateName() expected error containing %q, got nil", tt.wantErr)
+			}
+			if !strings.Contains(err.Error(), tt.wantErr) {
+				t.Errorf("CheckDuplicateName() error = %q, want it to contain %q", err, tt.wantErr)
+			}
+			// The message must point the author at the annotation to set.
+			if !strings.Contains(err.Error(), AnnotationKeyCompositionResourceName) {
+				t.Errorf("CheckDuplicateName() error = %q, want it to mention %q", err, AnnotationKeyCompositionResourceName)
 			}
 		})
 	}

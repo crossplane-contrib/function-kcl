@@ -120,7 +120,7 @@ func TestRunFunctionSimple(t *testing.T) {
 						},
 						"spec": {
 							"target": "Resources",
-							"source": "{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n}"
+							"source": "{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n    metadata.name = \"generated\"\n}"
 						}
 					}`),
 					Observed: &fnv1.State{
@@ -138,8 +138,8 @@ func TestRunFunctionSimple(t *testing.T) {
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
 						Resources: map[string]*fnv1.Resource{
-							"": {
-								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated"}`),
+							"generated": {
+								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated","metadata":{"name":"generated"}}`),
 							},
 						},
 					},
@@ -158,7 +158,7 @@ func TestRunFunctionSimple(t *testing.T) {
 							"name": "basic"
 						},
 						"spec": {
-							"source": "items = [{ \n    apiVersion: \"sql.gcp.upbound.io/v1beta1\"\n    kind: \"DatabaseInstance\"\n    spec: {\n        forProvider: {\n            project: \"test-project\"\n            settings: [{databaseFlags: [{\n                name: \"log_checkpoints\"\n                value: \"on\"\n            }]}]\n        }\n    }\n}]\n"
+							"source": "items = [{ \n    apiVersion: \"sql.gcp.upbound.io/v1beta1\"\n    kind: \"DatabaseInstance\"\n    metadata.name = \"database-instance\"\n    spec: {\n        forProvider: {\n            project: \"test-project\"\n            settings: [{databaseFlags: [{\n                name: \"log_checkpoints\"\n                value: \"on\"\n            }]}]\n        }\n    }\n}]\n"
 						}
 					}`),
 					Observed: &fnv1.State{
@@ -176,8 +176,8 @@ func TestRunFunctionSimple(t *testing.T) {
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
 						Resources: map[string]*fnv1.Resource{
-							"": {
-								Resource: resource.MustStructJSON(`{"apiVersion": "sql.gcp.upbound.io/v1beta1", "kind": "DatabaseInstance", "spec": {"forProvider": {"project": "test-project", "settings": [{"databaseFlags": [{"name": "log_checkpoints", "value": "on"}]}]}}}`),
+							"database-instance": {
+								Resource: resource.MustStructJSON(`{"apiVersion": "sql.gcp.upbound.io/v1beta1", "kind": "DatabaseInstance", "metadata": {"name": "database-instance"}, "spec": {"forProvider": {"project": "test-project", "settings": [{"databaseFlags": [{"name": "log_checkpoints", "value": "on"}]}]}}}`),
 							},
 						},
 					},
@@ -722,7 +722,7 @@ func TestRunFunctionSimple(t *testing.T) {
 		},
 		"EmptyInputWithDefaultSource": {
 			reason:        "The function should use the default source when input is not provided and default source is set",
-			defaultSource: "{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n}",
+			defaultSource: "{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n    metadata.name = \"generated\"\n}",
 			args: args{
 				req: &fnv1.RunFunctionRequest{
 					Meta:  &fnv1.RequestMeta{Tag: "empty-input"},
@@ -742,8 +742,8 @@ func TestRunFunctionSimple(t *testing.T) {
 							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
 						},
 						Resources: map[string]*fnv1.Resource{
-							"": {
-								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated"}`),
+							"generated": {
+								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated","metadata":{"name":"generated"}}`),
 							},
 						},
 					},
