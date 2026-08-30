@@ -184,6 +184,86 @@ func TestRunFunctionSimple(t *testing.T) {
 				},
 			},
 		},
+		"CustomTTLIsHonoured": {
+			reason: "spec.ttl should override the default function response TTL.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "custom-ttl"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Resources",
+							"source": "{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n    metadata.name = \"generated\"\n}",
+							"ttl": "5m"
+						}
+					}`),
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "custom-ttl", Ttl: durationpb.New(5 * time.Minute)},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"generated": {
+								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated","metadata":{"name":"generated"}}`),
+							},
+						},
+					},
+				},
+			},
+		},
+		"CustomTTLZeroRequeuesImmediately": {
+			reason: "spec.ttl = 0s should be honoured and request an immediate requeue (no wait).",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "custom-ttl-zero"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Resources",
+							"source": "{\n    apiVersion: \"example.org/v1\"\n    kind: \"Generated\"\n    metadata.name = \"generated\"\n}",
+							"ttl": "0s"
+						}
+					}`),
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "custom-ttl-zero", Ttl: durationpb.New(0)},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"generated": {
+								Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"Generated","metadata":{"name":"generated"}}`),
+							},
+						},
+					},
+				},
+			},
+		},
 		"CustomCompositionResourceNameIsSet": {
 			reason: "The Function should set value of crossplane.io/composition-resource-name annotation by krm.kcl.dev/composition-resource-name annotation ",
 			args: args{

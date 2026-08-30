@@ -75,6 +75,15 @@ type RunSpec struct {
 	// +kubebuilder:default:=Resources
 	// +kubebuilder:validation:Enum:=Default;PatchDesired;PatchResources;Resources;XR
 	Target resource.Target `json:"target"`
+	// TTL overrides the function response cache TTL (response.meta.ttl) returned
+	// to Crossplane for this run. When unset, the Crossplane function SDK default
+	// (response.DefaultTTL) is used. The duration string follows Kubernetes
+	// conventions, e.g. "90s", "5m", "1h". A value of 0 means Crossplane will
+	// retry this function as soon as the current reconcile loop completes, which
+	// can be useful to intentionally requeue (e.g. when waiting on an external
+	// condition that this function has not yet observed).
+	// +optional
+	TTL *metav1.Duration `json:"ttl,omitempty" yaml:"ttl,omitempty"`
 }
 
 // ConfigSpec defines the compile config.
