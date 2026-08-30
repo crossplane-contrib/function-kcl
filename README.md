@@ -385,6 +385,29 @@ spec:
     # omit other fields
 ```
 
+### Custom Function Response TTL
+
+By default the function asks Crossplane to re-run it after
+`response.DefaultTTL` (60s). You can override that on a per-Composition basis
+with `spec.ttl`, which sets `response.meta.ttl` on the function response.
+Accepts Kubernetes duration strings (e.g. `"90s"`, `"5m"`, `"1h"`). Setting
+`"0s"` requests an immediate requeue after the current reconcile loop, which
+is useful when the function is waiting on an external condition it has not yet
+observed (see [#392](https://github.com/crossplane-contrib/function-kcl/issues/392)).
+
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLInput
+spec:
+  source: |
+    items = [...]
+  ttl: 10m   # requeue this function every 10 minutes
+```
+
+Note: `spec.ttl` only changes the function response TTL; the in-process render
+cache is controlled separately via the `FUNCTION_KCL_RENDER_CACHE_TTL` and
+`FUNCTION_KCL_RENDER_CACHE_SIZE` environment variables.
+
 ### Dependencies
 
 ```yaml

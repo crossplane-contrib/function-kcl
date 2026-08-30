@@ -13,6 +13,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/v2/pkg/logging"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
 	"k8s.io/apimachinery/pkg/runtime"
 	"kcl-lang.io/krm-kcl/pkg/api"
@@ -66,6 +67,19 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 	if err := request.GetInput(req, in); err != nil {
 		response.Fatal(rsp, errors.Wrapf(err, "cannot get Function input from %T", req))
 		return rsp, nil
+	}
+	// Allow callers to override the function response TTL via spec.ttl. When
+	// unset we keep the Crossplane default so existing compositions behave the
+	// same. Negative durations are clamped to 0 — Crossplane treats 0 as
+	// "requeue immediately after the current reconcile finishes", which is
+	// useful for waiting on conditions this function has not yet observed.
+	if in.Spec.TTL != nil {
+		ttl := in.Spec.TTL.Duration
+		if ttl < 0 {
+			ttl = 0
+		}
+		log.Debug("using custom function response TTL", "ttl", ttl.String())
+		rsp.Meta.Ttl = durationpb.New(ttl)
 	}
 	// Set default source
 	if in.Spec.Source == "" {

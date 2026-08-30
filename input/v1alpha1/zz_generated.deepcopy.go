@@ -5,6 +5,7 @@
 package v1alpha1
 
 import (
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -143,6 +144,11 @@ func (in *RunSpec) DeepCopyInto(out *RunSpec) {
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
+	}
+	if in.TTL != nil {
+		in, out := &in.TTL, &out.TTL
+		*out = new(v1.Duration)
+		**out = **in
 	}
 }
 
