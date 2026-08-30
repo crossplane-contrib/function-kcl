@@ -305,6 +305,15 @@ spec:
     url: https://<oci-host-url> # or KCL_SRC_URL environment variable
     username: <username> # or KCL_SRC_USERNAME environment variable
     password: <password> # or KCL_SRC_PASSWORD environment variable
+    # Optional. When set, kpm's `--provider` flag is used to mint the
+    # OCI credential instead of `username/password`. Supported values:
+    #   "" / "basic" — Username/Password are used as-is (default).
+    #   "gcp"        — OAuth2 access token is fetched from the GCE/GKE
+    #                  metadata server (Workload Identity). Username
+    #                  and Password are ignored. Useful for GKE pods
+    #                  that should pull from Artifact Registry without
+    #                  any static credential.
+    provider: "" # optional
 ```
 
 You can provide credentials in a Secret to your pipeline step under the name `kcl-registry`.
@@ -367,6 +376,11 @@ data:
   username: dXNlcm5hbWU=
   password: cGFzc3dvcmQ=
   url: aHR0cHM6Ly9leGFtcGxlLmNvbQ==
+  # Optional. Set to "gcp" to authenticate via GCP Workload Identity
+  # (no static credential needed when the function runs in a GKE pod
+  # with Workload Identity bound). Leave unset for the basic
+  # username/password flow.
+  # provider: Z2Nw
 ```
 
 You can use these credentials with `crossplane render --function-credentials=secret.yaml xr.yaml composition.yaml functions.yaml`.

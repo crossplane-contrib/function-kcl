@@ -112,9 +112,28 @@ type ConfigSpec struct {
 
 // CredSpec defines authentication credentials for remote locations
 type CredSpec struct {
-	Url      string `json:"url,omitempty" yaml:"url,omitempty"`
-	Username string `json:"username" yaml:"username"`
-	Password string `json:"password" yaml:"password"`
+	// +optional
+	Url string `json:"url,omitempty" yaml:"url,omitempty"`
+	// Username is required when provider is "basic" (the default).
+	// Ignored when provider is "gcp".
+	// +optional
+	Username string `json:"username,omitempty" yaml:"username,omitempty"`
+	// Password is required when provider is "basic" (the default).
+	// Ignored when provider is "gcp".
+	// +optional
+	Password string `json:"password,omitempty" yaml:"password,omitempty"`
+	// Provider selects the credential provider used to mint an OCI
+	// credential for `url`. The empty string and "basic" both use
+	// Username/Password directly via `kpm login`. "gcp" mints an
+	// OAuth2 access token from the GCE/GKE metadata server (Workload
+	// Identity Federation) and requires neither Username nor Password
+	// to be set — useful for GKE pods that should pull from Artifact
+	// Registry without any static credential.
+	//
+	// Crossplane users supply this via the `kcl-registry`
+	// OpaqueCredential's `provider` data field.
+	// +optional
+	Provider string `json:"provider,omitempty" yaml:"provider,omitempty"`
 }
 
 type ResourceList []Resource

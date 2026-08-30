@@ -112,8 +112,18 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 				if url, ok := data.Data["url"]; ok {
 					in.Spec.Credentials.Url = string(url)
 				}
+			} else if _, hasProvider := data.Data["provider"]; hasProvider {
+				// No password is required when a provider is
+				// configured: the provider mints the credential
+				// (e.g. GCP Workload Identity).
+				if url, ok := data.Data["url"]; ok {
+					in.Spec.Credentials.Url = string(url)
+				}
 			} else {
 				log.Info("Warning: required password not found in the credentials")
+			}
+			if provider, ok := data.Data["provider"]; ok {
+				in.Spec.Credentials.Provider = string(provider)
 			}
 		}
 	}
@@ -376,4 +386,3 @@ func resetOCITokenCacheIfNeeded(log logging.Logger) {
 		log.Debug("Reset ORAS OCI token cache", "age", age.Round(time.Second), "maxAge", ociCacheMaxAge)
 	}
 }
-

@@ -96,13 +96,23 @@ spec:
                 properties:
                   password:
                     type: string
+                  provider:
+                    description: |-
+                      Provider selects the credential provider used to mint an OCI
+                      credential for `url`. The empty string and "basic" both use
+                      Username/Password directly via `kpm login`. "gcp" mints an
+                      OAuth2 access token from the GCE/GKE metadata server (Workload
+                      Identity Federation) and requires neither Username nor Password
+                      to be set — useful for GKE pods that should pull from Artifact
+                      Registry without any static credential.
+
+                      Crossplane users supply this via the `kcl-registry`
+                      OpaqueCredential's `provider` data field.
+                    type: string
                   url:
                     type: string
                   username:
                     type: string
-                required:
-                - password
-                - username
                 type: object
               dependencies:
                 description: |-

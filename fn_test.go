@@ -264,6 +264,57 @@ func TestRunFunctionSimple(t *testing.T) {
 				},
 			},
 		},
+		"CredentialsProviderFlowsThrough": {
+			reason: "Spec.Credentials.Provider must be populated from the kcl-registry credential data so downstream consumers (krm-kcl, kpm) can dispatch on it.",
+			args: args{
+				req: &fnv1.RunFunctionRequest{
+					Meta: &fnv1.RequestMeta{Tag: "creds-provider"},
+					Input: resource.MustStructJSON(`{
+						"apiVersion": "krm.kcl.dev/v1alpha1",
+						"kind": "KCLInput",
+						"metadata": {
+							"name": "basic"
+						},
+						"spec": {
+							"target": "Resources",
+							"source": "_creds = option(\"resource_list\")?.functionConfig?.spec?.credentials or {}\nitems = [{\n    apiVersion: \"v1\"\n    kind: \"ConfigMap\"\n    metadata.name = \"creds\"\n    data: {\n        provider = _creds.provider or \"\"\n        url = _creds.url or \"\"\n    }\n}]"
+						}
+					}`),
+					Credentials: map[string]*fnv1.Credentials{
+						"kcl-registry": {
+							Source: &fnv1.Credentials_CredentialData{
+								CredentialData: &fnv1.CredentialData{
+									Data: map[string][]byte{
+										"url":      []byte("gcr.io/my-project"),
+										"provider": []byte("gcp"),
+									},
+								},
+							},
+						},
+					},
+					Observed: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+					},
+				},
+			},
+			want: want{
+				rsp: &fnv1.RunFunctionResponse{
+					Meta: &fnv1.ResponseMeta{Tag: "creds-provider", Ttl: durationpb.New(response.DefaultTTL)},
+					Desired: &fnv1.State{
+						Composite: &fnv1.Resource{
+							Resource: resource.MustStructJSON(`{"apiVersion":"example.org/v1","kind":"XR"}`),
+						},
+						Resources: map[string]*fnv1.Resource{
+							"creds": {
+								Resource: resource.MustStructJSON(`{"apiVersion":"v1","kind":"ConfigMap","metadata":{"name":"creds"},"data":{"provider":"gcp","url":"gcr.io/my-project"}}`),
+							},
+						},
+					},
+				},
+			},
+		},
 		"CustomCompositionResourceNameIsSet": {
 			reason: "The Function should set value of crossplane.io/composition-resource-name annotation by krm.kcl.dev/composition-resource-name annotation ",
 			args: args{
