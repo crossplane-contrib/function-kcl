@@ -305,14 +305,19 @@ spec:
     url: https://<oci-host-url> # or KCL_SRC_URL environment variable
     username: <username> # or KCL_SRC_USERNAME environment variable
     password: <password> # or KCL_SRC_PASSWORD environment variable
-    # Optional. When set, kpm's `--provider` flag is used to mint the
-    # OCI credential instead of `username/password`. Supported values:
+    # Optional. When set, the OCI credential is fetched from the pod's
+    # cloud identity instead of `username/password`. Supported values:
     #   "" / "basic" — Username/Password are used as-is (default).
     #   "gcp"        — OAuth2 access token is fetched from the GCE/GKE
     #                  metadata server (Workload Identity). Username
     #                  and Password are ignored. Useful for GKE pods
     #                  that should pull from Artifact Registry without
     #                  any static credential.
+    #   "aws"        — a short-lived token is fetched from the pod's AWS
+    #                  identity (IRSA or EKS Pod Identity) via
+    #                  ecr:GetAuthorizationToken. Username and Password
+    #                  are ignored; `url` must be the ECR registry host.
+    #                  See "Pull from a private AWS ECR" below.
     provider: "" # optional
 ```
 
@@ -376,14 +381,97 @@ data:
   username: dXNlcm5hbWU=
   password: cGFzc3dvcmQ=
   url: aHR0cHM6Ly9leGFtcGxlLmNvbQ==
-  # Optional. Set to "gcp" to authenticate via GCP Workload Identity
-  # (no static credential needed when the function runs in a GKE pod
-  # with Workload Identity bound). Leave unset for the basic
-  # username/password flow.
+  # Optional. Set to "gcp" to authenticate via GCP Workload Identity, or
+  # "aws" to get an ECR token from the pod's AWS identity (IRSA / EKS Pod
+  # Identity) — no static credential needed in either case. Leave unset for
+  # the basic username/password flow. (base64 of "gcp" / "aws")
   # provider: Z2Nw
 ```
 
 You can use these credentials with `crossplane render --function-credentials=secret.yaml xr.yaml composition.yaml functions.yaml`.
+
+### Pull from a private AWS ECR (IRSA or EKS Pod Identity)
+
+Set `provider: "aws"` to pull the OCI source from a private Amazon ECR registry with no static
+credential. The function uses the pod's own AWS identity to get a short-lived token via
+`ecr:GetAuthorizationToken`. It works on EKS with either **IRSA** or **EKS Pod Identity** - the function
+side is the same for both (the standard AWS credential chain resolves whichever the pod has), but the
+ServiceAccount is set up differently, as shown below.
+
+```yaml
+apiVersion: krm.kcl.dev/v1alpha1
+kind: KCLInput
+spec:
+  source: oci://<account-id>.dkr.ecr.<region>.amazonaws.com/<repo>
+  credentials:
+    # The ECR registry host. Only the host is used; the region is read from it.
+    url: <account-id>.dkr.ecr.<region>.amazonaws.com
+    provider: aws
+```
+
+The function pod needs an AWS identity with `ecr:GetAuthorizationToken` (the pull itself is authorized by
+the ECR repository policy). The pod runs under the ServiceAccount from the function's
+`DeploymentRuntimeConfig`, and the two identity mechanisms need that ServiceAccount set up differently.
+
+**IRSA** - keep the built-in per-revision ServiceAccount (`function-kcl-<hash>`); only annotate it, and
+match the changing name with a wildcard in the role trust. No ServiceAccount name change:
+
+```yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: function-kcl
+spec:
+  serviceAccountTemplate:
+    metadata:
+      annotations:
+        eks.amazonaws.com/role-arn: arn:aws:iam::<account-id>:role/<function-kcl-ecr-role>
+```
+
+```json
+{
+  "Effect": "Allow",
+  "Principal": { "Federated": "arn:aws:iam::<account-id>:oidc-provider/<oidc-issuer>" },
+  "Action": "sts:AssumeRoleWithWebIdentity",
+  "Condition": { "StringLike": {
+    "<oidc-issuer>:sub": "system:serviceaccount:<ns>:function-kcl-*"
+  } }
+}
+```
+
+**EKS Pod Identity** - an association targets a fixed ServiceAccount name, so override the ServiceAccount
+name to a static value (no annotation needed - Pod Identity uses the association, not the `role-arn`
+annotation):
+
+```yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: function-kcl
+spec:
+  serviceAccountTemplate:
+    metadata:
+      name: function-kcl   # static name; the association below targets it
+```
+
+```bash
+aws eks create-pod-identity-association \
+  --cluster-name <cluster> --namespace <ns> \
+  --service-account function-kcl \
+  --role-arn arn:aws:iam::<account-id>:role/<function-kcl-ecr-role>
+```
+
+```json
+{
+  "Effect": "Allow",
+  "Principal": { "Service": "pods.eks.amazonaws.com" },
+  "Action": ["sts:AssumeRole", "sts:TagSession"]
+}
+```
+
+Either way the function references the runtime config with `runtimeConfigRef.name: function-kcl`. The role
+needs only `ecr:GetAuthorizationToken` on `*` (it has no resource-level scoping); read access to the
+repositories is granted by the ECR repository policy.
 
 ### Run Config
 
@@ -646,8 +734,8 @@ spec:
 
 ### Required resources
 
-By defining one or more "required resources", you can ask Crossplane to retrieve additional resources from the local cluster 
-and make them available to your templates. 
+By defining one or more "required resources", you can ask Crossplane to retrieve additional resources from the local cluster
+and make them available to your templates.
 See the [docs](https://docs.crossplane.io/latest/composition/compositions/#required-resources) for more information.
 
 This feature only works with Crossplane v2. Crossplane v1 must use [Extra Resources](#extra-resources), described in the section below.
@@ -789,7 +877,7 @@ kind: KCLInput
 spec:
   source: |
     er = option("params")?.requiredResources
-    
+
     if er?.bar:
       name = er?.bar[0]?.Resource?.metadata?.name or ""
     # Omit other logic

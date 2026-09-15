@@ -50,7 +50,7 @@ type Function struct {
 }
 
 // RunFunction runs the Function.
-func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) (*fnv1.RunFunctionResponse, error) {
+func (f *Function) RunFunction(ctx context.Context, req *fnv1.RunFunctionRequest) (*fnv1.RunFunctionResponse, error) {
 	// Reject new work while the process is draining for a memory recycle so
 	// Crossplane retries this reconcile elsewhere instead of having it cut off
 	// mid-render. begin() also bounds the recycle drain to in-flight calls.
@@ -114,7 +114,7 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 				}
 			} else if _, hasProvider := data.Data["provider"]; hasProvider {
 				// No password is required when a provider is
-				// configured: the provider mints the credential
+				// configured: the provider gets the credential
 				// (e.g. GCP Workload Identity).
 				if url, ok := data.Data["url"]; ok {
 					in.Spec.Credentials.Url = string(url)
@@ -126,6 +126,23 @@ func (f *Function) RunFunction(_ context.Context, req *fnv1.RunFunctionRequest) 
 				in.Spec.Credentials.Provider = string(provider)
 			}
 		}
+	}
+	// The "aws" provider gets a short-lived ECR credential from the pod's AWS identity
+	// (IRSA / Pod Identity), the same way the "gcp" provider uses Workload Identity. We write it into a
+	// docker config the pull reads, then CLEAR the credentials so krm-kcl does not call kpm login -
+	// kpm refuses to STORE plaintext credentials for an HTTPS registry, but READING them for the pull
+	// is fine. No static credential is stored.
+	if strings.EqualFold(in.Spec.Credentials.Provider, "aws") {
+		username, password, err := getECRCredential(ctx, in.Spec.Credentials.Url)
+		if err != nil {
+			response.Fatal(rsp, errors.Wrap(err, "cannot get ECR credential"))
+			return rsp, nil
+		}
+		if err := writeECRDockerConfig(in.Spec.Credentials.Url, username, password); err != nil {
+			response.Fatal(rsp, errors.Wrap(err, "cannot write ECR docker config"))
+			return rsp, nil
+		}
+		in.Spec.Credentials = fkcl.CredSpec{}
 	}
 	if err := in.Validate(); err != nil {
 		response.Fatal(rsp, errors.Wrap(err, "invalid function input"))

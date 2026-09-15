@@ -13,4 +13,8 @@ metadata:
       to write composite logic without the need for repeated packaging of crossplane functions,
       and we support package management and the [KRM KCL specification](https://github.com/kcl-lang/krm-kcl),
       which allows for OCI/Git source and the reuse of [KCL's module ecosystem](https://artifacthub.io/packages/search?org=kcl&sort=relevance&page=1).
-spec: {}
+spec:
+  # Required by crossplane v1.17+/v2 for a function used in a Composition pipeline. Declared explicitly
+  # (upstream leaves spec empty and relies on the CLI build default, which our build does not get).
+  capabilities:
+    - composition

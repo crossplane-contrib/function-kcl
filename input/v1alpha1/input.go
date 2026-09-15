@@ -122,13 +122,17 @@ type CredSpec struct {
 	// Ignored when provider is "gcp".
 	// +optional
 	Password string `json:"password,omitempty" yaml:"password,omitempty"`
-	// Provider selects the credential provider used to mint an OCI
+	// Provider selects the credential provider used to get an OCI
 	// credential for `url`. The empty string and "basic" both use
-	// Username/Password directly via `kpm login`. "gcp" mints an
+	// Username/Password directly via `kpm login`. "gcp" gets an
 	// OAuth2 access token from the GCE/GKE metadata server (Workload
 	// Identity Federation) and requires neither Username nor Password
 	// to be set — useful for GKE pods that should pull from Artifact
-	// Registry without any static credential.
+	// Registry without any static credential. "aws" gets a short-lived
+	// ECR credential from the pod's AWS identity (IRSA / EKS Pod Identity)
+	// via ecr:GetAuthorizationToken, so EKS pods can pull from a private
+	// ECR registry without any static credential; `url` must be the ECR
+	// registry host.
 	//
 	// Crossplane users supply this via the `kcl-registry`
 	// OpaqueCredential's `provider` data field.
