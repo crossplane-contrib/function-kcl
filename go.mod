@@ -8,7 +8,7 @@ require (
 	dario.cat/mergo v1.0.2
 	github.com/alecthomas/kong v1.16.1
 	github.com/aws/aws-sdk-go-v2/config v1.33.5
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.65.0
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.66.0
 	github.com/crossplane/crossplane-runtime/v2 v2.2.0
 	github.com/crossplane/function-sdk-go v0.5.0
 	github.com/go-logr/logr v1.4.4
