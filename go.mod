@@ -22,7 +22,7 @@ require (
 	kcl-lang.io/cli v0.12.10
 	kcl-lang.io/kcl-go v0.12.5
 	kcl-lang.io/kpm v0.12.9
-	kcl-lang.io/krm-kcl v0.12.9
+	kcl-lang.io/krm-kcl v0.12.10
 	oras.land/oras-go/v2 v2.6.2
 	sigs.k8s.io/controller-tools v0.22.0
 	sigs.k8s.io/kustomize/kyaml v0.21.1
