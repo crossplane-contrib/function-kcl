@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -231,6 +232,49 @@ func TestRenderInlineDoesNotCreateTempFile(t *testing.T) {
 	}
 	if canonical(t, got) == "" {
 		t.Fatal("renderInline returned no resources")
+	}
+}
+
+// TestRenderInlineSurfacesPrintOutput verifies that KCL print() output reaches
+// the function's stdout via the kcl-go logger, matching the krm-kcl CLI path.
+// Without WithLogger the gRPC LogMessage that carries print() output is
+// silently dropped (issue #453).
+func TestRenderInlineSurfacesPrintOutput(t *testing.T) {
+	src := `
+print("hello-from-kcl")
+items = [{
+    apiVersion = "example.org/v1"
+    kind = "Thing"
+    metadata.name = "thing"
+}]
+`
+	in := testInput(t, src, 0)
+
+	old := os.Stdout
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stdout = w
+	defer func() { os.Stdout = old }()
+
+	_, ok, err := renderInline(in)
+	if closeErr := w.Close(); closeErr != nil {
+		t.Fatal(closeErr)
+	}
+	if err != nil {
+		t.Fatalf("renderInline: %v", err)
+	}
+	if !ok {
+		t.Fatal("renderInline declined an inline source")
+	}
+
+	var buf bytes.Buffer
+	if _, err := io.Copy(&buf, r); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(buf.String(), "hello-from-kcl") {
+		t.Errorf("expected print() output to reach stdout, got %q", buf.String())
 	}
 }
 

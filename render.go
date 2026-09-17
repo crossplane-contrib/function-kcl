@@ -65,6 +65,10 @@ func renderInline(in *fkcl.KCLInput) (out []byte, ok bool, err error) {
 			kcl.WithCode(in.Spec.Source),
 			kcl.WithOptions(args...),
 			kcl.WithExternalPkgs(dependencies...),
+			// Surface KCL print() output to the function pod's stdout, as the
+			// krm-kcl CLI path does. Without a logger the gRPC LogMessage that
+			// carries print() output is discarded (see issue #453).
+			kcl.WithLogger(os.Stdout),
 		}
 		for _, setting := range in.Spec.Config.Settings {
 			opts = append(opts, kcl.WithSettings(setting))
