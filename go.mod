@@ -21,7 +21,7 @@ require (
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 	kcl-lang.io/cli v0.12.10
 	kcl-lang.io/kcl-go v0.13.0
-	kcl-lang.io/kpm v0.12.9
+	kcl-lang.io/kpm v0.13.0
 	kcl-lang.io/krm-kcl v0.12.10
 	oras.land/oras-go/v2 v2.6.2
 	sigs.k8s.io/controller-tools v0.22.0
@@ -162,7 +162,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/kubescape/go-git-url v0.0.32 // indirect
+	github.com/kubescape/go-git-url v0.0.33 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -197,7 +197,7 @@ require (
 	github.com/rogpeppe/go-internal v1.15.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3 // indirect
 	github.com/sergi/go-diff v1.4.0 // indirect
-	github.com/sirupsen/logrus v1.10.1 // indirect
+	github.com/sirupsen/logrus v1.10.2 // indirect
 	github.com/skeema/knownhosts v1.3.1 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cobra v1.10.2 // indirect
