@@ -25,7 +25,7 @@ require (
 	kcl-lang.io/krm-kcl v0.12.10
 	oras.land/oras-go/v2 v2.6.2
 	sigs.k8s.io/controller-tools v0.22.0
-	sigs.k8s.io/kustomize/kyaml v0.21.1
+	sigs.k8s.io/kustomize/kyaml v0.21.2
 	sigs.k8s.io/yaml v1.6.0
 )
 
