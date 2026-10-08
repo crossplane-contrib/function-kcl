@@ -21,7 +21,7 @@ require (
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 	kcl-lang.io/cli v0.13.0
 	kcl-lang.io/kcl-go v0.13.1
-	kcl-lang.io/kpm v0.13.0
+	kcl-lang.io/kpm v0.13.1
 	kcl-lang.io/krm-kcl v0.12.10
 	oras.land/oras-go/v2 v2.6.2
 	sigs.k8s.io/controller-tools v0.22.0
