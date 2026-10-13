@@ -23,7 +23,7 @@ require (
 	kcl-lang.io/kcl-go v0.13.1
 	kcl-lang.io/kpm v0.13.1
 	kcl-lang.io/krm-kcl v0.12.10
-	oras.land/oras-go/v2 v2.6.2
+	oras.land/oras-go/v2 v2.6.3
 	sigs.k8s.io/controller-tools v0.22.0
 	sigs.k8s.io/kustomize/kyaml v0.21.2
 	sigs.k8s.io/yaml v1.6.0
@@ -224,7 +224,7 @@ require (
 	golang.org/x/mod v0.41.0 // indirect
 	golang.org/x/net v0.59.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/term v0.46.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
