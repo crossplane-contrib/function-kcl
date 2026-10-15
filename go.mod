@@ -24,7 +24,7 @@ require (
 	kcl-lang.io/kpm v0.13.1
 	kcl-lang.io/krm-kcl v0.12.10
 	oras.land/oras-go/v2 v2.6.3
-	sigs.k8s.io/controller-tools v0.22.0
+	sigs.k8s.io/controller-tools v0.23.0
 	sigs.k8s.io/kustomize/kyaml v0.21.2
 	sigs.k8s.io/yaml v1.6.0
 )
@@ -229,7 +229,7 @@ require (
 	golang.org/x/term v0.46.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
-	golang.org/x/tools v0.50.0 // indirect
+	golang.org/x/tools v0.51.0 // indirect
 	google.golang.org/api v0.294.0 // indirect
 	google.golang.org/genproto v0.0.0-20260715232425-e75dac1f907d // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260715232425-e75dac1f907d // indirect
