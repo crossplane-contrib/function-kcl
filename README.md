@@ -1095,6 +1095,68 @@ spec:
     ]
 ```
 
+### Sanitizing error messages
+
+By default, when a KCL program fails, the function returns a fatal result containing the raw KCL diagnostic. Crossplane copies that message into the composite resource's `Synced` condition:
+
+```
+cannot compose resources: pipeline step "kcl" returned a fatal result: failed to run kcl function pipelines: EvaluationError
+---> File prog.k:335: Networking mode is public but hostedClusterConfig.dnsSplit.enabled is not true in environment config
+```
+
+If your users can read composite resources (for example namespaced v2 XRs, or XRs synced into another control plane), this exposes source line numbers, internal configuration names and runtime errors. A later pipeline step cannot clean it up, because a fatal result stops the pipeline.
+
+Set `FUNCTION_KCL_SANITIZE_ERRORS=true` on the function to return user-safe messages instead:
+
+- A diagnostic whose message starts with the user marker (default `[user]`) is returned without the marker, the `EvaluationError` header or the file and line. Use it for validation messages that users should see:
+
+  ```python
+  assert oxr.spec.parameters.baseDomain, "[user] spec.parameters.baseDomain is required when DNS is enabled"
+  ```
+
+  The marker also works for schema `check` blocks.
+- Every other KCL error, including unmarked asserts, runtime errors such as attribute access on `None`, and compile errors, is returned as a generic message.
+- The full error is always logged by the function, with the composite's kind, namespace and name, so operators keep the detail.
+
+The marker only counts at the start of a diagnostic message. A marker that appears elsewhere in an error, for example inside an interpolated value, does not opt it in.
+
+A marked message is shown to users exactly as written, including any values you interpolate into it. The marker is your promise that the message is safe to show, so do not interpolate internal values (configuration names, secrets, cluster details) into a `[user]` message.
+
+| Environment variable | Default | Description |
+|---|---|---|
+| `FUNCTION_KCL_SANITIZE_ERRORS` | `false` | Enable error sanitization. |
+| `FUNCTION_KCL_USER_ERROR_MARKER` | `[user]` | Prefix that marks a message as safe to show to users. |
+| `FUNCTION_KCL_SANITIZED_ERROR_MESSAGE` | `Unexpected error while composing resources. Contact your platform administrator.` | Message returned for any other KCL error. |
+
+Set the variables with a `DeploymentRuntimeConfig`, so they apply to every composition that uses the function:
+
+```yaml
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: function-kcl
+spec:
+  deploymentTemplate:
+    spec:
+      selector: {}
+      template:
+        spec:
+          containers:
+            - name: package-runtime
+              env:
+                - name: FUNCTION_KCL_SANITIZE_ERRORS
+                  value: "true"
+---
+apiVersion: pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-kcl
+spec:
+  package: xpkg.upbound.io/crossplane-contrib/function-kcl:<version>
+  runtimeConfigRef:
+    name: function-kcl
+```
+
 ## Library
 
 You can directly use [KCL standard libraries](https://kcl-lang.io/docs/reference/model/overview) such as `regex.match`, `math.log`.

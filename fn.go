@@ -23,6 +23,7 @@ import (
 
 	fnv1 "github.com/crossplane/function-sdk-go/proto/v1"
 	"github.com/crossplane/function-sdk-go/request"
+	"github.com/crossplane/function-sdk-go/resource"
 	"github.com/crossplane/function-sdk-go/response"
 
 	fkcl "github.com/crossplane-contrib/function-kcl/input/v1alpha1"
@@ -47,6 +48,7 @@ type Function struct {
 	dependencies string
 	recycler     *recycler
 	cache        *renderCache
+	sanitizer    *errorSanitizer
 }
 
 // RunFunction runs the Function.
@@ -270,7 +272,7 @@ func (f *Function) RunFunction(ctx context.Context, req *fnv1.RunFunctionRequest
 		// pipeline for non-inline sources (oci://, git, http, local path).
 		out, ok, err := renderInline(in)
 		if err != nil {
-			response.Fatal(rsp, errors.Wrap(err, "failed to run kcl function pipelines"))
+			f.kclFatal(log, rsp, oxr, err)
 			return rsp, nil
 		}
 		if !ok {
@@ -284,7 +286,7 @@ func (f *Function) RunFunction(ctx context.Context, req *fnv1.RunFunctionRequest
 			// Run pipeline to get the result mutated or validated by the KCL source.
 			pipeline := kio.NewPipeline(inputBytes, outputBytes, false)
 			if err := pipeline.Execute(); err != nil {
-				response.Fatal(rsp, errors.Wrap(err, "failed to run kcl function pipelines"))
+				f.kclFatal(log, rsp, oxr, err)
 				return rsp, nil
 			}
 			out = outputBytes.Bytes()
@@ -402,4 +404,20 @@ func resetOCITokenCacheIfNeeded(log logging.Logger) {
 		ociCacheCreated = time.Now()
 		log.Debug("Reset ORAS OCI token cache", "age", age.Round(time.Second), "maxAge", ociCacheMaxAge)
 	}
+}
+
+// kclFatal sets a fatal result for an error returned by the KCL runtime. With
+// sanitization enabled, the full error is logged and the result carries only a
+// user-safe message (see sanitize.go).
+func (f *Function) kclFatal(log logging.Logger, rsp *fnv1.RunFunctionResponse, oxr *resource.Composite, err error) {
+	if !f.sanitizer.enabled() {
+		response.Fatal(rsp, errors.Wrap(err, "failed to run kcl function pipelines"))
+		return
+	}
+	log.Info("KCL evaluation failed; returning a sanitized result",
+		"composite-kind", oxr.Resource.GetKind(),
+		"composite-namespace", oxr.Resource.GetNamespace(),
+		"composite-name", oxr.Resource.GetName(),
+		"error", err.Error())
+	response.Fatal(rsp, errors.New(f.sanitizer.message(err)))
 }

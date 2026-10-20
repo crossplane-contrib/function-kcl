@@ -47,7 +47,13 @@ func (c *CLI) Run() error {
 	if cache.enabled() {
 		log.Info("render cache enabled", "maxEntries", cache.max, "ttl", cache.ttl.String())
 	}
-	return function.Serve(&Function{dependencies: dependencies, log: log, recycler: rec, cache: cache},
+	// Optional error sanitization: keep raw KCL diagnostics out of user-facing
+	// status conditions. Enabled via FUNCTION_KCL_SANITIZE_ERRORS.
+	sanitizer := newErrorSanitizerFromEnv()
+	if sanitizer.enabled() {
+		log.Info("KCL error sanitization enabled")
+	}
+	return function.Serve(&Function{dependencies: dependencies, log: log, recycler: rec, cache: cache, sanitizer: sanitizer},
 		function.Listen(c.Network, c.Address),
 		function.MTLSCertificates(c.TLSCertsDir),
 		function.Insecure(c.Insecure),
