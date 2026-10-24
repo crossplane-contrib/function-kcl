@@ -19,7 +19,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/apimachinery v0.37.1
 	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
-	kcl-lang.io/cli v0.13.1
+	kcl-lang.io/cli v0.13.2
 	kcl-lang.io/kcl-go v0.13.2
 	kcl-lang.io/kpm v0.13.2
 	kcl-lang.io/krm-kcl v0.12.10
@@ -245,7 +245,7 @@ require (
 	k8s.io/gengo/v2 v2.0.0-20260408192533-25e2208e0dc3 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260721132016-d427ff9ee9ad // indirect
-	kcl-lang.io/kcl-openapi v0.12.0 // indirect
+	kcl-lang.io/kcl-openapi v0.12.1 // indirect
 	kcl-lang.io/lib v0.13.2 // indirect
 	sigs.k8s.io/controller-runtime v0.25.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
