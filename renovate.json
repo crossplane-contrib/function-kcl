@@ -3,6 +3,21 @@
   "extends": [
     "config:recommended"
   ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Bump Go version in GH Action workflows",
+      "managerFilePatterns": ["/^\\.github\\/workflows\\/[^/]+\\.ya?ml$/", "Dockerfile"],
+      "matchStrings": [
+        "GO_VERSION: ['\"]?(?<currentValue>.*?)['\"]?\\n",
+        "ARG GO_VERSION=(?<currentValue>.*?)\\n"
+      ],
+      "datasourceTemplate": "golang-version",
+      "depNameTemplate": "go",
+      "packageNameTemplate": "go",
+      "depTypeTemplate": "golang"
+    }
+  ],
   "crossplane": {
     "fileMatch": ["(^|/)example/.*\\.ya?ml$"]
   },
