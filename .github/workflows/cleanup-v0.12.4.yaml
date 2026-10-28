@@ -48,8 +48,14 @@ jobs:
         run: |
           set -euo pipefail
           accept="application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json"
+          for scope in "pull,push,delete" "*" "delete" "pull,push,delete,manage"; do
+            granted=$(curl -sS -u "${XPKG_ACCESS_ID}:${XPKG_TOKEN}" \
+              "https://xpkg.upbound.io/service/token?service=xpkg.upbound.io&scope=repository:${UPBOUND_REPO}:${scope}" \
+              | jq -r .token | cut -d. -f2 | base64 -d 2>/dev/null | jq -c '.access[0].actions // .access')
+            echo "scope=${scope} -> ${granted}"
+          done
           token=$(curl -sS -u "${XPKG_ACCESS_ID}:${XPKG_TOKEN}" \
-            "https://xpkg.upbound.io/service/token?service=xpkg.upbound.io&scope=repository:${UPBOUND_REPO}:pull,push,delete" \
+            "https://xpkg.upbound.io/service/token?service=xpkg.upbound.io&scope=repository:${UPBOUND_REPO}:*" \
             | jq -r .token)
           digest_of() {
             curl -sS -o /dev/null -D - -H "Authorization: Bearer ${token}" \
