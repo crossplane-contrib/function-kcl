@@ -57,6 +57,7 @@ jobs:
               "https://xpkg.upbound.io/v2/${UPBOUND_REPO}/manifests/$1" \
               | tr -d '\r' | awk 'tolower($1)=="docker-content-digest:"{print $2}'
           }
+          echo "token payload: $(echo "${token}" | cut -d. -f2 | base64 -d 2>/dev/null | jq -c .access)"
           digest=$(digest_of "${TAG}")
           echo "upbound_digest=${digest}"
           if [ -z "${digest}" ]; then
@@ -73,7 +74,7 @@ jobs:
           done
           for ref in "${digest}" "${TAG}"; do
             echo "-- DELETE by ${ref} --"
-            curl -sS -X DELETE -w "\nupbound_delete_status=%{http_code}\n" \
+            curl -sS -D - -X DELETE -w "\nupbound_delete_status=%{http_code}\n" \
               -H "Authorization: Bearer ${token}" \
               -H "Accept: ${accept}" \
               "https://xpkg.upbound.io/v2/${UPBOUND_REPO}/manifests/${ref}"
