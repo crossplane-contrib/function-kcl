@@ -1,0 +1,94 @@
+name: Cleanup v0.12.4
+
+# Temporary one-off workflow that removes the redundant v0.12.4 package from
+# the Upbound and GHCR registries. v0.12.4 shipped the same content as
+# v0.13.3 and is superseded by it.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  TAG: v0.12.4
+  UPBOUND_REPO: crossplane-contrib/function-kcl
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-26.04
+    steps:
+      - name: Delete GHCR tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          PACKAGE: function-kcl
+        run: |
+          set -euo pipefail
+          version_id=$(curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/orgs/${OWNER}/packages/container/${PACKAGE}/versions?per_page=100" \
+            | jq -r --arg tag "${TAG}" \
+              '.[] | select((.metadata.container.tags // []) | index($tag)) | .id')
+          echo "ghcr version_id=${version_id}"
+          if [ -z "${version_id}" ]; then
+            echo "no GHCR package version tagged ${TAG}" >&2
+            exit 1
+          fi
+          curl -sS -o /dev/null -w "ghcr_delete_status=%{http_code}\n" -X DELETE \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/orgs/${OWNER}/packages/container/${PACKAGE}/versions/${version_id}"
+
+      - name: Delete Upbound xpkg tag
+        env:
+          XPKG_ACCESS_ID: ${{ secrets.XPKG_ACCESS_ID }}
+          XPKG_TOKEN: ${{ secrets.XPKG_TOKEN }}
+        run: |
+          set -euo pipefail
+          accept="application/vnd.oci.image.index.v1+json,application/vnd.docker.distribution.manifest.list.v2+json,application/vnd.docker.distribution.manifest.v2+json"
+          token=$(curl -sS -u "${XPKG_ACCESS_ID}:${XPKG_TOKEN}" \
+            "https://xpkg.upbound.io/service/token?service=xpkg.upbound.io&scope=repository:${UPBOUND_REPO}:pull,push,delete" \
+            | jq -r .token)
+          digest_of() {
+            curl -sS -o /dev/null -D - -H "Authorization: Bearer ${token}" \
+              -H "Accept: ${accept}" \
+              "https://xpkg.upbound.io/v2/${UPBOUND_REPO}/manifests/$1" \
+              | tr -d '\r' | awk 'tolower($1)=="docker-content-digest:"{print $2}'
+          }
+          digest=$(digest_of "${TAG}")
+          echo "upbound_digest=${digest}"
+          if [ -z "${digest}" ]; then
+            echo "no Upbound manifest found for ${TAG}" >&2
+            exit 1
+          fi
+          # The manifest is shared by every tag pointing at it, so make sure
+          # the tags we want to keep do not resolve to the same digest.
+          for keep in v0.13.3 latest; do
+            if [ "$(digest_of "${keep}")" = "${digest}" ]; then
+              echo "${keep} shares the manifest with ${TAG}, refusing to delete" >&2
+              exit 1
+            fi
+          done
+          curl -sS -o /dev/null -w "upbound_delete_status=%{http_code}\n" -X DELETE \
+            -H "Authorization: Bearer ${token}" \
+            "https://xpkg.upbound.io/v2/${UPBOUND_REPO}/manifests/${digest}"
+
+      - name: Verify
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          PACKAGE: function-kcl
+        run: |
+          set -euo pipefail
+          echo "== GHCR tags =="
+          curl -sS -H "Authorization: Bearer ${GH_TOKEN}" \
+            "https://api.github.com/orgs/${OWNER}/packages/container/${PACKAGE}/versions?per_page=100" \
+            | jq -r '.[].metadata.container.tags // [] | .[]' | sort | tr '\n' ' '
+          echo
+          echo "== Upbound tags =="
+          token=$(curl -sS "https://xpkg.upbound.io/service/token?service=xpkg.upbound.io&scope=repository:${UPBOUND_REPO}:pull" | jq -r .token)
+          curl -sS -H "Authorization: Bearer ${token}" \
+            "https://xpkg.upbound.io/v2/${UPBOUND_REPO}/tags/list" | jq -r '.tags[]' | sort | tr '\n' ' '
+          echo
