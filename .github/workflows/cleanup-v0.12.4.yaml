@@ -33,8 +33,8 @@ jobs:
               '.[] | select((.metadata.container.tags // []) | index($tag)) | .id')
           echo "ghcr version_id=${version_id}"
           if [ -z "${version_id}" ]; then
-            echo "no GHCR package version tagged ${TAG}" >&2
-            exit 1
+            echo "no GHCR package version tagged ${TAG}, nothing to delete"
+            exit 0
           fi
           curl -sS -o /dev/null -w "ghcr_delete_status=%{http_code}\n" -X DELETE \
             -H "Authorization: Bearer ${GH_TOKEN}" \
