@@ -71,9 +71,13 @@ jobs:
               exit 1
             fi
           done
-          curl -sS -o /dev/null -w "upbound_delete_status=%{http_code}\n" -X DELETE \
-            -H "Authorization: Bearer ${token}" \
-            "https://xpkg.upbound.io/v2/${UPBOUND_REPO}/manifests/${digest}"
+          for ref in "${digest}" "${TAG}"; do
+            echo "-- DELETE by ${ref} --"
+            curl -sS -X DELETE -w "\nupbound_delete_status=%{http_code}\n" \
+              -H "Authorization: Bearer ${token}" \
+              -H "Accept: ${accept}" \
+              "https://xpkg.upbound.io/v2/${UPBOUND_REPO}/manifests/${ref}"
+          done
 
       - name: Verify
         env:
