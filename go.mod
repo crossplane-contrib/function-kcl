@@ -6,7 +6,7 @@ toolchain go1.27.3
 
 require (
 	dario.cat/mergo v1.0.2
-	github.com/alecthomas/kong v1.16.1
+	github.com/alecthomas/kong v1.17.0
 	github.com/aws/aws-sdk-go-v2/config v1.33.13
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.67.2
 	github.com/crossplane/crossplane-runtime/v2 v2.2.0
