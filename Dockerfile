@@ -1,7 +1,7 @@
 # We use the latest Go 1.x version unless asked to use something else.
 # The GitHub Actions CI job sets this argument for a consistent Go version.
 ARG GO_VERSION=1
-ARG BASE_IMAGE=kcllang/kcl
+ARG BASE_IMAGE=cgr.dev/chainguard/glibc-dynamic:latest-dev@sha256:c35cdd53eb8d848a697f233fdcc020598bb11d83a9cf63345a5a6787eb6b6546
 
 # Setup the base environment. The BUILDPLATFORM is set automatically by Docker.
 # The --platform=${BUILDPLATFORM} flag tells Docker to build the function using
@@ -35,11 +35,25 @@ RUN --mount=target=. \
     --mount=type=cache,target=/root/.cache/go-build \
     GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags "-w -s" -o /function .
 
-# Produce the Function image. We use a very lightweight 'distroless' image that
-# does not include any of the build tools used in previous stages.
+# The image carries none of the build tools used in the build stages.
+# Chainguard publishes no versioned tags on its free tier, so BASE_IMAGE keeps
+# a digest beside the tag and Renovate moves that digest.
 FROM ${BASE_IMAGE} AS image
+
+# The base carries no ssh. Only ssh:// KCL sources need it, and installing a
+# package needs root, so the image's own non-root user is restored afterwards.
+USER root
+RUN apk add --no-cache openssh-client
+USER 65532
+
 WORKDIR /
 COPY --from=build /function /function
+
+# Crossplane runs functions as uid 2000, which has no passwd entry in the base,
+# so HOME is '/' and KCL's library and package caches have to be pointed at a
+# writable directory.
+ENV KCL_LIB_HOME=/tmp KCL_PKG_PATH=/tmp
+
 RUN /function --help
 EXPOSE 9443
 ENTRYPOINT ["/function"]
