@@ -1,7 +1,7 @@
 # We use the latest Go 1.x version unless asked to use something else.
 # The GitHub Actions CI job sets this argument for a consistent Go version.
 ARG GO_VERSION=1
-ARG BASE_IMAGE=cgr.dev/chainguard/glibc-dynamic:latest-dev@sha256:514df652cae478690d16088ecb8c8de8dce0ef48840cccfa170c78d8e55098ea
+ARG BASE_IMAGE=cgr.dev/chainguard/glibc-dynamic:latest-dev@sha256:1c509b8cbd5ce95257443ccc6b41d977baf53b6cecdc42d1941e071886372874
 
 # Setup the base environment. The BUILDPLATFORM is set automatically by Docker.
 # The --platform=${BUILDPLATFORM} flag tells Docker to build the function using
